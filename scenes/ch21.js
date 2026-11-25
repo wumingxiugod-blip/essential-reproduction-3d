@@ -50,10 +50,16 @@
       spMs.push(eggBox);
       if (!isOligo) {
         const messy = CASE1 === 'age38' || CASE1 === 'meno';
+        // 雙極紡錘絲
+        [-0.45, 0, 0.45].forEach(off => {
+          spMs.push(ttube([V(-1.3, 0, 0.15), V(0, off, 0.18), V(1.3, 0, 0.15)], 0.025, 0xffd479, messy ? 0.38 : 0.72, { organic: false, seg: 14, radial: 8 }));
+        });
         for (let k = -2; k <= 2; k++) {
-          const dx = messy ? Math.sin(k * 2.5) * 0.65 : k * 0.14;
-          const dy = messy ? Math.cos(k * 1.9) * 0.55 : k * 0.22;
-          spMs.push(ell([dx, dy, 0.2], [0.16, 0.38, 0.16], messy ? 0xff5050 : 0x45c49e, 0.95));
+          const dx = messy ? Math.sin(k * 2.5) * 0.72 : 0;
+          const dy = messy ? Math.cos(k * 1.9) * 0.62 : k * 0.34;
+          const ch = chromMesh([dx, dy, 0.2], messy ? 0xff5050 : 0x45c49e, messy ? 0xff8080 : 0x45c49e, true, 0.45);
+          ch.g.rotation.z = messy ? k * 0.9 : Math.PI / 2;
+          spMs.push(...ch.ms);
         }
         reg(AX, messy ? '老化卵母細胞：MII 紡錘體不穩、染色體離散（非整倍體風險急升！）' : '年輕卵母細胞：整齊赤道板減數紡錘體', 'Meiotic spindle integrity (p.342)',
           '女性 35 歲後最早擊垮生育力的就是久置於減數分裂中的紡錘體微管老化，導致染色體誤分配與早期流產（Fig 21.3）。', spMs, { anchor: [0, 3.0, 0.9] });
@@ -133,11 +139,21 @@
       // 右側進針與單隻或數隻精子深度：
       // icsi: 針頭深入 x = 0.8 (oocytoplasm); suzi: x = 3.55 (perivitelline); zd: 僅孔洞 x=4.1 + 多隻外精子; ivf: 外圍游動
       const tipX = ART2 === 'icsi' ? 0.4 : (ART2 === 'suzi' ? 3.55 : (ART2 === 'zd' ? 4.35 : 5.6));
-      const needle = cone([8.0, 0, 0], [tipX, 0, 0], 0.18, 0xc8e8ff, 0.72);
-      const targetSp = ell([tipX - 0.35, 0, 0.1], [0.35, 0.18, 0.18], 0x46d16a, 0.98);
+      // 漸細玻璃微針吸管（LatheGeometry 呈現真實毛細管壁與尖端）
+      const pipLen = 8.2 - tipX;
+      const needle = lathe([[0.045, 0], [0.065, pipLen * 0.25], [0.16, pipLen * 0.65], [0.28, pipLen]], 0xc8ecff, 0.52, [tipX, 0, 0], [1, 0, 0], 24);
+      const targetSp = new THREE.Mesh(spermHeadGeo(0.75, 0.38, 0.2), mat(0x46d16a, 0.98));
+      targetSp.position.set(tipX - 0.38, 0, 0.08);
       const extraSp = [];
+      const _spG21 = spermHeadGeo(0.62, 0.32, 0.16);
       if (ART2 === 'ivf' || ART2 === 'zd') {
-        for (let i = 0; i < 6; i++) extraSp.push(ell([4.5 + (i % 2) * 0.5, -1.6 + i * 0.65, 0.4], [0.28, 0.15, 0.15], ART2 === 'zd' && i === 3 ? 0xff4040 : 0xffffff));
+        for (let i = 0; i < 6; i++) {
+          const sx = 4.6 + (i % 2) * 0.55, sy = -1.6 + i * 0.65;
+          const sh = new THREE.Mesh(_spG21, mat(ART2 === 'zd' && i === 3 ? 0xff4040 : 0xf6f2e8, 0.96));
+          sh.position.set(sx, sy, 0.4);
+          const st = ttube([V(sx + 0.3, sy, 0.4), V(sx + 0.75, sy + 0.1, 0.42), V(sx + 1.2, sy - 0.08, 0.38)], [0.04, 0.015], 0xd0e2f2, 0.94, { organic: false, seg: 12, radial: 8 });
+          extraSp.push(sh, st);
+        }
       }
       const pMs = ART2 === 'ivf' ? extraSp : [needle, targetSp, ...extraSp];
       reg(PIP, ART2_DATA[ART2][0], 'Micromanipulation depth & target', ART2_DATA[ART2][1], pMs, { anchor: [5.5, -2.5, 0.9] });
@@ -150,7 +166,7 @@
         const d = S2.play ? dt() : 0; S2.t += d;
         if (ART2 === 'icsi' || ART2 === 'suzi') {
           const osc = Math.sin(S2.t * 2.5) * 0.15;
-          needle.position.x = osc; targetSp.position.x = (tipX - 0.35) + osc;
+          needle.position.x = tipX + osc; targetSp.position.x = (tipX - 0.38) + osc;
         }
       };
     },
@@ -218,7 +234,7 @@
           cells.push(ell([Math.cos(a) * 1.1, Math.sin(a) * 1.1, (i % 2 ? 0.5 : -0.5)], [0.85, 0.85, 0.8], 0xe890b0, 0.92));
         }
         const biopsied = ell([3.2, 0.2, 0.3], [0.82, 0.82, 0.78], 0x46d16a, 0.98);
-        const pip = cone([7.2, 0.2, 0.3], [3.5, 0.2, 0.3], 0.28, 0xc8e8ff, 0.65);
+        const pip = lathe([[0.12, 0], [0.16, 1.0], [0.28, 2.5], [0.36, 3.8]], 0xc8ecff, 0.52, [3.45, 0.2, 0.3], [1, 0, 0], 24);
         reg(PAT, 'PGD 第 2–3 天 8 細胞胚胎抽取單顆分裂球（另有極體與 D5 滋養層切片）', 'Preimplantation Genetic Diagnosis (PGD) biopsy',
           S3_TXT[3][1], [zp, ...cells, biopsied, pip], { anchor: [0, -3.6, 0.9] });
       }

@@ -31,12 +31,11 @@
       reg(AM, AF_MODE === 'norm' ? `第 ${WK1} 週正常羊膜腔（約 ${WK1 < 20 ? Math.round(15 + (WK1 - 8) * 36) : 450} ml）` : (AF_MODE === 'potter' ? '羊水過少（腎缺損無胎尿）' : '羊水過多（食道閉鎖無吞嚥）'), 'Amniotic sac & fluid',
         AF_INFO[AF_MODE], [amnion, plac, cord], { anchor: [-4.6, 3.8, 0.8] });
 
-      // 簡易解剖位置精確的捲曲胎兒模型（頭在下或頭上，採坐立微捲曲便於標出 5 區棕色脂肪）
-      const fSc = 0.45 + 0.65 * u;
-      const head = ell([0.1, 1.6 * fSc, 0.1], [0.95 * fSc, 1.05 * fSc, 0.9 * fSc], 0xf2b8a0, 0.88);
-      const torso = ell([0, -0.15 * fSc, 0], [0.9 * fSc, 1.35 * fSc, 0.78 * fSc], 0xf2b8a0, 0.85);
-      const subFat = WK1 >= 34 ? ell([0, -0.15 * fSc, 0], [1.05 * fSc, 1.45 * fSc, 0.9 * fSc], 0xffe898, 0.35) : null;
-      const fMs = [head, torso]; if (subFat) fMs.push(subFat);
+      // 雕塑化捲曲胎兒模型（頭顱、弓背軀幹與屈曲四肢）
+      const fSc = 0.52 + 0.75 * u;
+      const fet = fetusMesh([0, 0.25 * fSc, 0], fSc * 1.15, 0xf2b8a0, 0.92);
+      const subFat = WK1 >= 34 ? ell([-0.2 * fSc, -0.05 * fSc, 0], [0.85 * fSc, 1.15 * fSc, 0.78 * fSc], 0xffe898, 0.28) : null;
+      const fMs = [...fet.ms]; if (subFat) fMs.push(subFat);
       reg(FT, `胎兒（約 ${(0.1 + 3.3 * Math.pow(u, 2.2)).toFixed(1)} kg${WK1 >= 38 ? '・脂肪已多於蛋白！' : ''}）`, 'Fetus & Growth axis',
         '<b>胎兒 IGF1</b> 感測血糖與胰島素直接促進生長（不靠垂體 GH！）；<b>IGF2</b> 刺激胎盤。足月時心臟高肝醣抗缺氧，大腦零肝醣極依賴血糖。',
         fMs, { anchor: [2.8, 1.8, 0.8] });
@@ -110,11 +109,12 @@
       S2 = { t: 0, play: true };
       const MT = '母體絨毛間隙（高血糖／O₂／AA）', SB = '合胞滋養層屏障（早10μm → 足月1–2μm）', FC = '胎兒微血管內皮（偏心頂貼！）';
       const th = TERM2 ? 0.95 : 2.3; // 障壁幾何厚度對比
-      const matB = box([0, 3.6, 0], [10.2, 1.3, 2.6], 0xd83048, 0.72);
-      reg(MT, '母體血池（絨毛間隙）', 'Maternal intervillous blood', '含有 90 mmHg O₂、母體血糖、游離脂肪酸（孕後期 hPL 動員）、胺基酸與母體 IgG。', matB, { anchor: [-5.2, 3.7, 0.8] });
+      const matSlab = tissueSlab([0, 3.6, 0], [10.2, 1.3, 2.6], 0xd83048, 0.44, { wave: 0.08, seed: 1.5 });
+      const matRbc = rbcDiscs([-3.6, -1.8, 0.1, 2.0, 3.8].map((x, i) => V(x, 3.6 + (i % 2 ? 0.15 : -0.15), 0.35)), 0.26, 0xff3b4a, 0.96);
+      reg(MT, '母體血池（絨毛間隙）', 'Maternal intervillous blood', '含有 90 mmHg O₂、母體血糖、游離脂肪酸（孕後期 hPL 動員）、胺基酸與母體 IgG。', [matSlab, matRbc], { anchor: [-5.2, 3.7, 0.8] });
 
       const syncTop = 1.6, syncBot = 1.6 - th;
-      const sync = box([0, (syncTop + syncBot) / 2, 0], [10.2, th, 2.5], 0xe56b92, 0.42);
+      const sync = tissueSlab([0, (syncTop + syncBot) / 2, 0], [10.2, th, 2.5], 0xe56b92, 0.5, { wave: 0.07, seed: 2.8 });
       // 載體蛋白雙側門通道 + 受體胞吞囊泡示意
       const gates = [];
       const gateCol = { diff: 0x90e8ff, glucose: 0xffd43a, active: 0x46d16a, lcpufa: 0xf09a4a, igg: 0xd080ff }[MECH2];
@@ -126,10 +126,11 @@
 
       // 胎兒微血管（足月頂貼上移縮短距離，早期遠離偏中心）
       const fcY = syncBot - (TERM2 ? 0.6 : 1.6);
-      const fetCap = cyl([-5.0, fcY, 0], [5.0, fcY, 0], 0.95, 0x4db8e8, 0.85);
+      const fetCap = ttube([V(-5.0, fcY, 0), V(0, fcY + 0.12, 0.08), V(5.0, fcY, 0)], 0.92, 0x4db8e8, 0.48, { organic: false, radial: 22 });
+      const fetRbc = rbcDiscs([-3.4, -1.2, 1.2, 3.4].map(x => V(x, fcY + 0.04, 0.1)), 0.24, 0xe03258, 0.96);
       reg(FC, TERM2 ? '偏心頂貼上移之胎兒微血管（極大化擴散率）' : '早期中央位胎兒微血管', 'Fetal capillary',
         TERM2 ? '終末絨毛縮細為 40 μm 且胎兒微血管頂向滋養層外側，距離縮短為早期的 1/5–1/10！' : '早期終末絨毛直徑 150–200 μm，代謝交換效率受厚距限制。',
-        fetCap, { anchor: [-5.2, fcY, 0.8] });
+        [fetCap, fetRbc], { anchor: [-5.2, fcY, 0.8] });
 
       // 分子穿流箭頭
       const trCurve = new THREE.CatmullRomCurve3([V(0, 3.6, 0.7), V(0, (syncTop + syncBot) / 2, 0.7), V(0, fcY, 0.7)]);
@@ -181,7 +182,7 @@
       const dpg = ell([-6.3, 1.75, 0.1], [0.32, 0.32, 0.32], 0xffd43a, 0.96); // DPG 鎖在兩條 β 鏈間！
       const hbF = [ell([-3.8, -2.0, 0.3], [0.55, 0.5, 0.45], 0x4db8e8), ell([-2.8, -2.0, 0.3], [0.55, 0.5, 0.45], 0x4db8e8),
         ell([-3.8, -2.9, -0.2], [0.55, 0.5, 0.45], 0x45c49e), ell([-2.8, -2.9, -0.2], [0.55, 0.5, 0.45], 0x45c49e)];
-      const wallL = box([-4.8, 0, 0], [5.0, 0.38, 1.6], 0xe56b92, 0.65);
+      const wallL = tissueSlab([-4.8, 0, 0], [5.0, 0.4, 1.6], 0xe56b92, 0.72, { wave: 0.06, seed: 1.9 });
 
       const cO2 = arcArrow([[-5.8, 1.4, 0.5], [-3.8, -1.6, 0.5]], 0x70e8ff, 0.06);
       const cCO2 = arcArrow([[-2.8, -1.6, 0.5], [-4.8, 1.4, 0.5]], 0xa8b8c8, 0.05);
@@ -191,7 +192,7 @@
 
       // 右側：胎兒骨髓/血球破壞 -> 脂溶未結合膽紅素 (橘) 穿過胎盤 -> 母體血清白蛋白載送 -> 母體肝臟 (UDPGT) 加上藍極性葡萄糖醛酸 -> 排出膽汁！
       const fetMar = ell([3.2, -2.6, 0.2], [1.1, 0.75, 0.7], 0xf08060, 0.92);
-      const wallR = box([5.2, 0, 0], [5.0, 0.38, 1.6], 0xe56b92, 0.65);
+      const wallR = tissueSlab([5.2, 0, 0], [5.0, 0.4, 1.6], 0xe56b92, 0.72, { wave: 0.06, seed: 2.7 });
       const matLiv = ell([6.8, 2.3, 0.2], [1.3, 0.9, 0.8], 0x904028, 0.92);
       const bileOut = ell([6.8, 4.1, 0.2], [0.6, 0.4, 0.4], 0x46d16a, 0.92);
       const cBil = arcArrow([[3.5, -1.8, 0.4], [4.8, 0.0, 0.4], [6.2, 1.6, 0.4]], 0xffa830, 0.06);

@@ -98,14 +98,15 @@
       const VL = '絨毛膜板與三級終末絨毛樹', S = '間質／血管內 EVT 與母體螺旋動脈', IV = '絨毛間隙液體與氧分壓';
 
       // 上層：絨毛膜板 + 幹絨毛分支 + 終末微血管結
-      const cPlate = box([0, 4.0, 0], [10.5, 0.65, 2.8], 0x45c49e, 0.9);
+      const cPlate = tissueSlab([0, 4.0, 0], [10.5, 0.68, 2.8], 0x45c49e, 0.92, { wave: 0.08, seed: 1.3 });
       const villiMs = [cPlate];
       [-3.0, 0, 3.0].forEach((vx, idx) => {
-        // 幹絨毛
-        villiMs.push(ttube([V(vx, 3.7, 0), V(vx + 0.15 * Math.sin(idx), 1.3, 0.2), V(vx, -0.7, 0)], [0.36, 0.25, 0.16], 0xe56b92, 0.88, { organic: false }));
-        // 終末血管叢
+        // 幹絨毛＋多級終末絨毛樹
+        villiMs.push(ttube([V(vx, 3.7, 0), V(vx + 0.18 * Math.sin(idx + 1), 1.4, 0.18), V(vx, -0.75, 0)], [0.36, 0.24, 0.14], 0xe56b92, 0.9));
         for (let b = -1; b <= 1; b += 2) {
-          villiMs.push(ttube([V(vx, 1.5, 0.1), V(vx + b * 1.1, 0.6, 0.35), V(vx + b * 1.35, -0.35, 0)], [0.16, 0.11], 0x4db8e8, 0.92, { organic: false }));
+          villiMs.push(ttube([V(vx, 2.0, 0.1), V(vx + b * 0.95, 1.25, 0.32), V(vx + b * 1.3, 0.35, 0.1)], [0.2, 0.1], 0xe56b92, 0.86));
+          villiMs.push(ttube([V(vx, 1.2, 0.1), V(vx + b * 1.15, 0.4, 0.4), V(vx + b * 1.4, -0.45, 0.05)], [0.15, 0.09], 0x4db8e8, 0.94, { organic: false }));
+          villiMs.push(ell([vx + b * 1.35, -0.45, 0.08], [0.22, 0.18, 0.2], 0xff80a8, 0.88));
         }
       });
       reg(VL, '絨毛膜板與三級終末絨毛微血管叢（約 200 個小葉）', 'Chorionic plate & Tertiary terminal villi',
@@ -114,13 +115,19 @@
 
       // 絨毛間隙半透明底池
       const ivCol = FLOW2 === 'plug' ? 0x70c8e8 : (FLOW2 === 'open' ? 0xd83048 : 0xff4040);
-      const ivPool = box([0, 0.8, -0.6], [10.2, 4.4, 2.2], ivCol, FLOW2 === 'plug' ? 0.18 : 0.32);
+      const ivPool = tissueSlab([0, 0.8, -0.6], [10.2, 4.4, 2.2], ivCol, FLOW2 === 'plug' ? 0.16 : 0.26, { wave: 0.07, seed: 2.1 });
+      const ivArr = [ivPool];
+      if (FLOW2 !== 'plug') {
+        const rPts = [];
+        for (let i = 0; i < 12; i++) rPts.push(V(-3.8 + (i % 6) * 1.5, -0.3 + Math.floor(i / 6) * 1.9 + (i % 2) * 0.4, 0.55));
+        ivArr.push(rbcDiscs(rPts, 0.2, 0xe82838, 0.94));
+      }
       reg(IV, FLOW2 === 'plug' ? '第一孕期：無紅血球清澈血漿＋子宮腺乳（2–3% O₂）' : '第二／三孕期：母血以 4–10 mmHg 浸潤空間', 'Intervillous space fluid/blood',
-        F2_TXT[FLOW2][1], ivPool, { anchor: [5.4, 1.8, 0.9] });
+        F2_TXT[FLOW2][1], ivArr, { anchor: [5.4, 1.8, 0.9] });
 
-      // 下層：脫膜基底板＋兩條螺旋動脈（顯示轉換粗細＋塞子！）
-      const bPlate = box([0, -1.8, 0], [10.5, 0.7, 2.8], 0xc87890, 0.85);
-      const dec = box([0, -3.5, 0], [10.5, 2.6, 2.7], 0x904860, 0.45);
+      // 下層：波浪有機脫膜基底板＋兩條螺旋動脈（顯示轉換粗細＋塞子！）
+      const bPlate = tissueSlab([0, -1.8, 0], [10.5, 0.72, 2.8], 0xc87890, 0.88, { wave: 0.08, seed: 3.1 });
+      const dec = tissueSlab([0, -3.5, 0], [10.5, 2.6, 2.7], 0x904860, 0.42, { wave: 0.08, seed: 4.2 });
       const artTopW = FLOW2 === 'fail' ? 0.22 : 0.68; // 轉換後喇叭口大幅擴張！
       const artL = ttube([V(-2.4, -4.6, 0.2), V(-2.0, -3.6, 0.2), V(-2.4, -2.7, 0.2), V(-2.1, -1.5, 0.2)], [0.22, 0.25, artTopW * 0.75, artTopW], FLOW2 === 'fail' ? 0xff4040 : 0xff7080, 0.88, { organic: false });
       const artR = ttube([V(2.4, -4.6, 0.2), V(2.0, -3.6, 0.2), V(2.4, -2.7, 0.2), V(2.1, -1.5, 0.2)], [0.22, 0.25, artTopW * 0.75, artTopW], FLOW2 === 'fail' ? 0xff4040 : 0xff7080, 0.88, { organic: false });

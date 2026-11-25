@@ -101,10 +101,12 @@
       const TH = '濾泡膜內層（上方，有血管）', GR = '壁顆粒細胞（下方，無血管）';
       const isPre = PHASE2 === 'preov';
       // 血管 + 膜內層 + 基底膜 + 顆粒層
-      const bv = cyl([-6.5, 4.4, 0], [6.5, 4.4, 0], 0.36, 0xd83a3a, 0.85);
-      const theca = box([0, 2.2, 0], [11.5, 2.8, 2.8], 0xd88a4a, 0.25);
-      const bm = box([0, 0.2, 0], [12.0, 0.28, 3.0], 0xf0e0c0, 0.85);
-      const gran = box([0, -2.3, 0], [11.5, 3.6, 2.8], 0xf4a0c0, 0.25);
+      const bvTube = ttube([V(-6.5, 4.4, 0), V(-2.0, 4.55, 0.1), V(2.5, 4.35, -0.05), V(6.5, 4.45, 0)], 0.42, 0xd83a48, 0.46, { organic: false, radial: 18 });
+      const bvRbc = rbcDiscs([-4.8, -2.6, -0.4, 1.8, 4.0].map((x, i) => V(x, 4.42 + Math.sin(i) * 0.08, 0.05)), 0.2, 0xe82838, 0.96);
+      const bv = [bvTube, bvRbc];
+      const theca = [tissueSlab([0, 2.2, 0], [11.5, 2.7, 2.7], 0xd88a4a, 0.26, { wave: 0.08, seed: 1.4 }), ...epitheliumRow({ x0: -5.2, x1: 5.2, y: 2.2, z0: -0.9, z1: 0.9, h: 1.15, nx: 7, nz: 2, col: 0xd88a4a, nucCol: 0x7c3e18, o: 0.45 })];
+      const bm = tissueSlab([0, 0.2, 0], [12.0, 0.3, 3.0], 0xf0e0c0, 0.9, { wave: 0.06, freq: 1.5, seed: 2.2 });
+      const gran = [tissueSlab([0, -2.3, 0], [11.5, 3.5, 2.7], 0xf4a0c0, 0.26, { wave: 0.09, seed: 3.1 }), ...epitheliumRow({ x0: -5.2, x1: 5.2, y: -2.1, z0: -0.9, z1: 0.9, h: 1.65, nx: 8, nz: 2, col: 0xf4a0c0, nucCol: 0x8e2e5c, o: 0.48 })];
       reg(TH, '微血管網（LH / FSH 與膽固醇來源）', 'Thecal capillary bed', '膜內層富含血管，基底膜徹底阻擋血管進入顆粒層。', bv, { anchor: [-5.2, 5.1, 0.5] });
       reg(TH, '濾泡膜內層細胞（具 LH-R）', 'Theca interna cell (LH-R)', 'LH 刺激乙酸／膽固醇 → 孕烯醇酮 → 雄烯二酮（A₄）與睪固酮（T），少部分產 E₂。', theca, { anchor: [5.0, 3.4, 0.6] });
       reg(TH, '濾泡基底膜（Membrana propria）', 'Basement membrane', '雄性素可脂溶自由擴散穿過進入顆粒層；血管與大分子不能穿透。', bm, { anchor: [-5.5, 0.3, 0.6] });
@@ -171,7 +173,8 @@
         const gv = ell([0.3, 0.4, 0.3], [0.95, 0.95, 0.9], 0x9a6ad0, 0.72);
         reg(O, ST3 === 3 ? '狗／狐初級卵母核（排卵時尚未排 PB1）' : '生發泡 GV（核網期停頓）', 'Germinal vesicle (Dictyate)', ST3 === 3 ? '狗與狐例外於減數分裂 I 尚未完成前即排卵，受精前後才恢復！' : '染色體停於第一次減數前期（雙帶期）等待 LH 潮湧。', gv, { anchor: [0.4, 1.6, 0.8] });
       } else {
-        const sp1 = [ell([0.8, 0.9, 0.5], [0.18, 0.45, 0.18], 0xff5080), ell([1.15, 0.9, 0.5], [0.18, 0.45, 0.18], 0x40a0ff)];
+        const sp1 = [...chromMesh([0.78, 0.95, 0.5], 0xff5080, 0xff5080, true, 0.65).ms, ...chromMesh([1.22, 0.95, 0.5], 0x40a0ff, 0x40a0ff, true, 0.65).ms,
+          capsule([0.1, 0.95, 0.5], [1.9, 0.95, 0.5], 0.03, 0xffd479, 0.7)];
         const cg = dots([V(-1.9, 0.6, 0.8), V(-1.7, -1.0, 0.8), V(-0.6, -1.9, 0.7), V(1.2, -1.7, 0.7)], 0.15, 0x46d16a);
         reg(O, ST3 === 1 ? '第一減數紡錘體（GVBD 後）' : '第二中期紡錘體（MII ＋ CSF 停頓）', 'Meiotic spindle & cortical granules', '皮質顆粒（綠）移至卵膜下準備受精後防止多精入卵；紡錘體無中心粒，僅由 PCM 組織。', [...sp1, cg], { anchor: [-1.8, -1.6, 0.8] });
         if (ST3 === 2) {

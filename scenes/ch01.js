@@ -35,17 +35,7 @@
 
       // 輔助：畫一條染色體或雙分體（含可切換互換色段）
       function mkChrom(pos, col, recombCol, doubled = true, scale = 1) {
-        const g = new THREE.Group(); g.position.set(...pos); g.scale.setScalar(scale);
-        const mkArm = (dx, c1, c2) => {
-          const u = cyl([dx, 0.04, 0], [dx, 0.55, 0], 0.09, c1);
-          const l = cyl([dx, -0.04, 0], [dx, -0.55, 0], 0.09, c2 || c1);
-          g.add(u, l); return [u, l];
-        };
-        const ms = [...mkArm(doubled ? -0.11 : 0, col, col)];
-        if (doubled) ms.push(...mkArm(0.11, col, recombCol || col));
-        const cen = ell([0, 0, 0], [0.15, 0.12, 0.15], 0xffffff); g.add(cen); ms.push(cen);
-        CUR.root.add(g);
-        return { g, ms };
+        return chromMesh(pos, col, recombCol, doubled, scale);
       }
 
       // 左側：有絲分裂細胞（parent 1 個 → 2 個子細胞）

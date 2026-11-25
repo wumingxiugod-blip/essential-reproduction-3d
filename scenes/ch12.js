@@ -17,72 +17,99 @@
     build() {
       S1 = { t: 0, play: true };
       const Z = '透明帶（Hatching 脫出控制）', BL = '分裂球與緊實化極性', DV = '囊胚腔、滋養層與內細胞團（ICM）';
-      // stage: DAY1 1..6.5 -> 2cell, 4cell, 8uncomp, 16comp, blastocyst(D5), hatching(D6)
       const isHatch = DAY1 >= 5.7, isBlast = DAY1 >= 4.4, isComp = DAY1 >= 3.0;
-      const zpGap = isHatch ? 1.05 : 0.45;
-      const zp = shell(1, [3.35, 3.35, 3.35], 0x90d8ff, isHatch ? 0.2 : 0.34, zpGap, Math.PI * 2 - zpGap);
-      if (isHatch) zp.position.set(-1.3, 0, 0);
+      const zpGap = isHatch ? 1.15 : 0.65;
+
+      // 厚壁透明帶剖面殼（有真實壁厚切緣）
+      const zp = thickShell(1, [3.4, 3.4, 3.4], 0x90d8ff, isHatch ? 0.28 : 0.38, zpGap, Math.PI * 2 - zpGap, 0.085);
+      if (isHatch) zp.position.set(-1.35, 0, 0);
       reg(Z, isHatch ? '變薄裂開之透明帶（Hatching）' : '完整包裹之透明帶（防分散與防嵌合）', 'Zona pellucida',
         isHatch ? 'HB-EGF 與滋養層/子宮分泌之蛋白酶溶解透明帶讓囊胚孵出以便貼附內膜！' : '在緊實化形成緊密連接之前，防止分裂球散落成同卵雙胞胎或鄰近胚胎黏合成嵌合體（p.209）。',
         zp, { anchor: [-3.9, 3.1, 0.9] });
 
-      const emOff = isHatch ? [1.1, 0, 0] : [0, 0, 0];
+      const emOff = isHatch ? [1.15, 0, 0] : [0, 0, 0];
       const cellMs = [];
       if (TWIN1 === 'single') {
-        if (DAY1 < 2.2) { // 2-cell or 4-cell
+        if (DAY1 < 2.2) { // 2-cell or 4-cell（含細胞核）
           const n = DAY1 < 1.5 ? 2 : 4;
           for (let i = 0; i < n; i++) {
             const a = i / n * Math.PI * 2;
-            cellMs.push(ell([emOff[0] + Math.cos(a) * 1.15, emOff[1] + Math.sin(a) * 1.15, 0], [1.15, 1.15, 1.1], 0xe890b0, 0.92));
+            const cx = emOff[0] + Math.cos(a) * 1.12, cy = emOff[1] + Math.sin(a) * 1.12;
+            cellMs.push(ell([cx, cy, 0], [1.14, 1.14, 1.08], 0xe890b0, 0.86));
+            cellMs.push(ell([cx, cy, 0.05], [0.44, 0.44, 0.42], 0x823664, 0.96));
           }
           reg(BL, `${n}-細胞分裂球（尚未緊實化）`, `${n}-cell blastomeres`, '細胞呈現放射狀對稱圓球形，彼此間尚未形成閉鎖型緊密連接。此時分裂即產雙絨毛雙胞胎。', cellMs, { anchor: [2.8, 2.2, 0.8] });
         } else if (!isBlast) { // 8-16 compacted morula
-          const n = 12;
+          const n = 14;
           for (let i = 0; i < n; i++) {
             const th = Math.acos(1 - 2 * (i + 0.5) / n), ph = Math.PI * (1 + Math.sqrt(5)) * i;
-            const r = isComp ? 1.55 : 1.75;
-            cellMs.push(ell([emOff[0] + r * Math.sin(th) * Math.cos(ph), emOff[1] + r * Math.cos(th), r * Math.sin(th) * Math.sin(ph)], isComp ? [0.95, 0.95, 0.8] : [0.78, 0.78, 0.78], isComp && i < 3 ? 0x4db8e8 : 0xf28ea8, 0.92));
+            const r = isComp ? 1.48 : 1.78;
+            const cx = emOff[0] + r * Math.sin(th) * Math.cos(ph), cy = emOff[1] + r * Math.cos(th), cz = r * Math.sin(th) * Math.sin(ph);
+            const inner = isComp && i < 4;
+            cellMs.push(ell([cx * (inner ? 0.55 : 1), cy * (inner ? 0.55 : 1), cz * (inner ? 0.55 : 1)], isComp ? [0.98, 0.94, 0.86] : [0.76, 0.76, 0.76], inner ? 0x4db8e8 : 0xf28ea8, 0.92));
           }
           reg(BL, isComp ? '緊實化桑椹胚（極化＋Zonular 緊密連接）' : '未緊實化 8 細胞胚', 'Compacted Morula',
             isComp ? '細胞最大化貼合變成楔形上皮化（基底核、頂端微絨毛與內體）；內外分裂建立滋養層 vs 多能胚層！' : '緊實化前的 8 細胞胚。',
             cellMs, { anchor: [3.1, 2.3, 0.8] });
-        } else { // Blastocyst (4.5 - 6.5)
-          const troph = shell(1, [2.7, 2.65, 2.4], 0xe56b92, 0.52, 0.6, Math.PI * 1.65);
+        } else { // Blastocyst (4.5 - 6.5)：厚壁滋養層剖面＋滋養層細胞核列＋極化雙層 ICM
+          const troph = thickShell(1, [2.72, 2.66, 2.45], 0xe56b92, 0.68, 0.65, Math.PI * 1.62, 0.14);
           troph.position.set(...emOff);
-          const cav = ell([emOff[0], emOff[1] - 0.35, 0], [2.2, 1.9, 1.85], 0x50b8ff, 0.25);
+          // 沿滋養層壁分布的扁平上皮細胞核
+          const tNucPts = [];
+          for (let i = 0; i < 16; i++) {
+            const ph = 0.85 + (i / 15) * (Math.PI * 1.45);
+            const th = 0.6 + ((i * 7) % 5) * 0.45;
+            tNucPts.push(V(emOff[0] - Math.cos(ph) * Math.sin(th) * 2.52, emOff[1] + Math.cos(th) * 2.46, Math.sin(ph) * Math.sin(th) * 2.26));
+          }
+          const tNucs = dots(tNucPts, 0.16, 0x8e244c, 0.96, 12);
+          const cav = ell([emOff[0], emOff[1] - 0.35, 0], [2.15, 1.85, 1.8], 0x50b8ff, 0.24);
+          // ICM：上方多能上胚層（藍）＋下方覆蓋囊胚腔頂的下胚層（金）
           const icmMs = [];
-          for (let i = 0; i < 8; i++) {
-            const a = i / 8 * Math.PI * 2;
-            icmMs.push(ell([emOff[0] + Math.cos(a) * 0.78 * (i % 2 ? 0.65 : 1), emOff[1] + 1.35 + (i % 2 ? 0.28 : -0.1), Math.sin(a) * 0.55], [0.56, 0.5, 0.5], i < 3 ? 0xffd43a : 0x4db8e8, 0.95));
+          for (let i = 0; i < 7; i++) {
+            const a = i / 7 * Math.PI * 2;
+            const r = i === 0 ? 0 : 0.72;
+            icmMs.push(ell([emOff[0] + Math.cos(a) * r, emOff[1] + 1.52 + (i === 0 ? 0.16 : 0), Math.sin(a) * r * 0.75], [0.54, 0.48, 0.48], 0x4db8e8, 0.96));
+          }
+          for (let i = 0; i < 5; i++) {
+            const x = emOff[0] + (i - 2) * 0.46;
+            icmMs.push(ell([x, emOff[1] + 0.92, (i % 2 ? 0.18 : -0.18)], [0.36, 0.22, 0.36], 0xffd43a, 0.96));
           }
           reg(DV, '外圈滋養層（Trophoblast: Cdx2+ / Eomes+）', 'Trophoblast & Blastocoelic cavity',
             '占胚體 &gt;95% 的胚外細胞群，Zonular 緊密連接阻止鈉離子與水分滲漏而撐大囊胚腔，日後形成絨毛膜與胎盤（Fig 12.2）。',
-            [troph, cav], { anchor: [-3.5, -2.5, 0.9] });
+            [troph, tNucs, cav], { anchor: [-3.5, -2.5, 0.9] });
           reg(DV, '內細胞團 Pluriblast（上胚層 Oct3/4+Nanog [藍]／下胚層 GATA6 [金]）', 'Inner Cell Mass (Epiblast & Hypoblast)',
             '僅上胚層（Epiblast）發育為真正的胎兒本體，下胚層（Hypoblast）則形成卵黃囊支持胚外結構。',
             icmMs, { anchor: [3.2, 2.5, 0.9] });
         }
-      } else { // 同卵雙胞胎分化時刻演示（Fig 12.4）
-        const splitX = 1.65;
+      } else { // 同卵雙胞胎分化時刻演示（Fig 12.4，全面厚壁剖面）
         const tConfig = {
-          t1: ['緊實化前分裂（40%）：各自雙絨毛雙羊膜', 0xe56b92, true, 0.85],
-          t3: ['囊胚 ICM 分裂（60%）：單絨毛雙羊膜（輸血風險！）', 0xe56b92, false, 0.9],
-          t4: ['胚盤極晚分裂（<2%）：單絨毛單羊膜／連體風險', 0xf09a4a, false, 0.95]
+          t1: ['緊實化前分裂（40%）：各自雙絨毛雙羊膜', 0xe56b92],
+          t3: ['囊胚 ICM 分裂（60%）：單絨毛雙羊膜（輸血風險！）', 0xe56b92],
+          t4: ['胚盤極晚分裂（<2%）：單絨毛單羊膜／連體風險', 0xf09a4a]
         }[TWIN1];
         if (TWIN1 === 't1') {
-          const ch1 = shell(1, [1.85, 2.0, 1.7], tConfig[1], 0.45, 0.5, Math.PI * 1.6); ch1.position.set(-2.1, 0, 0);
-          const ch2 = shell(1, [1.85, 2.0, 1.7], tConfig[1], 0.45, 0.5, Math.PI * 1.6); ch2.position.set(2.1, 0, 0);
-          const e1 = ell([-2.1, 0.5, 0], [0.7, 0.65, 0.6], 0x4db8e8);
-          const e2 = ell([2.1, 0.5, 0], [0.7, 0.65, 0.6], 0x4db8e8);
+          const ch1 = thickShell(1, [1.85, 2.0, 1.7], tConfig[1], 0.56, 0.55, Math.PI * 1.6, 0.12); ch1.position.set(-2.15, 0, 0);
+          const ch2 = thickShell(1, [1.85, 2.0, 1.7], tConfig[1], 0.56, 0.55, Math.PI * 1.6, 0.12); ch2.position.set(2.15, 0, 0);
+          const e1 = ell([-2.15, 0.45, 0], [0.72, 0.62, 0.58], 0x4db8e8, 0.96);
+          const e2 = ell([2.15, 0.45, 0], [0.72, 0.62, 0.58], 0x4db8e8, 0.96);
           reg(DV, tConfig[0], 'Type 1/2 Dichorionic Diamniotic', '極早分裂產生兩顆獨立胚胎，各有絨毛膜與羊膜（半數後來融成雙絨毛胎盤但罕有血管吻合）。', [ch1, ch2, e1, e2], { anchor: [0, 3.2, 0.8] });
         } else {
-          const chShared = shell(1, [3.4, 2.5, 2.1], 0xe56b92, 0.38, 0.5, Math.PI * 1.6);
-          const am1 = shell(1, [1.3, 1.3, 1.2], 0x70e8ff, 0.25, 0, Math.PI * 2); am1.position.set(TWIN1 === 't4' ? -0.3 : -1.25, 0.2, 0);
-          const am2 = shell(1, [1.3, 1.3, 1.2], 0x70e8ff, TWIN1 === 't4' ? 0.0 : 0.25, 0, Math.PI * 2); am2.position.set(1.25, 0.2, 0);
-          const e1 = ell([TWIN1 === 't4' ? -0.45 : -1.25, 0.2, 0.1], [0.65, 0.6, 0.5], 0x4db8e8);
-          const e2 = ell([TWIN1 === 't4' ? 0.45 : 1.25, 0.2, 0.1], [0.65, 0.6, 0.5], 0x4db8e8);
-          const shLink = TWIN1 === 't3' ? cyl([-1.2, -1.6, 0.2], [1.2, -1.6, 0.2], 0.12, 0xff4040) : null;
-          const ms = [chShared, am1, am2, e1, e2]; if (shLink) ms.push(shLink);
+          const chShared = thickShell(1, [3.45, 2.55, 2.15], 0xe56b92, 0.48, 0.55, Math.PI * 1.62, 0.12);
+          const am1 = thickShell(1, [1.28, 1.28, 1.18], 0x70e8ff, 0.32, 0.5, Math.PI * 1.65, 0.08);
+          am1.position.set(TWIN1 === 't4' ? 0 : -1.28, 0.2, 0);
+          if (TWIN1 === 't4') am1.scale.set(1.9, 1.4, 1.25);
+          const ms = [chShared, am1];
+          if (TWIN1 === 't3') {
+            const am2 = thickShell(1, [1.28, 1.28, 1.18], 0x70e8ff, 0.32, 0.5, Math.PI * 1.65, 0.08);
+            am2.position.set(1.28, 0.2, 0);
+            ms.push(am2);
+          }
+          const e1 = ell([TWIN1 === 't4' ? -0.52 : -1.28, 0.2, 0.1], [0.64, 0.58, 0.52], 0x4db8e8, 0.96);
+          const e2 = ell([TWIN1 === 't4' ? 0.52 : 1.28, 0.2, 0.1], [0.64, 0.58, 0.52], 0x4db8e8, 0.96);
+          ms.push(e1, e2);
+          if (TWIN1 === 't3') {
+            ms.push(ttube([V(-1.25, -0.4, 0.15), V(-0.6, -1.55, 0.25), V(0.6, -1.55, 0.25), V(1.25, -0.4, 0.15)], 0.11, 0xff4040, 0.96, { organic: false }));
+          }
           reg(DV, tConfig[0], TWIN1 === 't3' ? 'Type 3 Monochorionic Diamniotic' : 'Type 4/5 Monochorionic Monoamniotic',
             TWIN1 === 't3' ? '紅血管示「單一胎盤血管吻合」：占同卵雙胞胎 60%，易發生雙胎輸血症候群（一胎過大、一胎發育受阻）。' : '極晚於胚盤期才分裂（&lt;2%），共用同一羊膜與絨毛膜，分離不完全將造成連體嬰（Type 5）。',
             ms, { anchor: [0, 3.4, 0.8] });
@@ -130,50 +157,85 @@
       S2 = { t: 0, play: true };
       const BL = '囊胚（細胞/合胞滋養層＋ICM）', EP = '子宮管腔上皮與 Muc1/LIF–Stat3', ST = '內膜腺體、脫膜細胞與新生血管';
 
-      // 上皮層：y = -0.35 (invasion 時中央破開並侵入深層！)
-      const epY = WIN2 === 'invasion' ? -0.45 : -0.5;
-      const epL = box([-3.6, epY, 0], [3.6, 0.72, 2.8], 0xe8889a, 0.9);
-      const epR = box([3.6, epY, 0], [3.6, 0.72, 2.8], 0xe8889a, 0.9);
-      const epMid = WIN2 === 'invasion' ? null : box([0, epY, 0], [3.6, 0.72, 2.8], 0xe8889a, 0.9);
-      const mucPts = [];
-      for (let i = -8; i <= 8; i++) if (!(WIN2 === 'receptive' && Math.abs(i) < 4) && !(WIN2 === 'invasion' && Math.abs(i) < 5)) mucPts.push(V(i * 0.55, epY + 0.55, 0.7));
-      const mucD = dots(mucPts, WIN2 === 'pre' || WIN2 === 'diapause' ? 0.16 : 0.08, 0xff6080, WIN2 === 'pre' || WIN2 === 'diapause' ? 0.95 : 0.35);
-      // 胞飲突（receptive 時顯著突出）
+      // 獨立柱狀子宮管腔上皮細胞列（含基底核；侵入期中央破開讓囊胚沉入）
+      const epY = WIN2 === 'invasion' ? -0.42 : -0.48;
+      const epRows = epitheliumRow({
+        x0: -5.4, x1: 5.4, y: epY, z0: -1.25, z1: 1.25, h: 0.86, nx: 14, nz: 3,
+        col: 0xe8889a, nucCol: 0x703874, o: 0.88,
+        skip: WIN2 === 'invasion' ? cx => Math.abs(cx) < 1.85 : null
+      });
+      // Muc1 跨膜醣萼刷狀層（小直立纖毛柱）
+      const mucMs = [];
+      for (let i = -8; i <= 8; i++) {
+        if ((WIN2 === 'receptive' && Math.abs(i) < 4) || (WIN2 === 'invasion' && Math.abs(i) < 5)) continue;
+        const hM = (WIN2 === 'pre' || WIN2 === 'diapause') ? 0.42 : 0.16;
+        mucMs.push(capsule([i * 0.58, epY + 0.42, 0.65], [i * 0.58, epY + 0.42 + hM, 0.65], 0.055, 0xff5a7e, (WIN2 === 'pre' || WIN2 === 'diapause') ? 0.95 : 0.42));
+      }
+      // 蘑菇狀胞飲突（receptive 期中央隆起吸收管腔液）
       const pino = [];
-      if (WIN2 === 'receptive') for (let i = -3; i <= 3; i++) pino.push(ell([i * 0.8, epY + 0.5, 0], [0.28, 0.32, 0.3], 0xffd479, 0.9));
-      const epAll = [epL, epR, mucD, ...pino]; if (epMid) epAll.push(epMid);
+      if (WIN2 === 'receptive') {
+        for (let i = -3; i <= 3; i++) {
+          pino.push(ell([i * 0.72, epY + 0.62, 0.1], [0.3, 0.24, 0.28], 0xffd479, 0.94));
+          pino.push(capsule([i * 0.72, epY + 0.36, 0.1], [i * 0.72, epY + 0.55, 0.1], 0.12, 0xf2b858, 0.94));
+        }
+      }
       reg(EP, WIN2 === 'pre' ? '覆蓋厚 Muc1「走開」醣萼之管腔上皮' : '去除 Muc1＋升起胞飲突＋表現 HB-EGF', 'Endometrial luminal epithelium',
-        W2_INFO[WIN2][1], epAll, { anchor: [-4.6, -0.4, 0.9] });
+        W2_INFO[WIN2][1], [...epRows, ...mucMs, ...pino], { anchor: [-4.6, -0.4, 0.9] });
 
-      // 基質、腺體（LIF來源）與脫膜血管
-      const stroma = box([0, -2.9, 0], [11.2, 4.1, 2.7], WIN2 === 'invasion' ? 0xd05872 : 0xb05872, 0.42);
-      const glandL = ttube([V(-4.2, -4.4, 0.3), V(-4.0, -2.5, 0.3), V(-4.3, -0.7, 0.3)], 0.3, 0xffe090, 0.9, { organic: false });
-      const glandR = ttube([V(4.2, -4.4, 0.3), V(4.0, -2.5, 0.3), V(4.3, -0.7, 0.3)], 0.3, 0xffe090, 0.9, { organic: false });
+      // 波浪狀有機子宮內膜基質、捲曲腺體（LIF 來源）與螺旋新生血管
+      const stroma = tissueSlab([0, -2.95, 0], [11.2, 4.0, 2.7], WIN2 === 'invasion' ? 0xd05872 : 0xb05872, 0.36, { wave: 0.09, freq: 1.0, seed: 3.3 });
+      const glandL = ttube([V(-4.3, -4.5, 0.2), V(-3.8, -3.4, 0.45), V(-4.4, -2.3, 0.1), V(-3.9, -1.3, 0.35), V(-4.2, -0.65, 0.2)], [0.34, 0.24], 0xffe090, 0.92, { organic: false });
+      const glandR = ttube([V(4.3, -4.5, 0.2), V(3.8, -3.4, 0.45), V(4.4, -2.3, 0.1), V(3.9, -1.3, 0.35), V(4.2, -0.65, 0.2)], [0.34, 0.24], 0xffe090, 0.92, { organic: false });
       const vesMs = [];
       for (let i = 0; i < (WIN2 === 'invasion' ? 4 : 2); i++) {
         const vx = -2.4 + i * 1.6;
-        vesMs.push(ttube([V(vx, -4.4, 0.5), V(vx + (vx > 0 ? -0.5 : 0.5), -1.8, 0.5)], WIN2 === 'invasion' ? 0.14 : 0.08, 0xff3b3b, 0.92, { organic: false }));
+        const axis = new THREE.CatmullRomCurve3([V(vx, -4.4, 0.45), V(vx + (vx > 0 ? -0.45 : 0.45), -1.85, 0.45)]);
+        vesMs.push(ttube(helixAlong(axis, 0.16, 4.5, i * 1.2, 80), WIN2 === 'invasion' ? 0.11 : 0.075, 0xff3b4a, 0.94, { organic: false }));
       }
-      const decCells = WIN2 === 'invasion' ? dots([V(-1.6, -2.1, 0.8), V(1.6, -2.1, 0.8), V(-2.2, -2.8, 0.8), V(2.2, -2.8, 0.8)], 0.25, 0xffb8d0) : null;
-      const stArr = [stroma, glandL, glandR, ...vesMs]; if (decCells) stArr.push(decCells);
+      const stArr = [stroma, glandL, glandR, ...vesMs];
+      if (WIN2 === 'invasion') {
+        // 肥大聚倍體脫膜細胞＋母血竇紅血球
+        [[-1.85, -2.15, 0.65], [1.85, -2.15, 0.65], [-2.45, -2.95, 0.55], [2.45, -2.95, 0.55]].forEach(p => {
+          stArr.push(ell(p, [0.36, 0.3, 0.3], 0xffb8d0, 0.92));
+          stArr.push(ell([p[0], p[1], p[2] + 0.06], [0.16, 0.14, 0.14], 0x8a3a6a, 0.96));
+        });
+        stArr.push(rbcDiscs([V(-0.9, -2.35, 0.55), V(0.85, -2.4, 0.55), V(0, -2.8, 0.6), V(-0.4, -2.1, 0.65), V(0.45, -2.15, 0.65)], 0.15, 0xe82838, 0.96));
+      }
       reg(ST, '分泌 LIF 之子宮腺體與基質脫膜反應（Cox2 / PGI₂ / VEGF）', 'Glands (LIF), Decidua & Angiogenesis',
         '受 E₂+Hmx3 刺激的腺體分泌 LIF（綠箭頭），透過 Jak–Stat3 開啟窗口；侵入後水腫與 Cox2–PGI₂–PPARδ 引導脫膜與微血管長入形成血竇（lacunae）。',
         stArr, { anchor: [4.8, -3.3, 0.9] });
 
-      // 囊胚（依階段下降貼附甚至沉入基質中！）
-      const bY = WIN2 === 'pre' || WIN2 === 'diapause' ? 2.4 : (WIN2 === 'receptive' ? 1.15 : -1.25);
-      const blShell = shell(1, [1.55, 1.45, 1.35], 0xe56b92, 0.65, 0.45, Math.PI * 1.7);
+      // 厚壁囊胚（侵入期長出指狀合胞滋養層絨毛深入基質）
+      const bY = WIN2 === 'pre' || WIN2 === 'diapause' ? 2.4 : (WIN2 === 'receptive' ? 1.2 : -1.15);
+      const blShell = thickShell(1, [1.55, 1.45, 1.35], 0xe56b92, 0.72, 0.5, Math.PI * 1.65, 0.14);
       blShell.position.set(0, bY, 0);
-      const blIcm = ell([0, bY + 0.45, 0.1], [0.75, 0.55, 0.6], 0x4db8e8, 0.95);
-      const sync = WIN2 === 'invasion' ? ell([0, -2.05, 0], [2.4, 1.35, 1.3], 0xff80a0, 0.58) : null;
-      const blArr = [blShell, blIcm]; if (sync) blArr.push(sync);
-      if (WIN2 === 'pre' || WIN2 === 'diapause') blArr.push(ell([0, bY, 0], [1.85, 1.75, 1.65], 0x90d8ff, 0.28)); // 尚包透明帶
+      const blIcm = [
+        ell([-0.28, bY + 0.45, 0.1], [0.46, 0.38, 0.4], 0x4db8e8, 0.96),
+        ell([0.28, bY + 0.45, 0.1], [0.46, 0.38, 0.4], 0x4db8e8, 0.96),
+        ell([0, bY + 0.12, 0.12], [0.55, 0.2, 0.36], 0xffd43a, 0.96)
+      ];
+      const blArr = [blShell, ...blIcm];
+      if (WIN2 === 'invasion') {
+        // 指狀侵蝕合胞滋養層絨毛
+        const roots = [
+          [V(-0.9, -1.7, 0.1), V(-1.45, -2.4, 0.25), V(-1.85, -3.05, 0.1)],
+          [V(-0.35, -2.0, 0.15), V(-0.55, -2.85, 0.3), V(-0.8, -3.4, 0.15)],
+          [V(0.35, -2.0, 0.15), V(0.55, -2.85, 0.25), V(0.85, -3.35, 0.1)],
+          [V(0.9, -1.7, 0.1), V(1.45, -2.4, 0.25), V(1.85, -3.0, 0.15)]
+        ];
+        roots.forEach(pts => blArr.push(ttube(pts, [0.42, 0.16], 0xff789c, 0.84)));
+      }
+      if (WIN2 === 'pre' || WIN2 === 'diapause') {
+        const zp2 = thickShell(1, [1.9, 1.8, 1.7], 0x90d8ff, 0.3, 0.5, Math.PI * 1.65, 0.08);
+        zp2.position.set(0, bY, 0);
+        blArr.push(zp2);
+      }
       reg(BL, WIN2 === 'invasion' ? '侵入性胚胎（合胞滋養層深入基質）' : '囊胚（表現 EGFR + HSPG 受體）', 'Blastocyst / Syncytiotrophoblast',
         W2_INFO[WIN2][1], blArr, { anchor: [2.8, bY + 1.2, 0.9] });
 
       // LIF (腺體->上皮) & HB-EGF (上皮->囊胚) 訊號箭頭
-      const cLIF = arcArrow([[-4.0, -1.6, 0.5], [-2.5, -0.5, 0.6]], C_STIM, 0.06);
-      const cHB = arcArrow([[-1.6, epY + 0.35, 0.5], [-0.9, bY - 0.5, 0.5]], 0xffd43a, 0.06);
+      const cLIF = arcArrow([[-4.0, -1.6, 0.55], [-2.5, -0.45, 0.65]], C_STIM, 0.06);
+      const cHB = arcArrow([[-1.6, epY + 0.4, 0.55], [-0.9, bY - 0.5, 0.55]], 0xffd43a, 0.06);
       addRoot([...cLIF, ...cHB]);
       S2.fL = flowOn(cLIF.curve, 8, 0.1, 0x46d16a, 0x104010, WIN2 === 'pre' || WIN2 === 'diapause' ? 0.04 : 0.32, 0.03);
       S2.fH = flowOn(cHB.curve, 8, 0.1, 0xffd43a, 0x403000, WIN2 === 'pre' || WIN2 === 'diapause' ? 0.04 : 0.35, 0.03);
@@ -224,41 +286,73 @@
       const [ttl, trophLayers, matLayers, , infoHtml] = SP3_DATA[SP3];
       const L = '左側：組織學屏障層疊（Fig 12.7）', R = '右側：巨觀胎盤型態與長距妊娠訊號';
 
-      // 左側從上到下：母體紅血球池 (y = +3.3) -> 母體殘餘層 (matLayers: 0=無, 1=內皮, 2=上皮+基底+內皮, 3=融合上皮合胞+內皮) -> 胎兒滋養層 (1 or 3層) -> 胎兒微血管 (y = -3.3)
-      const matPool = box([-4.4, 3.3, 0], [6.2, 1.1, 2.2], 0xcc2838, 0.72);
-      const fetCap = cyl([-7.4, -3.3, 0], [-1.4, -3.3, 0], 0.42, 0x4db8e8, 0.92);
-      const layersMs = [matPool, fetCap];
-      // 母血球點
-      layersMs.push(dots([V(-6, 3.3, 0.6), V(-4.5, 3.4, 0.6), V(-3.0, 3.2, 0.6), V(-2.0, 3.3, 0.6)], 0.16, 0xff5050));
+      // 左側：波浪有機母血池＋雙凹紅血球＋帶細胞核的波浪細胞層＋胎兒微血管
+      const matPool = tissueSlab([-4.4, 3.35, 0], [6.2, 1.05, 2.2], 0xcc2838, 0.42, { wave: 0.08, freq: 1.3, seed: 1.1 });
+      const matRbcs = rbcDiscs([V(-6.2, 3.35, 0.3), V(-4.9, 3.45, -0.2), V(-3.5, 3.25, 0.35), V(-2.2, 3.4, 0.1), V(-5.5, 3.2, -0.35), V(-2.9, 3.5, -0.25)], 0.24, 0xff4252, 0.96);
+      const fetCap = ttube([V(-7.4, -3.35, 0), V(-4.4, -3.22, 0.1), V(-1.4, -3.35, 0)], 0.46, 0x4db8e8, 0.48, { organic: false, radial: 20 });
+      const fetRbcs = rbcDiscs([V(-6.4, -3.32, 0.02), V(-4.8, -3.25, 0.08), V(-3.2, -3.28, 0.04), V(-2.0, -3.34, 0.02)], 0.19, 0xd83258, 0.96);
+      const layersMs = [matPool, matRbcs, fetCap, fetRbcs];
 
-      let curY = 2.3;
-      if (matLayers >= 1) {
-        layersMs.push(box([-4.4, curY, 0], [6.2, 0.48, 2.2], 0xff8080, 0.88)); // 母微血管內皮
-        curY -= 0.62;
-      }
-      if (matLayers >= 2) {
-        layersMs.push(box([-4.4, curY, 0], [6.2, 0.56, 2.2], matLayers === 3 ? 0xe090d8 : 0xf0b080, 0.88)); // 上皮或雙核合胞體
-        curY -= 0.68;
-      }
+      const addCellLayer = (y, h, col, nucCol, seed, binuc = false) => {
+        layersMs.push(tissueSlab([-4.4, y, 0], [6.2, h, 2.15], col, 0.82, { wave: 0.06, freq: 1.5, seed }));
+        const nPts = [];
+        for (let i = 0; i < 6; i++) {
+          const x = -6.7 + i * 0.92;
+          if (binuc) { nPts.push(V(x - 0.11, y, 0.45), V(x + 0.11, y, 0.45)); }
+          else nPts.push(V(x, y, 0.45));
+        }
+        layersMs.push(dots(nPts, 0.11, nucCol, 0.96, 10));
+      };
+
+      let curY = 2.25;
+      if (matLayers >= 1) { addCellLayer(curY, 0.44, 0xff8080, 0x8a2434, 2.2); curY -= 0.64; }
+      if (matLayers >= 2) { addCellLayer(curY, 0.56, matLayers === 3 ? 0xe090d8 : 0xf0b080, 0x6b2f6c, 3.4, matLayers === 3); curY -= 0.72; }
       for (let k = 0; k < trophLayers; k++) {
-        layersMs.push(box([-4.4, curY - k * 0.62, 0], [6.2, 0.48, 2.2], 0xe56b92, 0.92));
+        addCellLayer(curY - k * 0.64, 0.48, 0xe56b92, 0x7c1f48, 4.5 + k);
       }
       reg(L, `母胎介面：${trophLayers} 層滋養層 ＋ ${matLayers === 0 ? '無母體層（直泡母血）' : matLayers === 1 ? '母體血管內皮' : matLayers === 3 ? '雙核細胞融合合胞上皮+內皮' : '完整母體上皮+基底膜+內皮'}`, 'Placental tissue layers (Fig 12.7)',
         infoHtml, layersMs, { anchor: [-4.4, 0.5, 0.9] });
 
-      // 右側上：胎盤巨觀形狀 (Fig 12.6)
-      const sac = ell([4.6, 1.8, 0], [2.4, 1.55, 1.4], 0xffe4b8, 0.55);
+      // 右側上：立體胎盤巨觀形狀 (Fig 12.6)
+      const sac = ell([4.6, 1.85, 0], [2.4, 1.55, 1.4], 0xffe4b8, 0.48);
       const macMs = [sac];
-      if (SP3 === 'human' || SP3 === 'rat') macMs.push(ell([4.6, 3.05, 0], [1.45, 0.45, 1.15], 0xd83050, 0.92)); // 圓盤 Discoid
-      else if (SP3 === 'dog') { const zn = cyl([4.0, 1.8, 0], [5.2, 1.8, 0], 1.55, 0xd83050, 0.85); zn.rotation.z = Math.PI / 2; macMs.push(zn); } // 環帶 Zonary
-      else if (SP3 === 'cow') { // 子葉型 Cotyledonary
-        for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; macMs.push(ell([4.6 + Math.cos(a) * 1.9, 1.8 + Math.sin(a) * 1.2, 0.7 * Math.cos(a * 2)], [0.35, 0.35, 0.35], 0xd83050, 0.95)); }
-      } else { // 彌散型 Diffuse
-        for (let i = 0; i < 18; i++) { const a = i * 2.3; macMs.push(ell([4.6 + Math.cos(a) * 2.1, 1.8 + Math.sin(a * 1.3) * 1.35, 0.9 * Math.sin(a)], [0.22, 0.22, 0.22], 0xd83050, 0.9)); }
+      if (SP3 === 'human' || SP3 === 'rat') {
+        // 圓盤狀胎盤（帶微厚圓盤與臍帶血管）
+        const discP = lathe([[0.01, -0.22], [1.45, -0.18], [1.62, 0], [1.45, 0.22], [0.01, 0.28]], 0xd83050, 0.95, [4.6, 3.12, 0], [0, 1, 0], 36);
+        const cord = ttube([V(4.6, 3.0, 0), V(4.85, 2.45, 0.25), V(4.45, 1.95, 0.1)], 0.11, 0x80c8ff, 0.95, { organic: false });
+        macMs.push(discP, cord);
+      } else if (SP3 === 'dog') {
+        // 環帶腰封狀（貼合卵形囊腰部的真實 3D 環帶）
+        const bandProf = [];
+        for (let i = 0; i <= 12; i++) {
+          const t = (i / 12 - 0.5) * 1.45;
+          const r = 1.62 * Math.sqrt(Math.max(0.2, 1 - (t / 2.45) * (t / 2.45)));
+          bandProf.push([r, t]);
+        }
+        const zn = lathe(bandProf, 0xd83050, 0.92, [4.6, 1.85, 0], [1, 0, 0], 36);
+        zn.scale.set(1, 0.96, 0.92);
+        macMs.push(zn);
+      } else if (SP3 === 'cow') {
+        // 子葉型（圓頂鈕扣狀子宮阜 placentomes）
+        for (let i = 0; i < 10; i++) {
+          const th = Math.acos(1 - 2 * (i + 0.5) / 10), ph = Math.PI * (1 + Math.sqrt(5)) * i;
+          const p = V(4.6 + Math.sin(th) * Math.cos(ph) * 2.35, 1.85 + Math.cos(th) * 1.5, Math.sin(th) * Math.sin(ph) * 1.35);
+          const btnM = ell(p.toArray(), [0.36, 0.26, 0.34], 0xd83050, 0.96);
+          macMs.push(btnM);
+        }
+      } else {
+        // 彌散型（均勻分布絨毛凸點）
+        const vPts = [];
+        for (let i = 0; i < 36; i++) {
+          const th = Math.acos(1 - 2 * (i + 0.5) / 36), ph = Math.PI * (1 + Math.sqrt(5)) * i;
+          vPts.push(V(4.6 + Math.sin(th) * Math.cos(ph) * 2.42, 1.85 + Math.cos(th) * 1.56, Math.sin(th) * Math.sin(ph) * 1.42));
+        }
+        macMs.push(dots(vPts, 0.16, 0xd83050, 0.95, 10));
       }
-      // 右側下：長距離辨識路徑（概念體 -> 黃體 or 子宮 PGF2a阻斷）
-      const concB = ell([2.2, -2.5, 0], [0.75, 0.55, 0.55], 0xe56b92, 0.95);
-      const targetO = ell([7.0, -2.5, 0], [0.95, 0.72, 0.72], SP3 === 'human' ? 0xffd43a : 0x46d16a, 0.95);
+
+      // 右側下：長距離辨識路徑（概念體 -> 黃體 or 子宮 PGF2a 阻斷）
+      const concB = ell([2.2, -2.5, 0], [0.78, 0.56, 0.56], 0xe56b92, 0.95);
+      const targetO = ell([7.0, -2.5, 0], [0.96, 0.72, 0.72], SP3 === 'human' ? 0xffd43a : 0x46d16a, 0.95);
       const sigCol = SP3 === 'human' ? C_STIM : C_INH;
       const sigArc = arcArrow([[3.0, -2.3, 0.2], [6.0, -2.3, 0.2]], sigCol, 0.07, { inhibit: SP3 === 'cow' || SP3 === 'pig' });
       macMs.push(concB, targetO, ...sigArc);

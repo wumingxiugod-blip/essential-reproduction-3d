@@ -46,17 +46,23 @@
       bm.position.set(alvX, alvY, 0);
       const myoMs = [];
       for (let i = 0; i < 6; i++) {
-        const a = -1.2 + i * 0.5;
-        myoMs.push(ttube([V(alvX + Math.cos(a) * 2.9, alvY + Math.sin(a) * 2.9, -0.4), V(alvX + Math.cos(a) * 2.9, alvY + Math.sin(a) * 2.9, 0.6)], 0.12, 0xf06070, 0.9, { organic: false }));
+        const a = -1.25 + i * 0.5;
+        const p0 = V(alvX + Math.cos(a - 0.18) * 2.85, alvY + Math.sin(a - 0.18) * 2.85, -0.65);
+        const p1 = V(alvX + Math.cos(a) * 2.98, alvY + Math.sin(a) * 2.98, 0.1);
+        const p2 = V(alvX + Math.cos(a + 0.18) * 2.85, alvY + Math.sin(a + 0.18) * 2.85, 0.85);
+        myoMs.push(ttube([p0, p1, p2], [0.09, 0.14, 0.09], 0xf06070, 0.94, { organic: false }));
       }
-      // 一圈 8 個分泌上皮細胞 + 腔內乳汁微滴
+      // 一圈 9 顆帶基底核的立方分泌上皮細胞 + 腔內乳汁微滴
       const epCells = [], droplets = [];
-      for (let i = 0; i < 8; i++) {
-        const a = i / 8 * Math.PI * 1.45 + 0.85;
-        const r = 2.25;
+      for (let i = 0; i < 9; i++) {
+        const a = i / 9 * Math.PI * 1.55 + 0.78;
+        const r = 2.22;
         const cx = alvX + Math.cos(a) * r, cy = alvY + Math.sin(a) * r;
         const cCol = L_ST1 === 'preg' ? 0xc890b0 : (L_ST1 === 'lact' ? 0xf6c860 : 0x708090);
-        epCells.push(ell([cx, cy, 0], [0.58, 0.58, 0.55], cCol, L_ST1 === 'wean' ? 0.45 : 0.92));
+        const cell = ell([cx, cy, 0], [0.56, 0.48, 0.52], cCol, L_ST1 === 'wean' ? 0.45 : 0.9);
+        cell.rotation.z = a;
+        const nuc = ell([alvX + Math.cos(a) * (r + 0.16), alvY + Math.sin(a) * (r + 0.16), 0.12], [0.2, 0.2, 0.2], 0x5c3474, 0.96);
+        epCells.push(cell, nuc);
       }
       const nDrop = L_ST1 === 'lact' ? 14 : (L_ST1 === 'wean' ? 18 : 2);
       for (let i = 0; i < nDrop; i++) {

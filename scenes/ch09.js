@@ -179,9 +179,9 @@
       const isMens = DAY3 <= 5, isProlif = DAY3 > 5 && DAY3 <= 14, isOv = DAY3 >= 12 && DAY3 <= 15;
       // 內膜厚度 0.8 (月經) → 3.4 (增生末) → 4.6 (分泌中末)
       const thick = isMens ? 0.9 : isProlif ? 1.2 + (DAY3 - 5) / 9 * 2.1 : 3.3 + Math.sin(Math.min(1, (DAY3 - 14) / 10) * Math.PI * 0.6) * 1.4;
-      const myo = box([-4.6, -4.1, 0], [8.0, 0.9, 3.0], 0xb84a50, 0.9);
-      const basalis = box([-4.6, -3.3, 0], [8.0, 0.7, 3.0], 0xc86a78, 0.92);
-      const funct = box([-4.6, -2.95 + thick / 2, 0], [8.0, thick, 2.9], isMens ? 0x983040 : (isProlif ? 0xe88098 : 0xf29ab0), isMens ? 0.55 : 0.72);
+      const myo = tissueSlab([-4.6, -4.1, 0], [8.0, 0.9, 3.0], 0xb84a50, 0.92, { wave: 0.06, seed: 1.2 });
+      const basalis = tissueSlab([-4.6, -3.3, 0], [8.0, 0.7, 3.0], 0xc86a78, 0.92, { wave: 0.07, seed: 2.3 });
+      const funct = tissueSlab([-4.6, -2.95 + thick / 2, 0], [8.0, thick, 2.9], isMens ? 0x983040 : (isProlif ? 0xe88098 : 0xf29ab0), isMens ? 0.52 : 0.66, { wave: isMens ? 0.14 : 0.09, topOnly: true, seed: 3.5 });
       reg(EN, '子宮肌層與內膜基底層', 'Myometrium & stratum basalis', isProlif ? 'E₂ 主導：肌層興奮性上升，出現「由子宮頸朝向子宮底（cervico-fundal）」蠕動助運精！' : 'P₄ 主導：肌層保持安靜利於著床（肌底極少脫落）。', [myo, basalis], { anchor: [-8.6, -4.1, 0.6] });
       reg(EN, `內膜功能層（厚 ${thick.toFixed(1)} 單位）`, 'Stratum functionalis', isMens ? 'P₄ 撤退引起細胞凋亡與動脈痙攣，功能層崩解隨經血排出。' : isProlif ? '增生期：基質水腫與細胞分裂增厚，並大量合成助孕素受體（PR）。' : '分泌期：分泌醣蛋白養分與基質細胞肥大（脫膜前準備）。', funct, { anchor: [-8.4, -1.5, 0.6] });
 
@@ -223,9 +223,12 @@
         mucLines, { anchor: [5.2, 3.2, 0.5] });
 
       S3.sperms = [];
+      const _spHG = spermHeadGeo(0.5, 0.26, 0.14);
       for (let i = 0; i < 5; i++) {
         const g = new THREE.Group();
-        g.add(ell([0, 0, 0], [0.24, 0.13, 0.13], 0xffffff), cyl([-0.24, 0, 0], [-0.95, 0, 0], 0.035, 0xd8e0e8));
+        const hd = new THREE.Mesh(_spHG, mat(0xf6f2e8, 0.96)); hd.rotation.y = Math.PI;
+        const tl = ttube([V(-0.22, 0, 0), V(-0.52, 0.08, 0.02), V(-0.82, -0.07, -0.02), V(-1.12, 0.05, 0)], [0.038, 0.015], 0xd0e2f2, 0.94, { organic: false, seg: 14, radial: 8 });
+        g.add(hd, tl);
         g.position.set(2.5, -1.6 + i * 0.8, 0.4);
         CUR.root.add(g);
         S3.sperms.push(g);

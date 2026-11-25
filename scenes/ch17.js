@@ -45,26 +45,25 @@
         'IL-6/IL-8 吸引單核球、PGE₂＋NO 加上高→低 MW 玻尿酸水化使膠原分散順從，並配合白色人類骨盆出口密切引導胎頭娩出（Fig 17.1）。',
         [cervix, pelv, vag], { anchor: [3.4, -1.8, 0.8] });
 
-      // 胎兒（頭朝下從 y=1.3 -> y=0.2 -> y=-2.8 娩出！）
-      const fY = STG1 === 0 ? 0.85 : (STG1 === 1 ? 0.15 : -2.25);
-      const fHead = ell([0, fY - 1.15, 0], [1.22, 1.32, 1.15], 0xf2b8a0, 0.96);
-      const fBody = ell([0, fY + 0.65, 0], [1.35, 1.65, 1.25], 0xf2b8a0, 0.92);
-      const cord = ttube([V(0, fY + 0.5, 0.6), V(1.1, fY + 1.4, 0.6), V(1.4, 2.8, 0.3)], 0.14, 0x45c49e, 0.9, { organic: false });
-      const plac = ell([1.2, 3.2, -0.5], [1.4, 0.65, 1.1], 0xd83050, 0.9);
+      // 雕塑化頭位捲曲胎兒（頭朝下從 y=0.85 -> 0.15 -> -2.25 娩出！）
+      const fY = STG1 === 0 ? 0.9 : (STG1 === 1 ? 0.15 : -2.1);
+      const fet = fetusMesh([0, fY, 0], 1.55, 0xf2b8a0, 0.95);
+      fet.g.rotation.z = Math.PI; // 頭位向下！
+      const cord = ttube([V(0.2, fY + 0.3, 0.55), V(1.15, fY + 1.35, 0.55), V(1.4, 2.85, 0.25)], 0.14, 0x45c49e, 0.92, { organic: false });
+      const plac = lathe([[0.01, -0.25], [1.35, -0.18], [1.5, 0], [1.35, 0.25], [0.01, 0.32]], 0xd83050, 0.94, [1.2, 3.25, -0.45], [0, 1, 0], 32);
       reg(FT, `胎兒（頭位${STG1 === 2 ? '正滑出骨盆底擴張外伸' : '向下推進'}）& 頂部胎盤`, 'Fetus & Placenta',
         '胎頭雙頂徑緊貼骨盆開口（Fig 17.1），必須屈曲對齊最小徑線並隨產程內旋轉、伸展娩出（Fig 17.3）。',
-        [fHead, fBody, cord, plac], { anchor: [-3.5, -1.0, 0.9] });
+        [...fet.ms, cord, plac], { anchor: [-3.5, -1.0, 0.9] });
 
-      S1.fHead = fHead; S1.fBody = fBody;
+      S1.fetG = fet.g;
       textSprite(STG1_DATA[STG1][0], [0, 5.1, 0], 0.34, '#ffd479');
 
       const dt = dtClock();
       CUR.tick = () => {
         const d = S1.play ? dt() : 0; S1.t += d;
         if (STG1 >= 1) {
-          const push = Math.max(0, Math.sin(S1.t * 2.4)) * 0.18;
-          fHead.position.y = (fY - 1.15) - push;
-          fBody.position.y = (fY + 0.65) - push * 0.7;
+          const push = Math.max(0, Math.sin(S1.t * 2.4)) * 0.2;
+          S1.fetG.position.y = fY - push;
         }
       };
     },

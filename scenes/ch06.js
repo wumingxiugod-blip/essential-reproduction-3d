@@ -22,47 +22,83 @@
     build() {
       S1 = { t: 0, play: true };
       const EX = '管外分區（V & I）', IN = '塞透力氏細胞與 BTB', GM = '管內生殖細胞（B → A）';
-      // 管壁：纖維細胞 + 肌樣細胞 + 基底膜（底層 y=-4.5）
-      const bm = box([0, -3.7, 0], [11.5, 0.25, 4.5], 0x9ab0c8, 0.85);
-      const myo = [box([-3, -4.15, 0], [5.2, 0.45, 4.4], 0xc87870, 0.85), box([3, -4.15, 0], [5.2, 0.45, 4.4], 0xc87870, 0.85)];
-      const ley = [ell([-3.8, -5.6, 0.6], [1.0, 0.75, 0.8], 0xff9a3a), ell([2.2, -5.5, -0.4], [1.0, 0.75, 0.8], 0xff9a3a)];
-      const bv = cyl([-6.5, -5.7, 0.8], [6.5, -5.7, 0.8], 0.48, 0xd83a3a, 0.72);
-      reg(EX, '血管與間質分區（V & I＋來狄吉細胞）', 'Vascular & Interstitial compartments', '血管與間質（含淋巴與 Leydig 細胞）之間物質自由平衡，但沒有血管或神經能進入曲細精管。', [bv, ...ley], { anchor: [-4.5, -5.8, 0.9] });
+
+      // 波浪狀有機基底膜與紡錘形管周肌樣細胞
+      const bm = tissueSlab([0, -3.72, 0], [11.6, 0.28, 4.4], 0x9ab4cc, 0.9, { wave: 0.055, freq: 1.4, seed: 2.1 });
+      const myo = [];
+      [-4.1, -1.4, 1.4, 4.1].forEach((mx, i) => {
+        myo.push(ell([mx, -4.18, (i % 2 ? 0.55 : -0.45)], [1.35, 0.22, 1.15], 0xc87870, 0.9));
+        myo.push(ell([mx, -4.18, (i % 2 ? 0.55 : -0.45)], [0.45, 0.14, 0.32], 0x7c3840, 0.95));
+      });
+      // 來狄吉細胞群（多角飽滿細胞＋深色核）與半透明微血管＋雙凹紅血球
+      const ley = [
+        ell([-3.8, -5.55, 0.5], [1.05, 0.78, 0.85], 0xff9a3a, 0.92),
+        ell([-3.8, -5.55, 0.65], [0.42, 0.36, 0.38], 0x9a4818, 0.96),
+        ell([2.3, -5.45, -0.3], [1.0, 0.76, 0.82], 0xff9a3a, 0.92),
+        ell([2.3, -5.45, -0.15], [0.4, 0.34, 0.36], 0x9a4818, 0.96)
+      ];
+      const bv = ttube([V(-6.5, -5.75, 0.85), V(-2.2, -5.55, 0.95), V(2.2, -5.85, 0.85), V(6.5, -5.65, 0.95)], 0.5, 0xd83a48, 0.42, { organic: false, radial: 20 });
+      const rbcPts = [-5.0, -3.1, -1.2, 0.7, 2.6, 4.5].map((x, i) => V(x, -5.7 + Math.sin(i) * 0.14, 0.9));
+      const rbcs = rbcDiscs(rbcPts, 0.24, 0xe82838, 0.96);
+      reg(EX, '血管與間質分區（V & I＋來狄吉細胞）', 'Vascular & Interstitial compartments', '血管與間質（含淋巴與 Leydig 細胞）之間物質自由平衡，但沒有血管或神經能進入曲細精管。', [bv, rbcs, ...ley], { anchor: [-4.5, -5.8, 0.9] });
       reg(EX, '基底膜與管周肌樣細胞', 'Basement membrane & myoid cells', '圍繞曲細精管外圍，僅具點狀連接，尚不足以構成主要擴散障壁；肌樣細胞具收縮性推動管腔液。', [bm, ...myo], { anchor: [4.8, -4.1, 0.8] });
 
-      // 兩顆柱狀 Sertoli 細胞（從 y=-3.5 伸至管腔 y=4.0）
-      const sL = box([-2.6, 0.3, 0], [3.4, 7.2, 3.6], 0x70b8e8, 0.22);
-      const sR = box([2.6, 0.3, 0], [3.4, 7.2, 3.6], 0x70b8e8, 0.22);
-      const sNuc = [ell([-2.6, -2.5, 0.4], [0.75, 0.52, 0.6], 0x3b6cd8), ell([2.6, -2.5, 0.4], [0.75, 0.52, 0.6], 0x3b6cd8)];
-      reg(IN, '塞透力氏細胞（基底 → 管腔柱狀）', 'Sertoli cells', '橫跨基底膜至管腔，協調生精節律、分泌管腔液（高 K⁺/肌醇/ABP）與多種旁分泌生長因子。', [sL, sR, ...sNuc], { anchor: [-4.6, 1.5, 0.8] });
+      // 兩顆雕塑化柱狀 Sertoli 細胞（寬基底腳＋側壁凹槽＋帶核仁基底核）
+      const sL = sertoliColumn(-1, 0x70b8e8, 0.25);
+      const sR = sertoliColumn(1, 0x70b8e8, 0.25);
+      const sNuc = [
+        ell([-2.8, -2.55, 0.2], [0.82, 0.56, 0.64], 0x3b6cd8, 0.92),
+        ell([-2.65, -2.5, 0.55], [0.22, 0.2, 0.22], 0x1d3578, 0.98),
+        ell([2.8, -2.55, 0.2], [0.82, 0.56, 0.64], 0x3b6cd8, 0.92),
+        ell([2.65, -2.5, 0.55], [0.22, 0.2, 0.22], 0x1d3578, 0.98)
+      ];
+      reg(IN, '塞透力氏細胞（基底 → 管腔柱狀）', 'Sertoli cells', '橫跨基底膜至管腔，側壁凹槽包覆各期生殖細胞，協調生精節律並分泌高 K⁺/肌醇/ABP 管腔液。', [sL, sR, ...sNuc], { anchor: [-4.6, 1.5, 0.8] });
 
-      // BTB 連接複合體（緊密連接 + 肌動蛋白絲 + RER）
-      const gapX = BREACH ? 0.55 : 0.12;
-      const btbL = box([-0.45 - gapX, -1.6, 0], [0.7, 0.6, 3.6], 0xff5a5a, 0.92);
-      const btbR = box([0.45 + gapX, -1.6, 0], [0.7, 0.6, 3.6], 0xff5a5a, 0.92);
-      const actin = [box([-1.0 - gapX, -1.6, 0], [0.22, 0.9, 3.6], 0xffd43a), box([1.0 + gapX, -1.6, 0], [0.22, 0.9, 3.6], 0xffd43a)];
+      // BTB 連接複合體（緊密連接拉鍊索＋肌動蛋白絲束）
+      const gapX = BREACH ? 0.52 : 0.08;
+      const btbMs = [];
+      [-1, 1].forEach(side => {
+        for (let k = -2; k <= 2; k++) {
+          const z = k * 0.62;
+          btbMs.push(capsule([side * (0.28 + gapX), -1.85, z], [side * (0.28 + gapX), -1.3, z], 0.13, 0xff5a5a, 0.95));
+          btbMs.push(capsule([side * (0.62 + gapX), -1.95, z], [side * (0.62 + gapX), -1.2, z], 0.07, 0xffd43a, 0.95));
+        }
+        // 縱向緊密連接蛋白條帶
+        btbMs.push(ttube([V(side * (0.28 + gapX), -1.58, -1.45), V(side * (0.34 + gapX), -1.52, 0), V(side * (0.28 + gapX), -1.58, 1.45)], 0.09, 0xff3b4a, 0.96, { organic: false }));
+      });
+      if (!BREACH) {
+        for (let k = -2; k <= 2; k++) {
+          btbMs.push(capsule([-0.32, -1.58, k * 0.62], [0.32, -1.58, k * 0.62], 0.075, 0xff8080, 0.96));
+        }
+      }
       reg(IN, '血睪障壁 BTB（環狀緊密＋黏附＋間隙連接）', 'Blood–testis barrier (Zonular junctions)',
         BREACH ? '<b>TNFα 與 TGFβ3 作用中</b>：BTB 短暫重塑開啟，讓複製完 DNA 的前細紐期初級精母細胞向上移入近腔分區！'
           : '完全環繞 Sertoli 細胞腰部（內襯肌動蛋白絲與 RER），徹底隔離近腔分區免受免疫細胞與血中水溶性大分子進入。',
-        [btbL, btbR, ...actin], { anchor: [3.2, -1.6, 0.8] });
+        btbMs, { anchor: [3.2, -1.6, 0.8] });
 
-      // 基底 vs 近腔生殖細胞 + ectoplasmic specialization / tubulobulbar
-      const spg = ell([0, -2.9, 0.2], [0.65, 0.52, 0.6], 0x5aa0f0);
-      const spc = ell([0, BREACH ? -1.4 : 0.4, 0.2], [0.85, 0.8, 0.75], 0x9a6ad8);
-      const rtid = ell([-1.2, 2.3, 0.2], [0.5, 0.5, 0.5], 0xd8a8ff);
-      const es = ring(V(-1.2, 2.3, 0.2), V(0, 1, 0), 0.62, 0.08, 0x46d16a);
-      const etid = [ell([1.2, 3.1, 0.2], [0.22, 0.55, 0.2], 0xf6f0d8), cyl([1.2, 3.6, 0.2], [1.2, 5.0, 0.2], 0.04, 0xd8e0e8)];
-      const tbc = cyl([0.9, 2.7, 0.2], [1.5, 2.5, 0.2], 0.14, 0xffb84a);
+      // 基底 vs 近腔生殖細胞（含核＋ES 環＋真實梨形頭延長精細胞）
+      const spg = [ell([0, -2.92, 0.2], [0.68, 0.54, 0.62], 0x5aa0f0, 0.88), ell([0, -2.92, 0.25], [0.36, 0.3, 0.34], 0x26529c, 0.96)];
+      const spcY = BREACH ? -1.45 : 0.45;
+      const spc = [ell([0, spcY, 0.2], [0.88, 0.82, 0.78], 0x9a6ad8, 0.85), ell([0, spcY, 0.25], [0.48, 0.45, 0.44], 0x542c8a, 0.96)];
+      const rtid = [ell([-0.85, 2.25, 0.2], [0.52, 0.52, 0.5], 0xd8a8ff, 0.88), ell([-0.85, 2.25, 0.25], [0.28, 0.28, 0.28], 0x6e3ca8, 0.96)];
+      const es = ring(V(-0.85, 2.25, 0.2), V(0, 1, 0), 0.64, 0.085, 0x46d16a, 0.95);
+      // 延長精細胞：真正扁平梨形頭＋波浪鞭毛
+      const eHead = new THREE.Mesh(spermHeadGeo(0.95, 0.52, 0.24), mat(0xf6f0d8, 0.96));
+      eHead.position.set(0.85, 3.05, 0.2); eHead.rotation.z = Math.PI / 2;
+      const eAcr = new THREE.Mesh(spermAcrosomeGeo(1.0, 0.56, 0.27, 0.62), mat(0xff80a8, 0.9));
+      eAcr.position.set(0.85, 3.05, 0.2); eAcr.rotation.z = Math.PI / 2;
+      const eTail = ttube([V(0.85, 3.45, 0.2), V(1.02, 4.05, 0.25), V(0.75, 4.65, 0.15), V(0.95, 5.2, 0.22)], [0.06, 0.025], 0xd8e4f0, 0.95, { organic: false });
+      const tbc = ttube([V(0.65, 2.75, 0.22), V(1.05, 2.55, 0.35), V(1.38, 2.38, 0.2)], [0.11, 0.17], 0xffb84a, 0.95, { organic: false });
       reg(GM, 'B 基底分區：精原細胞', 'Basal: Spermatogonium', '位於血睪障壁下方，受 GDNF 維持幹細胞微環境並進行有絲分裂。', spg, { anchor: [0, -2.9, 0.9] });
-      reg(GM, 'A 近腔分區：初級精母細胞', 'Adluminal: Primary spermatocyte', '穿越 BTB 後進入漫長減數分裂 I（粗絲期最敏感）。', spc, { anchor: [0, 0.4, 1.0] });
-      reg(GM, '圓形／延長精細胞（ES ＋ 管球狀複合體）', 'Spermatids (ES & tubulobulbar complex)', '外質特化（綠環 ES）負責錨定／重塑精細胞；管球狀複合體（橘）協助內吞多餘胞質並於排精釋出精子。', [rtid, es, ...etid, tbc], { anchor: [1.8, 3.8, 0.8] });
+      reg(GM, 'A 近腔分區：初級精母細胞', 'Adluminal: Primary spermatocyte', '穿越 BTB 後進入漫長減數分裂 I（粗絲期最敏感）。', spc, { anchor: [0, spcY, 1.0] });
+      reg(GM, '圓形／延長精細胞（ES ＋ 管球狀複合體）', 'Spermatids (ES & tubulobulbar complex)', '外質特化（綠環 ES）負責錨定／重塑精細胞；管球狀複合體（橘）協助內吞多餘胞質並於排精釋出精子。', [...rtid, es, eHead, eAcr, eTail, tbc], { anchor: [1.8, 3.8, 0.8] });
 
       // 標記小分子擴散測試（血中染料滲入間質但被 BTB 阻擋）
       const dyePts = [];
-      for (let i = 0; i < 18; i++) dyePts.push(V(-4.5 + (i % 9) * 1.1, i < 9 ? -4.9 : -3.1, 1.0));
+      for (let i = 0; i < 18; i++) dyePts.push(V(-4.5 + (i % 9) * 1.1, i < 9 ? -4.9 : -3.1, 1.05));
       S1.dyes = dots(dyePts, 0.12, 0x60f0ff); CUR.root.add(S1.dyes);
 
-      textSprite('A 近腔分區（高 K⁺ / 肌醇 / 睪固酮）', [0, 4.9, 0], 0.36, '#8fd0ff');
+      textSprite('A 近腔分區（高 K⁺ / 肌醇 / 睪固酮）', [0, 5.1, 0], 0.36, '#8fd0ff');
       textSprite('V+I 管外（染料自由擴散到此被 BTB 擋住）', [0, -6.7, 0], 0.34, '#ffd479');
 
       const dt = dtClock();
@@ -118,39 +154,64 @@
         ['次級精母 → 圓形精細胞 (1n)', 'Spermatids (CREMτ active)', -1.2, 8, 0xd8a8ff, '細胞質橋共享 mRNA/蛋白；CREMτ 啟動單倍體基因轉錄高峰。'],
         ['釋放成熟精子（斷開胞質橋）', 'Spermiation', -3.6, 8, 0xf6f0d8, '殘餘體被 Sertoli 細胞吞噬，精子斷橋釋入曲細精管腔。']
       ];
-      const br = [];
+      const brMs = [];
+      // 沙漏狀胞質橋旋轉輪廓
+      const bridgeProf = [[0.14, -0.32], [0.09, -0.15], [0.075, 0], [0.09, 0.15], [0.14, 0.32]];
+      const sHeadG = spermHeadGeo(0.56, 0.3, 0.16);
       rows.forEach(([zh, en, y, cnt, col, info], ri) => {
-        const ms = [], span = cnt * 0.92;
+        const ms = [], span = cnt * 0.94;
         for (let i = 0; i < cnt; i++) {
           const x = -5.2 - span / 2 + (span * i) / (cnt - 1);
           if (ri < 3) {
-            ms.push(ell([x, y, 0], [0.34, 0.34, 0.34], col));
-            if (i < cnt - 1) br.push([new THREE.CylinderGeometry(0.08, 0.08, 1, 8), segMtx(V(x, y, 0), V(x + span / (cnt - 1), y, 0))]);
+            ms.push(ell([x, y, 0], [0.35, 0.34, 0.34], col, 0.88));
+            ms.push(ell([x, y, 0.04], [0.17, 0.17, 0.17], 0x2a325c, 0.95));
+            if (i < cnt - 1) {
+              const nx = x + span / (cnt - 1);
+              brMs.push(lathe(bridgeProf, 0x70d8ff, 0.92, [(x + nx) / 2, y, 0], [1, 0, 0], 18));
+            }
           } else {
-            ms.push(ell([x, y + 0.25, 0], [0.14, 0.28, 0.12], col), cyl([x, y, 0], [x, y - 1.1, 0], 0.04, 0xc8d4e0));
+            const hd = new THREE.Mesh(sHeadG, mat(col, 0.96));
+            hd.position.set(x, y + 0.3, 0); hd.rotation.z = -Math.PI / 2;
+            const tl = ttube([V(x, y + 0.02, 0), V(x + 0.1, y - 0.42, 0.04), V(x - 0.08, y - 0.88, -0.03), V(x + 0.06, y - 1.28, 0.02)], [0.045, 0.018], 0xc8d8e8, 0.95, { organic: false, seg: 18, radial: 8 });
+            ms.push(hd, tl);
           }
         }
         reg(CL, zh, en, info, ms, { anchor: [-5.2 - span / 2 - 0.5, y, 0.4] });
       });
-      reg(CL, '細胞質橋（胞質相連同步化）', 'Cytoplasmic bridges (syncytium)', '即使完成減數分裂成為單倍體，基因產物仍可在整個群落細胞間自由擴散交流，因此 X/Y 精子在表面蛋白質上並無分化差異。', new THREE.Mesh(mergeGeo(br), mat(0x70d8ff, 0.92)), { anchor: [-2.2, 0, 0.5] });
+      reg(CL, '細胞質橋（胞質相連同步化）', 'Cytoplasmic bridges (syncytium)', '即使完成減數分裂成為單倍體，基因產物仍可在整個群落細胞間自由擴散交流，因此 X/Y 精子在表面蛋白質上並無分化差異。', brMs, { anchor: [-2.2, 0, 0.5] });
 
-      // 右側：染色質包裝模型（隨 CHROM_ST 切換鬆緊與蛋白質類型）
-      const sp = CHROM_ST === 0 ? 1.8 : CHROM_ST === 1 ? 1.15 : 0.65;
+      // 右側：染色質包裝模型（圓盤核小體八聚體 / 過渡蛋白 / 緊密魚精蛋白核心）
+      const sp = CHROM_ST === 0 ? 1.85 : CHROM_ST === 1 ? 1.15 : 0.62;
       const protCol = CHROM_ST === 0 ? 0xd8a848 : CHROM_ST === 1 ? 0x46d16a : 0xff7090;
-      const cores = [], dnaPts = [], ssPts = [];
+      const cores = [], dna1 = [], dna2 = [], ssPts = [];
       for (let i = 0; i < 4; i++) {
         const y = (i - 1.5) * sp;
-        cores.push(ell([5.2, y, 0], [CHROM_ST === 2 ? 0.42 : 0.72, 0.38, 0.55], protCol));
-        for (let k = 0; k <= 12; k++) {
-          const a = k / 12 * Math.PI * 2;
-          dnaPts.push(V(5.2 + Math.cos(a) * (CHROM_ST === 2 ? 0.55 : 0.85), y + (k / 12 - 0.5) * 0.3, Math.sin(a) * (CHROM_ST === 2 ? 0.55 : 0.85)));
+        if (CHROM_ST === 0) {
+          const oct = disc(0.68, 0.44, protCol, 0.95, 5.2, y, -0.22);
+          oct.rotation.x = Math.PI / 2;
+          cores.push(oct);
+        } else {
+          cores.push(ell([5.2, y, 0], [CHROM_ST === 2 ? 0.42 : 0.64, CHROM_ST === 2 ? 0.24 : 0.34, CHROM_ST === 2 ? 0.42 : 0.56], protCol, 0.95));
         }
-        if (CHROM_ST === 2 && i < 3) ssPts.push([V(5.55, y + 0.15, 0.35), V(5.55, y + sp - 0.15, 0.35)]);
+        const rad = CHROM_ST === 2 ? 0.52 : 0.82;
+        for (let k = 0; k <= 14; k++) {
+          const a = k / 14 * Math.PI * 2;
+          const yy = y + (k / 14 - 0.5) * (CHROM_ST === 2 ? 0.22 : 0.34);
+          dna1.push(V(5.2 + Math.cos(a) * rad, yy, Math.sin(a) * rad));
+          dna2.push(V(5.2 + Math.cos(a + 0.35) * (rad + 0.1), yy + 0.07, Math.sin(a + 0.35) * (rad + 0.1)));
+        }
+        if (CHROM_ST === 2 && i < 3) {
+          ssPts.push([V(5.58, y + 0.12, 0.34), V(5.58, y + sp - 0.12, 0.34)]);
+          ssPts.push([V(4.82, y + 0.12, -0.34), V(4.82, y + sp - 0.12, -0.34)]);
+        }
       }
       reg(CR, CH_TXT[CHROM_ST][0], 'Chromatin packaging protein', CH_TXT[CHROM_ST][1], cores, { anchor: [7.2, 1.5, 0.6] });
-      reg(CR, '精子染色體 DNA 雙螺旋', 'Spermatogenic DNA', '當替換為魚精蛋白並形成雙硫鍵後，呈惰性異染色質且不再進行轉錄。', ttube(dnaPts, 0.08, 0x5aa8ff, 1, { organic: false }), { anchor: [3.2, 0, 0.6] });
+      reg(CR, '精子染色體 DNA 雙螺旋', 'Spermatogenic DNA', '當替換為魚精蛋白並形成雙硫鍵後，呈惰性異染色質且不再進行轉錄。', [
+        ttube(dna1, 0.065, 0x5aa8ff, 1, { organic: false }),
+        ttube(dna2, 0.055, 0x9fd8ff, 0.95, { organic: false })
+      ], { anchor: [3.2, 0, 0.6] });
       if (ssPts.length) {
-        const ssMeshes = ssPts.map(([a, b]) => cyl(a.toArray(), b.toArray(), 0.07, 0xffd43a));
+        const ssMeshes = ssPts.map(([a, b]) => capsule(a, b, 0.07, 0xffd43a, 0.98));
         reg(CR, '半胱胺酸雙硫鍵（S–S 交聯）', 'Cysteine disulphide cross-links', '魚精蛋白間的 S–S 鍵將相鄰 DNA 緊鎖成流線且抗自由基氧化的結晶樣核心。', ssMeshes, { anchor: [7.0, -1.0, 0.5] });
       }
     },
@@ -177,35 +238,78 @@
 <p>圓形精細胞不經再分裂，而是經歷劇烈的細胞重塑（<b>Spermiogenesis</b>）打包成具運動與穿卵能力的精子（Ch.6 p.110–111, Fig 6.6）。</p>
 <p class="src">Essential Reproduction 7e Ch.6 p.110–111（Fig 6.6）</p>`,
     build() {
-      S3 = { t: 0 };
+      S3 = { t: 0, play: true };
       const P = '精細胞變形構造';
       const k = ST3 / 3;
-      const cytoSc = [2.4 - 1.5 * k, 2.3 - 1.6 * k, 2.2 - 1.5 * k];
-      const cyto = ell([0.6 * k, 0, 0], cytoSc, 0xe8d0f0, 0.35);
-      const nuc = ell([-0.4 - 1.4 * k, 0, 0], [0.95 - 0.1 * k, 0.9 - 0.42 * k, 0.85 - 0.55 * k], 0x4870c8);
-      const acr = shell(0.95, [1.0, 0.9 - 0.42 * k, 0.85 - 0.55 * k], 0xff7aa8, 0.85, Math.PI * (0.65 - 0.15 * k), Math.PI * (0.7 + 0.3 * k));
-      acr.position.set(-0.45 - 1.45 * k, 0, 0);
-      const golgi = ell([0.1 + 1.8 * k, 0.8 - 1.2 * k, 0.3], [0.42 * (1 - 0.5 * k), 0.3 * (1 - 0.5 * k), 0.3], 0xffe060);
-      const cent = ell([0.5 - 1.3 * k, 0, 0], [0.22, 0.22, 0.22], 0xd8c870);
-      const tail = cyl([0.5 - 1.3 * k, 0, 0], [1.2 + 3.6 * k, 0, 0], 0.09, 0x70d8ff);
+
+      // 細胞質外膜（厚壁開窗剖面，成熟期收縮為流線貼身外膜）
+      const cyto = ST3 < 3
+        ? thickShell(1, [2.4 - 0.9 * k, 2.25 - 1.15 * k, 2.1 - 1.15 * k], 0xe8d0f0, 0.34, 0.45, Math.PI * 1.65, 0.12)
+        : new THREE.Mesh(spermHeadGeo(2.35, 1.18, 0.56), mat(0xe8d0f0, 0.25));
+      cyto.position.set(ST3 < 3 ? 0.55 * k : -2.05, 0, 0);
+
+      // 細胞核（高爾基/頭帽期為球形，頂體/成熟期演變為流線梨形）
+      let nuc, acr;
+      if (ST3 <= 1) {
+        nuc = ell([-0.4 - 1.1 * k, 0, 0], [0.95, 0.9, 0.85], 0x4870c8, 0.95);
+        acr = ST3 === 0
+          ? ell([-1.35, 0.15, 0], [0.36, 0.42, 0.36], 0xff7aa8, 0.92)
+          : thickShell(1.02, [1.0, 0.94, 0.88], 0xff7aa8, 0.88, Math.PI * 0.62, Math.PI * 0.76, 0.12);
+        if (ST3 === 1) acr.position.set(-0.4 - 1.1 * k, 0, 0);
+      } else {
+        const len = ST3 === 2 ? 2.0 : 2.15, w = ST3 === 2 ? 1.15 : 0.98, th = ST3 === 2 ? 0.62 : 0.42;
+        nuc = new THREE.Mesh(spermHeadGeo(len, w, th), mat(0x4870c8, 0.96));
+        nuc.position.set(-1.35 - 0.7 * (ST3 - 2), 0, 0);
+        acr = new THREE.Mesh(spermAcrosomeGeo(len * 1.05, w * 1.07, th * 1.12, 0.62), mat(0xff7aa8, 0.88));
+        acr.position.copy(nuc.position);
+      }
+
+      // 層疊扁囊狀高爾基氏器（3 片微彎囊泡）
+      const gx = 0.05 + 1.65 * k, gy = 0.95 - 1.3 * k;
+      const gScale = 1 - 0.45 * k;
+      const golgi = [-0.14, 0, 0.14].map((dy, i) =>
+        ttube([V(gx - 0.45 * gScale, gy + dy * gScale, 0.25), V(gx, gy + (dy + 0.12) * gScale, 0.35), V(gx + 0.45 * gScale, gy + dy * gScale, 0.25)], 0.075 * gScale, 0xffe060, 0.95, { organic: false })
+      );
+
+      // 中心粒與連續波動鞭毛
+      const tailX = ST3 <= 1 ? (0.55 - 1.1 * k) : (-0.35 - 0.6 * (ST3 - 2));
+      const cent = [
+        capsule([tailX - 0.08, -0.14, 0], [tailX - 0.08, 0.14, 0], 0.09, 0xd8c870, 0.96),
+        capsule([tailX + 0.12, 0, -0.12], [tailX + 0.12, 0, 0.12], 0.085, 0xe8b860, 0.96)
+      ];
+      const tailLen = 1.4 + 4.4 * k;
+      const tail = waveTail(tailX, 0, 0, tailLen, 0.1, 0.035, 0x70d8ff, 0.95, 36, 12);
+      S3.tail = tail;
+
       reg(P, '精細胞質／殘餘體', 'Cytoplasm → Residual body', ST3 === 3 ? '多餘胞質向下擠出成為殘餘體（將被 Sertoli 細胞吞噬）。' : '提供高爾基氏器與粒線體重組所需的細胞質空間。', cyto, { anchor: [1.8, -2.0, 0.5] });
       reg(P, '細胞核（從圓形濃縮成流線型）', 'Nucleus (condensing chromatin)', '染色質由組蛋白逐步替換為 TNP1/2 與魚精蛋白濃縮至 5% 體積。', nuc, { anchor: [-2.2, 1.2, 0.5] });
-      reg(P, '高爾基氏器與頭巾（Acrosome）', 'Golgi & Acrosomal cap', '高爾基氏器分泌類溶體顆粒融合覆蓋核前端成酵素頭巾（酶刀）。', [acr, golgi], { anchor: [-2.4, -1.2, 0.5] });
-      reg(P, '中心粒與鞭毛（9+2 軸索）', 'Centrioles & Flagellum', '遠端中心粒長出 9+2 微小管鞭毛；成熟期粒線體纏繞前段形成中片螺旋鞘。', [cent, tail], { anchor: [3.2, 1.0, 0.5] });
+      reg(P, '高爾基氏器與頭巾（Acrosome）', 'Golgi & Acrosomal cap', '高爾基氏器分泌類溶體顆粒融合覆蓋核前端成酵素頭巾（酶刀）。', [acr, ...golgi], { anchor: [-2.4, -1.2, 0.5] });
+      reg(P, '中心粒與鞭毛（9+2 軸索）', 'Centrioles & Flagellum', '遠端中心粒長出 9+2 微小管鞭毛；成熟期粒線體纏繞前段形成中片螺旋鞘。', [...cent, tail], { anchor: [3.2, 1.0, 0.5] });
 
       if (ST3 === 3) {
-        const mito = ttube(helixAlong(lineCurve([-0.8, 0, 0], [1.6, 0, 0]), 0.18, 10, 0, 140), 0.08, 0x70e060, 0.95, { organic: false });
-        const resBody = ell([1.2, -1.6, 0], [0.95, 0.75, 0.75], 0xd8a8c0, 0.75);
+        const mito = ttube(helixAlong(lineCurve([-0.92, 0, 0], [1.45, 0, 0]), 0.19, 11, 0, 180), 0.085, 0x70e060, 0.96, { organic: false });
+        const resBody = [
+          ell([1.15, -1.65, 0], [0.92, 0.72, 0.72], 0xd8a8c0, 0.82),
+          ell([1.75, -1.35, 0.2], [0.48, 0.42, 0.42], 0xe8b8d0, 0.82),
+          ttube([V(0.2, -0.25, 0), V(0.65, -0.85, 0.05), V(0.95, -1.35, 0)], [0.1, 0.22], 0xd8a8c0, 0.78, { organic: false })
+        ];
         reg(P, '螺旋粒線體鞘（中片）', 'Mitochondrial sheath', '粒線體聚集中片提供鞭毛擺動所需 ATP。', mito, { anchor: [0.4, 1.1, 0.5] });
         reg(P, '殘餘體（將被 Sertoli 吞噬）', 'Residual body', '經 tubulobulbar complexes 排除多餘胞質與脫離的高爾基殘骸。', resBody, { anchor: [1.5, -2.6, 0.5] });
       }
       textSprite(SP_STEPS[ST3][0], [0, 3.3, 0], 0.42, '#ffd479');
+
+      const dt = dtClock();
+      CUR.tick = () => {
+        const d = S3.play ? dt() : 0; S3.t += d;
+        if (S3.tail) S3.tail.updateWave(S3.t * 6.5, ST3 >= 2 ? 0.3 : 0.12, 6.5);
+      };
     },
     panel(box) {
       const info = note(box, '', 'big');
       const sl = slider(box, '變形階段', 0, 3, ST3, 1, v => { ST3 = v; reloadKeep(); });
       btnRow(box, [['◀ 上一步', () => { ST3 = Math.max(0, ST3 - 1); sl.value = ST3; reloadKeep(); }], ['下一步 ▶', () => { ST3 = Math.min(3, ST3 + 1); sl.value = ST3; reloadKeep(); }]]);
       info.innerHTML = `<b>${SP_STEPS[ST3][0]}</b><br>${SP_STEPS[ST3][1]}`;
+      checkbox(box, '鞭毛波動', true, v => S3.play = v);
     }
   });
 
@@ -230,54 +334,88 @@
 <li><b>終片</b>：ODF 與纖維鞘皆終止，僅剩 9+2 軸索與質膜。</li></ul></details>
 <p class="src">Essential Reproduction 7e Ch.6 p.111–112（Fig 6.7）</p>`,
     build() {
-      S4 = { t: 0, play: true, segs: [] };
+      S4 = { t: 0, play: true };
       const H = '頭部與頸部（Fig 6.7a,b）', T = '鞭毛三段（Fig 6.7c,d）', CS = '橫切面結構（9+2 軸索）';
       const yM = 1.9;
-      const nuc = ell([-5.8, yM, 0], [1.15, 0.72, 0.25], 0x44aa77);
-      const acr = shell(1.2, [1.0, 0.68, 0.26], 0xff80a8, 0.8, Math.PI * 0.58, Math.PI * 0.85);
+
+      // 扁平梨形濃縮核＋厚壁貼合頂體帽＋貼合式赤道區環帶＋流線外質膜
+      const nuc = new THREE.Mesh(spermHeadGeo(2.3, 1.38, 0.48), mat(0x44aa77, 0.96));
+      nuc.position.set(-5.8, yM, 0);
+      const acr = new THREE.Mesh(spermAcrosomeGeo(2.42, 1.48, 0.54, 0.6), mat(0xff80a8, 0.86));
       acr.position.set(-5.8, yM, 0);
-      const eq = box([-5.35, yM, 0], [0.34, 1.38, 0.54], 0xffd479, 0.55);
-      const mem = ell([-5.8, yM, 0], [1.28, 0.84, 0.34], 0xe8f4ff, 0.22);
+      // 貼合扁平頭輪廓的赤道帶與後環（橢圓環帶，取代原本的方塊！）
+      const eq = ring(V(-5.48, yM, 0), V(1, 0, 0), 0.72, 0.085, 0xffd479, 0.92);
+      eq.scale.set(1.0, 0.96, 0.42);
+      const postRing = ring(V(-4.72, yM, 0), V(1, 0, 0), 0.34, 0.055, 0xffa850, 0.94);
+      postRing.scale.set(1.0, 0.92, 0.56);
+      const mem = new THREE.Mesh(spermHeadGeo(2.58, 1.62, 0.66), mat(0xdcf0ff, 0.22));
+      mem.position.set(-5.8, yM, 0);
       mem.visible = XRAY4;
       S4.mem = mem;
-      const neck = [ell([-4.6, yM, 0], [0.16, 0.28, 0.22], 0xd8c890), cyl([-4.55, yM, 0], [-4.05, yM, 0], 0.19, 0xe8b860)];
+
+      // 頸部：漏斗狀頭冠＋7 條環繞分節柱＋近端中心粒
+      const cap = lathe([[0.18, -0.22], [0.28, -0.05], [0.3, 0.14], [0.16, 0.22]], 0xd8c890, 0.95, [-4.52, yM, 0], [1, 0, 0], 24);
+      const neck = [cap, capsule([-4.35, yM - 0.14, 0], [-4.35, yM + 0.14, 0], 0.065, 0x70d8ff, 0.98)];
+      for (let i = 0; i < 7; i++) {
+        const a = i / 7 * Math.PI * 2;
+        neck.push(capsule([-4.55, yM + Math.cos(a) * 0.2, Math.sin(a) * 0.18], [-4.02, yM + Math.cos(a) * 0.16, Math.sin(a) * 0.16], i < 2 ? 0.048 : 0.036, 0xe8b860, 0.96));
+      }
       reg(H, '濃縮細胞核與核孔（植入窩）', 'Condensed nucleus & implantation fossa', '核高度濃縮，僅後端植入窩保留核孔並以細絲連至頭冠（capitulum）。', nuc, { anchor: [-5.8, yM + 1.0, 0.4] });
       reg(H, '頂體帽／頭巾（內／外頂體膜）', 'Acrosomal sac', '位於核前端之變形溶體，含水解酵素以穿透透明帶（Fig 6.7b）。', [acr, mem], { anchor: [-7.1, yM + 0.9, 0.4] });
-      reg(H, '赤道區與後環界線', 'Equatorial segment & posterior ring', '膜上脂質與蛋白質分區；赤道區為受精時與卵膜最先融合處。', eq, { anchor: [-5.2, yM - 1.1, 0.4] });
+      reg(H, '赤道區與後環界線', 'Equatorial segment & posterior ring', '膜上脂質與蛋白質分區；赤道區為受精時與卵膜最先融合處。', [eq, postRing], { anchor: [-5.2, yM - 1.1, 0.4] });
       reg(H, '頸部：頭冠、分節柱與近端中心粒', 'Connecting piece (capitulum & segmented columns)', '2 條主＋5 條次分節柱連接外緻密纖維；近端中心粒將貢獻給受精卵（遠端中心粒已退化）。', neck, { anchor: [-4.3, yM - 0.9, 0.4] });
 
-      const midAxis = lineCurve([-4.05, yM, 0], [-0.8, yM, 0]);
-      const midH = ttube(helixAlong(midAxis, 0.22, 12, 0, 200), 0.1, 0x70d850, 0.92, { organic: false });
-      const midC = cyl([-4.05, yM, 0], [-0.8, yM, 0], 0.12, 0x50b8ff);
-      const ann = ring(V(-0.8, yM, 0), V(1, 0, 0), 0.27, 0.065, 0xffd43a);
+      // 中片：螺旋粒線體鞘＋軸索＋軸環
+      const midAxis = lineCurve([-4.02, yM, 0], [-0.8, yM, 0]);
+      const midH = ttube(helixAlong(midAxis, 0.22, 13, 0, 220), 0.095, 0x70d850, 0.96, { organic: false });
+      const midC = cyl([-4.02, yM, 0], [-0.8, yM, 0], 0.13, 0x50b8ff, 0.95);
+      const ann = ring(V(-0.8, yM, 0), V(1, 0, 0), 0.27, 0.068, 0xffd43a, 0.96);
       reg(T, '中片（螺旋粒線體鞘）與軸環', 'Midpiece & annulus', '粒線體螺旋纏繞外緻密纖維與 9+2 軸索，止於環狀軸環（annulus）。', [midH, midC, ann], { anchor: [-2.4, yM + 1.0, 0.4] });
 
-      const nSeg = 18, tLen = 8.4;
-      for (let i = 0; i < nSeg; i++) {
-        const f = i / nSeg, x = -0.8 + f * tLen, isEnd = f > 0.72, r = isEnd ? 0.06 : 0.16 * (1 - 0.45 * f);
-        S4.segs.push({ m: cyl([x, yM, 0], [x + tLen / nSeg, yM, 0], r, isEnd ? 0x90e0ff : 0x587098, 0.92), x, dx: tLen / nSeg, f, isEnd });
-      }
-      reg(T, '主片（纖維鞘縱柱＋環肋）', 'Principal piece', '兩縱柱連接第 3、8 號 ODF，提供鞭毛平面擺動之彈性力學支撐。', S4.segs.filter(s => !s.isEnd).map(s => s.m), { anchor: [2.2, yM + 0.9, 0.4] });
-      reg(T, '終片（僅餘 9+2 軸索）', 'End piece', 'ODF 與纖維鞘皆消失，僅餘軸索微管與細胞膜。', S4.segs.filter(s => s.isEnd).map(s => s.m), { anchor: [6.8, yM + 0.8, 0.4] });
+      // 連續滑順波動的主片與終片（取代原本 18 段斷裂圓柱！）
+      const prinTail = waveTail(-0.8, yM, 0, 6.0, 0.18, 0.09, 0x5878a8, 0.96, 36, 14);
+      const endTail = waveTail(5.2, yM, 0, 2.6, 0.085, 0.032, 0x90e0ff, 0.96, 20, 10);
+      S4.prinTail = prinTail; S4.endTail = endTail;
+      reg(T, '主片（纖維鞘縱柱＋環肋）', 'Principal piece', '兩縱柱連接第 3、8 號 ODF，提供鞭毛平面擺動之彈性力學支撐。', prinTail, { anchor: [2.2, yM + 0.9, 0.4] });
+      reg(T, '終片（僅餘 9+2 軸索）', 'End piece', 'ODF 與纖維鞘皆消失，僅餘軸索微管與細胞膜。', endTail, { anchor: [6.8, yM + 0.8, 0.4] });
 
+      // 三段超微橫切面（帶半透明胞質底盤、真實雙聯體微管與 ODF）
       function mkCS(cx, cy, kind) {
         const g = new THREE.Group(); g.position.set(cx, cy, 0);
-        const ms = [cyl([-0.08, 0, -0.15], [-0.08, 0, 0.15], 0.04, 0x90e0ff), cyl([0.08, 0, -0.15], [0.08, 0, 0.15], 0.04, 0x90e0ff)];
+        const outerR = kind === 'mid' ? 1.04 : kind === 'prin' ? 0.88 : 0.52;
+        const ms = [
+          disc(outerR, 0.14, 0x203550, 0.42, 0, 0, -0.07),
+          // 中央單微管對
+          cyl([-0.08, 0, -0.18], [-0.08, 0, 0.18], 0.045, 0x90e0ff),
+          cyl([0.08, 0, -0.18], [0.08, 0, 0.18], 0.045, 0x90e0ff)
+        ];
         for (let i = 0; i < 9; i++) {
           const a = i / 9 * Math.PI * 2;
-          ms.push(cyl([Math.cos(a) * 0.34, Math.sin(a) * 0.34, -0.15], [Math.cos(a) * 0.34, Math.sin(a) * 0.34, 0.15], 0.045, 0x50b8ff));
+          const ca = Math.cos(a), sa = Math.sin(a);
+          // 9 組 A/B 雙聯體微管
+          ms.push(cyl([ca * 0.32 - sa * 0.03, sa * 0.32 + ca * 0.03, -0.18], [ca * 0.32 - sa * 0.03, sa * 0.32 + ca * 0.03, 0.18], 0.038, 0x50b8ff));
+          ms.push(cyl([ca * 0.32 + sa * 0.03, sa * 0.32 - ca * 0.03, -0.18], [ca * 0.32 + sa * 0.03, sa * 0.32 - ca * 0.03, 0.18], 0.034, 0x3892d8));
           if (kind !== 'end') {
             const rf = kind === 'mid' ? 0.56 : 0.52;
-            ms.push(cyl([Math.cos(a) * rf, Math.sin(a) * rf, -0.15], [Math.cos(a) * rf, Math.sin(a) * rf, 0.15], 0.06, 0xc060b0));
+            const odf = ell([ca * rf, sa * rf, 0], [0.075, 0.095, 0.18], 0xc864b8, 0.96);
+            odf.rotation.z = a;
+            ms.push(odf);
           }
         }
         if (kind === 'mid') {
-          for (let i = 0; i < 10; i++) { const a = i / 10 * Math.PI * 2; ms.push(ell([Math.cos(a) * 0.82, Math.sin(a) * 0.82, 0], [0.16, 0.12, 0.14], 0x70d850)); }
-          ms.push(ring(V(0, 0, 0), V(0, 0, 1), 1.0, 0.04, 0xf0e0c0));
+          for (let i = 0; i < 10; i++) {
+            const a = i / 10 * Math.PI * 2;
+            const mt = ell([Math.cos(a) * 0.82, Math.sin(a) * 0.82, 0], [0.18, 0.12, 0.16], 0x70d850, 0.95);
+            mt.rotation.z = a + Math.PI / 2;
+            ms.push(mt);
+          }
+          ms.push(ring(V(0, 0, 0), V(0, 0, 1), 1.02, 0.045, 0xf0e0c0, 0.95));
         } else if (kind === 'prin') {
-          ms.push(ell([0.78, 0, 0], [0.18, 0.25, 0.16], 0xff90a8), ell([-0.78, 0, 0], [0.18, 0.25, 0.16], 0xff90a8));
-          ms.push(ring(V(0, 0, 0), V(0, 0, 1), 0.82, 0.055, 0x3a4a70));
-        } else ms.push(ring(V(0, 0, 0), V(0, 0, 1), 0.48, 0.04, 0xf0e0c0));
+          ms.push(ell([0.78, 0, 0], [0.16, 0.28, 0.18], 0xff90a8, 0.96), ell([-0.78, 0, 0], [0.16, 0.28, 0.18], 0xff90a8, 0.96));
+          ms.push(ring(V(0, 0, 0), V(0, 0, 1), 0.84, 0.06, 0x4b628c, 0.95));
+        } else {
+          ms.push(ring(V(0, 0, 0), V(0, 0, 1), 0.5, 0.042, 0xf0e0c0, 0.95));
+        }
         return { g, ms };
       }
       const csM = mkCS(-4.2, -2.5, 'mid'), csP = mkCS(0.5, -2.5, 'prin'), csE = mkCS(5.2, -2.5, 'end');
@@ -285,18 +423,20 @@
       attachPart(reg(CS, '主片橫切（3/8 縱柱＋環肋）', 'Principal piece cross-section', '纖維鞘兩側縱柱精準對應第 3 與第 8 號 ODF。', csP.ms, { anchor: [0, -1.5, 0.4] }), csP.g);
       attachPart(reg(CS, '終片橫切（僅 9+2 軸索）', 'End piece cross-section', '僅剩中央與外圍微管雙聯體。', csE.ms, { anchor: [0, -1.5, 0.4] }), csE.g);
 
-      textSprite('中片橫切', [-4.2, -1.0, 0], 0.34, '#70e860');
-      textSprite('主片橫切', [0.5, -1.0, 0], 0.34, '#ff9ad8');
-      textSprite('終片橫切', [5.2, -1.0, 0], 0.34, '#90e0ff');
+      textSprite('中片橫切', [-4.2, -0.95, 0], 0.34, '#70e860');
+      textSprite('主片橫切', [0.5, -0.95, 0], 0.34, '#ff9ad8');
+      textSprite('終片橫切', [5.2, -0.95, 0], 0.34, '#90e0ff');
 
       const dt = dtClock();
       CUR.tick = () => {
         const d = S4.play ? dt() : 0; S4.t += d;
-        S4.segs.forEach(s => {
-          const amp = S4.play ? 0.38 * s.f : 0;
-          const y1 = yM + Math.sin(S4.t * 7 - s.f * 8) * amp, y2 = yM + Math.sin(S4.t * 7 - (s.f + 0.05) * 8) * amp;
-          setCyl(s.m, V(s.x, y1, 0), V(s.x + s.dx, y2, 0), s.isEnd ? 0.06 : 0.16 * (1 - 0.45 * s.f));
-        });
+        const amp = S4.play ? 0.38 : 0;
+        const ph = S4.t * 7;
+        S4.prinTail.updateWave(ph, amp * 0.72, 6.2);
+        // 終片緊接主片末端座標
+        const endY = yM + Math.sin(ph - 6.2) * (amp * 0.72);
+        S4.endTail.position.y = endY - yM;
+        S4.endTail.updateWave(ph - 6.2, amp * 0.55, 3.8);
       };
     },
     panel(box) {
@@ -331,31 +471,43 @@
       const W = '縱向剖開曲細精管：空間生精波', T = '固定點四世代重疊切面（時間週期）';
       const stCols = [0x4488cc, 0x4aa8ff, 0x5ad1a0, 0x86efac, 0xfde047, 0xfb923c, 0xf472b6, 0xc084fc];
       const stages = [7, 6, 5, 4, 3, 2, 3, 4, 5, 6, 7];
-      // 11 個相鄰管段展示 Fig 6.11 的雙向空間波
+      // 11 個帶倒角圓環管段展示 Fig 6.11 的雙向空間波
       stages.forEach((stNum, idx) => {
-        const x = (idx - 5) * 1.55;
-        const m = cyl([x - 0.7, 2.2, 0], [x + 0.7, 2.2, 0], 0.95, stCols[stNum - 1], 0.85);
+        const x = (idx - 5) * 1.48;
+        const m = annulus(0.98, 0.42, 1.38, stCols[stNum - 1], 0.9, -0.69);
+        m.rotation.y = Math.PI / 2;
+        m.position.set(x, 2.25, 0);
         S5.segMeshes.push({ m, baseSt: stNum });
         reg(W, `管段 #${idx + 1}（第 ${stNum} 期）`, `Tubule segment Stage ${stNum}`, `相鄰區段相位超前或落後 1 期（7→6→5→4→3→2…），使整條曲細精管任何時刻都有區段在排精（第 8/1 期）。`, m, { anchor: [x, 3.6, 0.6], nolabel: idx % 2 === 1 });
       });
 
-      // 下方：定點放大 4 層同心細胞世代（基底→近腔）
+      // 下方：定點放大 4 層同心細胞世代（帶厚壁管壁＋管腔）
+      addRoot(annulus(2.85, 2.58, 0.55, 0x9ab0c8, 0.88, 0));
+      CUR.root.children[CUR.root.children.length - 1].position.set(0, -2.5, 0);
+      addRoot(annulus(2.58, 0.55, 0.45, 0x3b6088, 0.26, 0.05));
+      CUR.root.children[CUR.root.children.length - 1].position.set(0, -2.5, 0);
       const layers = [
-        ['第 1 世代（基底）：A₁–B 精原細胞', 2.4, 0x5aa0f0],
-        ['第 2 世代（中下）：粗絲期初級精母細胞', 1.8, 0x9a6ad8],
-        ['第 3 世代（中上）：圓形精細胞', 1.2, 0xd8a8ff],
-        ['第 4 世代（管腔）：成熟精子準備排精', 0.65, 0xffd479]
+        ['第 1 世代（基底）：A₁–B 精原細胞', 2.35, 0x5aa0f0, 0.23],
+        ['第 2 世代（中下）：粗絲期初級精母細胞', 1.78, 0x9a6ad8, 0.26],
+        ['第 3 世代（中上）：圓形精細胞', 1.22, 0xd8a8ff, 0.2],
+        ['第 4 世代（管腔）：成熟精子準備排精', 0.72, 0xffd479, 0.14]
       ];
-      layers.forEach(([zh, rad, col], li) => {
+      layers.forEach(([zh, rad, col, rDot], li) => {
         const pts = [];
-        const n = SPEC5 === 'man' ? 4 : 10; // 人類楔形局部 vs 大鼠整圈同步
+        const n = SPEC5 === 'man' ? 4 : 12;
         for (let i = 0; i < n; i++) {
-          const a = (SPEC5 === 'man' ? 0.3 + i * 0.25 : i / n * Math.PI * 2);
-          pts.push(V(Math.cos(a) * rad, -2.5 + Math.sin(a) * rad, 0.3));
+          const a = (SPEC5 === 'man' ? 0.35 + i * 0.24 : i / n * Math.PI * 2);
+          pts.push(V(Math.cos(a) * rad, -2.5 + Math.sin(a) * rad, 0.32));
         }
-        reg(T, zh, `Generation ${li + 1}`, SPEC5 === 'man' ? '人類橫切面呈「楔形（wedge）」局部同步，同一圈可能混有多個階段。' : '多數哺乳類（如大鼠）整個橫切面圓周呈現高度同步的四世代固定細胞組合。', dots(pts, 0.2, col), { anchor: [3.4, -0.8 - li * 0.85, 0.4] });
+        const ms = [dots(pts, rDot, col, 0.96, 14)];
+        if (li === 3) {
+          pts.forEach(p => {
+            const inward = V(0, -2.5, 0.32).sub(p).normalize().multiplyScalar(0.5);
+            ms.push(capsule(p, p.clone().add(inward), 0.035, 0xd8e8f8, 0.92));
+          });
+        }
+        reg(T, zh, `Generation ${li + 1}`, SPEC5 === 'man' ? '人類橫切面呈「楔形（wedge）」局部同步，同一圈可能混有多個階段。' : '多數哺乳類（如大鼠）整個橫切面圓周呈現高度同步的四世代固定細胞組合。', ms, { anchor: [3.4, -0.8 - li * 0.85, 0.4] });
       });
-      addRoot(ring(V(0, -2.5, 0.3), V(0, 0, 1), 2.75, 0.08, 0x9ab0c8));
 
       textSprite('空間維度：沿曲細精管的「生精波」(Fig 6.11)', [0, 4.7, 0], 0.38, '#ffd479');
       textSprite(SPEC5 === 'man' ? '時間維度：人類楔形局部同步橫切' : '時間維度：大鼠整圈四世代同步橫切 (Fig 6.9)', [0, -5.8, 0], 0.36, '#8fd0ff');
@@ -364,7 +516,7 @@
       CUR.tick = () => {
         const d = S5.play ? dt() : 0; S5.t += d;
         const shift = Math.floor(S5.t * 1.4);
-        S5.segMeshes.forEach((s, i) => {
+        S5.segMeshes.forEach(s => {
           const st = ((s.baseSt + shift) % 8);
           s.m.material.color.setHex(stCols[st]).convertSRGBToLinear();
         });

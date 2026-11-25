@@ -26,12 +26,16 @@
       const zpFibs = [];
       for (let i = -3; i <= 3; i++) zpFibs.push(cyl([i * 1.1, 3.6 + Math.abs(i) * 0.08, -0.5], [i * 1.1, 3.6 + Math.abs(i) * 0.08, 0.5], 0.16, 0x90d0ff, 0.72));
       const zpCross = cyl([-3.8, 3.65, 0], [3.8, 3.65, 0], 0.2, 0xc8e8ff, 0.65);
-      // 精核 + 內頂體膜 + 外頂體膜 + 質膜
-      const nuc = ell([0, -0.4, 0], [1.45, 2.1, 0.9], 0x5578a8, 0.95);
-      const iam = ell([0, 0.5, 0], [1.65, 2.0, 1.0], 0xf08a30, 0.75); // 內頂體膜（含 acrosin）
-      const oam = ell([0, 0.65, 0], [1.9, 2.25, 1.1], 0xffd479, ST1 === 3 ? 0.18 : 0.48); // 外頂體膜
+      // 扁平梨形精核 + 貼合內頂體膜 + 外頂體帽 + 質膜（直立朝向透明帶）
+      const nuc = new THREE.Mesh(spermHeadGeo(4.2, 2.75, 1.35), mat(0x5578a8, 0.96));
+      nuc.position.set(0, -0.15, 0); nuc.rotation.z = -Math.PI / 2;
+      const iam = new THREE.Mesh(spermAcrosomeGeo(4.45, 2.95, 1.5, 0.64), mat(0xf08a30, 0.82));
+      iam.position.set(0, -0.05, 0); iam.rotation.z = -Math.PI / 2;
+      const oam = new THREE.Mesh(spermAcrosomeGeo(4.85, 3.25, 1.68, 0.64), mat(0xffd479, ST1 === 3 ? 0.16 : 0.46));
+      oam.position.set(0, 0.02, 0); oam.rotation.z = -Math.PI / 2;
       const pmCol = ST1 === 0 ? 0xa0b4c8 : (ST1 >= 2 ? 0x60f0c8 : 0x70d0f0);
-      const pm = ell([0, 0.3, 0], [2.15, 2.7, 1.22], pmCol, ST1 === 3 ? 0.22 : 0.35);
+      const pm = new THREE.Mesh(spermHeadGeo(5.2, 3.55, 1.9), mat(pmCol, ST1 === 3 ? 0.2 : 0.32));
+      pm.position.set(0, -0.05, 0); pm.rotation.z = -Math.PI / 2;
 
       // 赤道與後端 Izumo1 (ST1=3 時露出紅綠亮珠！)
       const izPts = [];
@@ -68,25 +72,20 @@
         ST1 === 3 ? '高 Ca²⁺ 切斷 F-actin，質膜與外頂體膜融合形成混合囊泡逸出酵素，暴露內膜 Acrosin 與赤道 Izumo1。' : '在獲能過程中阻隔「已不穩定化之外膜」提早與頂體融合。',
         [actBar, ...vesMs], { anchor: [3.2, 2.0, 0.9] });
 
-      // 鞭毛與中段
-      const tailGrp = new THREE.Group();
-      const midp = cyl([0, -2.1, 0], [0, -3.2, 0], 0.24, 0x50d890);
-      const tPts = []; for (let i = 0; i <= 12; i++) tPts.push(V(0, -3.2 - i * 0.22, 0));
-      const tSegs = [];
-      for (let i = 0; i < 6; i++) tSegs.push(cyl([0, -3.2 - i * 0.42, 0], [0, -3.2 - (i + 1) * 0.42, 0], 0.08, 0xd8e0e8));
-      tailGrp.add(midp, ...tSegs);
-      CUR.root.add(tailGrp);
+      // 螺旋粒線體中段＋連續滑順波動鞭毛
+      const midp = ttube(helixAlong(lineCurve([0, -2.15, 0], [0, -3.35, 0]), 0.2, 6, 0, 120), 0.095, 0x50d890, 0.96, { organic: false });
+      const wTail = waveTail(0, 0, 0, 3.0, 0.11, 0.035, 0xd8e4f0, 0.96, 28, 12);
+      wTail.rotation.z = -Math.PI / 2; wTail.position.set(0, -3.3, 0);
       reg(T, ST1 >= 1 ? '超活化鞭打擺動（Whiplash）' : '一般規律波動', 'Flagellar motility',
         '細胞質鈣離子上升直接刺激軸絲改變鞭毛擺幅為不對稱高力道鞭打，推動精子切過黏稠卵丘與透明帶。',
-        [midp, ...tSegs], { anchor: [1.6, -4.1, 0.6] });
+        [midp, wTail], { anchor: [1.6, -4.1, 0.6] });
 
       textSprite(ST1_DATA[ST1][0], [0, 4.9, 0], 0.38, '#ffd479');
 
       const dt = dtClock();
       CUR.tick = () => {
         const d = S1.play ? dt() : 0; S1.t += d;
-        const amp = ST1 === 0 ? 0.06 : 0.24, spd = ST1 === 0 ? 5 : 9;
-        tSegs.forEach((m, i) => { m.position.x = Math.sin(S1.t * spd - i * 0.6) * amp * (i + 1) * 0.35; });
+        wTail.updateWave(S1.t * (ST1 === 0 ? 5 : 9.5), ST1 === 0 ? 0.16 : 0.55, 6.2);
       };
     },
     panel(box) {
@@ -137,9 +136,10 @@
         '排出的第一極體旁即為 MII 紡錘體；該上方質膜<b>刻意缺乏整合素、CD9 與微絨毛</b>，防止精子從此進入干擾極體分離（p.198）。',
         [ooMem, spSpin, noBindArc, pb1], { anchor: [1.5, 4.4, 0.8] });
 
-      // 主融合精子（左側橫躺融合！）
-      const sHead = ell([-3.75, 0.1, 0.4], [0.45, 0.24, 0.22], 0x50ffb0, 0.98);
-      const sTail = cyl([-3.95, 0.05, 0.4], [-5.2, -0.5, 0.4], 0.055, 0xd8e0e8);
+      // 主融合精子（扁平梨形頭＋波浪鞭毛）
+      const sHead = new THREE.Mesh(spermHeadGeo(0.95, 0.48, 0.24), mat(0x50ffb0, 0.98));
+      sHead.position.set(-3.75, 0.1, 0.4); sHead.rotation.y = Math.PI;
+      const sTail = ttube([V(-4.15, 0.06, 0.4), V(-4.75, -0.15, 0.45), V(-5.35, -0.42, 0.35), V(-5.95, -0.25, 0.4)], [0.06, 0.02], 0xd8e4f0, 0.95, { organic: false, seg: 18, radial: 10 });
       // PLCζ 鈣波環從 [-3.4, 0.1] 掃過
       const waveX = PHASE2 === 0 ? -3.0 : (PHASE2 === 1 ? 0.0 : 2.5);
       const waveRing = ell([waveX, 0.1, 0.2], [0.35, 3.1 - Math.abs(waveX) * 0.35, 2.2 - Math.abs(waveX) * 0.25], 0xffd43a, PHASE2 >= 1 ? 0.45 : 0.12);
