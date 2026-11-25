@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ch6 精子生成｜動物繁殖 3D</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='28' fill='%2312233a' stroke='%23ffd479' stroke-width='4'/><text x='32' y='44' font-size='34' text-anchor='middle'>🧬</text></svg>">
+<link rel="stylesheet" href="lib/style.css">
+</head>
+<body>
+<script src="lib/three.min.js"></script>
+<script src="lib/OrbitControls.js"></script>
+<script src="lib/core.js"></script>
+<script src="lib/util.js"></script>
+<script>window.REAL_PROFILE = "tissue";</script>
+<script src="lib/realism.js"></script>
+<script src="lib/hx.js"></script>
+<script src="lib/mols.js"></script>
+<script src="lib/kit_extra.js"></script>
+<script>
+window.CHAPTER = {
+  no: 6, zh: '精子生成', en: 'Making sperm', color: '#4ade80',
+  summary: `
+<h3>6-1 睪丸四個生理分區與血睪障壁（Figs 6.1–6.2）</h3>
+<ul>
+  <li><b>管外分區</b>：① <b>血管（V）</b>、② <b>間質組織（I）</b>（含淋巴管與製造雄性素的<b>來狄吉細胞</b>；血液與淋巴液可自由平衡）。</li>
+  <li><b>管內分區</b>：③ <b>基底分區（B）</b>（位於基底膜與肌樣細胞內側，含精原幹細胞 SSCs 與 A/In/B 型精原細胞）、④ <b>近腔分區（A）</b>（受<b>血睪障壁 BTB</b> 嚴密隔離）。</li>
+  <li><b>血睪障壁（Blood–testis barrier）</b>：由相鄰<b>塞透力氏細胞（Sertoli cells）</b>腰部環狀<b>緊密連接、黏附連接與間隙連接</b>（內側襯有肌動蛋白絲與內質網）組成；防止自體免疫抗精子抗體攻擊（autoallergic orchitis），並維持管腔液高 <b>K⁺、肌醇、睪固酮</b>、低 Na⁺ 與低蛋白的獨特化學微環境。</li>
+  <li><b>穿越機轉</b>：前細紐期初級精母細胞分泌 <b>TNFα 與 TGFβ3</b>，短暫重塑 BTB 跨入近腔分區。</li>
+</ul>
+<h3>6-2 精子生成三大階段與染色質重塑（Figs 6.4–6.6, Boxes 6.1–6.3）</h3>
+<ol>
+  <li><b>有絲分裂增殖期</b>（基底分區）：SSCs（受 Sertoli 細胞 <b>GDNF</b>、bFGF、CSF-1 維持多能性）→ A₁–A₄ → 中間型（In）→ B 型精原細胞 → 休止初級精母細胞。<b>胞質分裂不完全</b>，整個細胞群落（如大鼠最多 512 細胞）以<b>細胞質橋（cytoplasmic bridges）</b>相連成合體細胞。</li>
+  <li><b>減數分裂期</b>（近腔分區）：粗絲期（pachytene）常染色體互換，性染色體配對並沉默於<b>性小泡（sex vesicle）</b>；減數分裂 I 產生次級精母細胞，迅速分裂為單倍體圓形精細胞。</li>
+  <li><b>精子形成（Spermiogenesis）</b>（細胞分化包裝）：
+    <ul>
+      <li>高爾基氏器融合成<b>頭巾（acrosome）</b>（含 proacrosin 等酵素）。</li>
+      <li>遠端中心粒長出 <b>9+2 軸索鞭毛</b>並隨後退化；近端中心粒形成頸部連接片（保留中心粒但失中心粒周物質 PCM，與卵互補）。</li>
+      <li><b>染色質重塑（Box 6.3）</b>：減數後仰賴 <b>CREMτ</b> 等專一轉錄複合體進行單倍體轉錄高峰；隨後 ＞90% 組蛋白被<b>過渡核蛋白（TNP1/2）</b>取代，再被富含精胺酸與雙硫鍵交聯的<b>魚精蛋白（Protamines 1/2）</b>替換，將核體積濃縮至體細胞核的 <b>5%</b> 並全面關閉轉錄。</li>
+      <li>粒線體移至中片螺旋排列；多餘細胞質成<b>殘餘體（residual body）</b>經<b>管球狀複合體（tubulobulbar complexes）</b>由 Sertoli 細胞吞噬，斷開細胞質橋釋入管腔（<b>排精 spermiation</b>）。</li>
+    </ul>
+  </li>
+</ol>
+<h3>6-3 精子超微構造與生精週期／生精波（Figs 6.7–6.11, Table 6.1）</h3>
+<table>
+  <tr><th>物種（Table 6.1）</th><th>人類 Man</th><th>牛 Bull</th><th>綿羊 Ram</th><th>豬 Boar</th><th>大鼠 Rat</th></tr>
+  <tr><td><b>生精總時長（天）</b></td><td>64</td><td>54</td><td>49</td><td>34</td><td>48</td></tr>
+  <tr><td><b>生精上皮週期（天）</b></td><td>16</td><td>13.5</td><td>12.25</td><td>8.5</td><td>12</td></tr>
+</table>
+<ul>
+  <li><b>週期（Cycle）發生在「時間」</b>（約為總生精時長的 1/4，同一位置反覆呈現固定 4 世代細胞組合）；<b>波（Wave）發生在「空間」</b>（沿曲細精管縱軸呈連續階段推進，確保每日連續平穩產精；人類與類人猿組織同步較侷限為「楔形 wedges」）。</li>
+</ul>`,
+  quiz: [
+    { q: '睪丸內真正的「血睪障壁（blood–testis barrier）」主要是哪一種細胞結構所構成（Fig 6.1）？', o: ['管周肌樣細胞的緊密排列', '微血管內皮細胞的連續基底膜', '相鄰塞透力氏細胞（Sertoli cells）之間環繞的緊密、黏附與間隙連接複合體，將管內分隔為基底與近腔分區', '白膜的膠原纖維層'], a: 2, e: 'Ch6 p.106–107, Fig 6.1：染料能自由進入間質並較慢進入基底分區，但被 Sertoli 細胞間的 zonular junctions 徹底阻擋於近腔分區外。' },
+    { q: '關於曲細精管「近腔分區（adluminal compartment）」內管腔液體的組成，與血漿及淋巴液相比何者正確（Fig 6.2）？', o: ['K⁺ 與肌醇（inositol）濃度極高，睪固酮濃縮，但 Na⁺ 與蛋白質濃度顯著低於血漿', '成分與血漿完全相同，無任何濃度梯度', '蛋白質與 Na⁺ 遠高於血漿', '完全不含睪固酮'], a: 0, e: 'Ch6 Fig 6.2：管腔液由 Sertoli 細胞主動運輸形成，含高濃度 K⁺、inositol 與睪固酮（結合 ABP），低 Na⁺ 與低蛋白。' },
+    { q: '為何在分離純化 X 精子與 Y 精子時，無法單純利用「單倍體表現的基因產物差異」來篩選，目前實務主要靠什麼原理（p.113）？', o: ['因為精子沒有任何減數分裂後轉錄', '因細胞質橋使 mRNA 與蛋白質在整個合體群落間自由擴散互通，且性染色體在減數分裂期已去活化（sex vesicle）；目前主要靠 X/Y 總 DNA 含量差異（人類約差 2.9%）進行流式細胞分選', '因為 Y 精子沒有細胞核', '因為精原細胞不具細胞質橋'], a: 1, e: 'Ch6 p.113：同步胞質橋分享單倍體轉錄物加上性染色體失活，故以流式細胞儀偵測 DNA 含量差異（人 2.9%、牛 3.8%、羊 4.2%）。' },
+    { q: '精子形成過程中，細胞核染色質濃縮至體細胞核體積 5% 的正確蛋白質替換順序為何（Box 6.3）？', o: ['魚精蛋白 → 組蛋白 → 過渡蛋白', '（過乙醯化組蛋白移除）→ 過渡核蛋白（TNP1/2）→ 富含精胺酸並以雙硫鍵交聯的魚精蛋白（Protamines 1/2）', '肌動蛋白 → 膠原蛋白 → 彈性蛋白', '僅需 DNA 甲基化即可濃縮 20 倍'], a: 1, e: 'Ch6 Box 6.3：超過 90% 的組蛋白先被 TNP1/2 取代，隨後在延長期再被 Protamines 1/2 替換並以雙硫鍵緊密交聯（少數早發育關鍵基因仍保留組蛋白）。' },
+    { q: '依據《Essential Reproduction 7e》Table 6.1，人類、牛、豬與大鼠完成整個生精作用與上皮週期的時間配對何者正確？', o: ['人類總長 64 天／週期 16 天；牛 54 天／13.5 天；豬 34 天／8.5 天；大鼠 48 天／12 天', '人類 34 天；豬 74 天', '所有哺乳類的生精總長固定為 40 天', '上皮週期長於生精總時長'], a: 0, e: 'Ch6 Table 6.1 & p.117：生精週期恆為該物種生精總時長的約 1/4（4 個世代重疊於同一橫切面）。' },
+    { q: '下列關於「生精上皮週期（cycle）」與「生精波（wave）」的區別，何者最精準（p.119）？', o: ['兩者是完全無關的器官', '週期發生在「時間」軸（同一切面隨時間依序輪替 1→8 期）；波發生在「空間」軸（沿著曲細精管縱軸鄰近區段呈相鄰階段推進），人類管壁則呈較小「楔形（wedges）」同步', '生精波只存在於卵巢', '只有人類沒有生精週期'], a: 1, e: 'Ch6 p.118–119：課本以「固定點縮時攝影（cycle）」比對「沿管移動攝影（wave）」說明時間與空間的對應。' },
+    { q: '精子超微構造（Fig 6.7）中，主片（principal piece）纖維鞘兩條縱柱（longitudinal columns）附著在九條外緻密纖維（ODF）與軸索微管的哪兩條位置？', o: ['第 1 與第 5 號', '第 3 與第 8 號外緻密纖維／外雙聯微管', '第 6 與第 9 號', '中央一對微管'], a: 1, e: 'Ch6 Fig 6.7d 圖說：纖維鞘兩縱柱附著於第 3 與第 8 號外緻密纖維，當後者終止於主片末端前則直接接於 3 與 8 號外微管雙聯體。' },
+    { q: '精細胞轉變為成熟精子並被釋放時，哪兩項特殊細胞連接構造分別負責「錨定並重塑精細胞」與「清除多餘細胞質（殘餘體）」？', o: ['橋粒與半橋粒', '外質特化結構（ectoplasmic specializations）與管球狀複合體（tubulobulbar complexes）', '緊密連接與肺泡界面活性劑', '突觸小泡與神經肌接合'], a: 1, e: 'Ch6 p.119 & Fig 6.1：Ectoplasmic specializations 負責錨定與重塑精細胞（排精時消失）；tubulobulbar complexes 協助 Sertoli 細胞內吞移除多餘細胞質。' }
+  ]
+};
+</script>
+<script src="scenes/ch06.js"></script>
+<script src="lib/main.js"></script>
+</body>
+</html>

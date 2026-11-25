@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ch11 受精、鈣離子振盪與單性生殖｜動物繁殖 3D</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='28' fill='%2312233a' stroke='%23ffd479' stroke-width='4'/><text x='32' y='44' font-size='34' text-anchor='middle'>🧬</text></svg>">
+<link rel="stylesheet" href="lib/style.css">
+</head>
+<body>
+<script src="lib/three.min.js"></script>
+<script src="lib/OrbitControls.js"></script>
+<script src="lib/core.js"></script>
+<script src="lib/util.js"></script>
+<script>window.REAL_PROFILE = "tissue";</script>
+<script src="lib/realism.js"></script>
+<script src="lib/hx.js"></script>
+<script src="lib/mols.js"></script>
+<script src="lib/kit_extra.js"></script>
+<script>
+window.CHAPTER = {
+  no: 11, zh: '受精、鈣離子振盪與親源銘印', en: 'Fertilization', color: '#f09a4a',
+  summary: `
+<h3>11-1 獲能與頂體反應分子路徑（Figs 11.1–11.2, Boxes 11.1–11.3）</h3>
+<ul>
+  <li><b>獲能（Capacitation）</b>：剛射出的精子無法立即受精，需於雌道去除表面吸附醣蛋白（如 <b>EPPIN</b>）、<b>膽固醇外流</b>、細胞質鹼化（<b>HCO<sub>3</sub><sup>−</sup> 進入 / Na<sup>+</sup>/H<sup>+</sup> 交換</b>）→ Ca<sup>2+</sup> 流入 → <b>腺苷酸環化酶 → cAMP ↑ → PKA → 酪胺酸磷酸化</b>與形成膜<b>脂質蛋白筏（rafts）</b>，同時 <b>PI4K 促進 F-actin 聚合</b>於細胞膜與外頂體膜之間防止過早融合，表現<b>鞭打式超活化運動（whiplash hyperactivation）</b>。初期可被精漿「去獲能」逆轉。</li>
+  <li><b>穿越卵丘與透明帶結合</b>：先鋒「犧牲」精子釋放<b>玻尿酸酶（hyaluronidase）</b>瓦解卵丘細胞間質（hyaluronan）；透明帶含 <b>ZP1–3</b>（小鼠 ZP1 交聯 ZP2–3 雙聚體；人另含 <b>ZP4</b> 與 ZP3 共同結合）。精子頭端 <b>GalT1、Selectin（結合 SLe<sup>x</sup> 醣鏈）、ZP3R（SP56）與 Zonadhesin（決定物種專一性）</b>結合 ZP3。</li>
+  <li><b>頂體反應（Acrosome Reaction）</b>：大量 Ca<sup>2+</sup> 與 <b>PI3K → PIP3</b> 活化並透過切斷蛋白<b>解聚 F-actin</b> → 質膜與外頂體膜多點融合囊泡化（脫落 ZP3 受體，另釋 <b>β-hexosaminidase B</b> 切除局部 ZP3），暴露內頂體膜蛋白酶 <b>Acrosin</b> 於 <b>5–20 分鐘</b>內消化穿過透明帶。</li>
+</ul>
+<h3>11-2 精卵融合、Ca<sup>2+</sup> 波與雙套確立（Figs 11.2–11.5, Boxes 11.4–11.5）</h3>
+<ul>
+  <li><b>精卵結合與融合</b>：精子橫躺於卵周隙，由赤道部與頂體後膜 <b>ADAM1/2/3（fertilin α/β, cyritestin）</b>結合卵膜 <b>整合素（integrins）</b>，並由 <b>Izumo1（剔除全不孕，可被 ICSI 救援）</b>結合含 <b>CD9/CD81 四跨膜蛋白</b>與 <b>CD55/CD59 GPI 錨定蛋白</b>的卵膜複合體融合（第二減數紡錘體正上方質膜缺整合素、CD9 與微絨毛以免干涉極體排出）。</li>
+  <li><b>Ca<sup>2+</sup> 振盪開關（Figs 11.3–11.4）</b>：融合後精子輸入 <b>磷脂酶 Cζ（PLCζ）</b>切斷 PIP<sub>2</sub> → IP<sub>3</sub> + DAG；1–5 分鐘內出現由入精點橫掃全卵的 Ca<sup>2+</sup> 首波（2–3 min），隨後每 <b>3–15 分鐘</b>產生歷時 1–2 min 的 Ca<sup>2+</sup> 脈衝持續數小時。</li>
+  <li><b>防止多精入卵（避免雄核性三倍體）</b>：Ca<sup>2+</sup> 經 <b>CaMKII</b> 動員並由 <b>Synaptotagmin</b> 促進皮質顆粒胞吐（Cortical reaction）→ 蛋白酶切 <b>ZP2</b>、<b>β-hexosaminidase B</b> 消化 ZP3 醣基、酪胺酸交聯硬化透明帶（Zona reaction），同時降低卵膜結合力。</li>
+  <li><b>恢復減數分裂 II（30–45 min，避免雌核性三倍體，Fig 11.5, Box 11.5）</b>：Ca<sup>2+</sup> → CaMKII 磷酸化 <b>Emi2（CSF 細胞靜止因子核心）</b> → <b>Plx1</b> 標記降解 Emi2 → 解除對 <b>APC/C</b> 的抑制並泛素降解 <b>Cyclin B</b> → <b>MPF（cdk1 + cyclin B）</b>崩解 → 排出<b>第二極體</b>！</li>
+</ul>
+<h3>11-3 配子非染色體貢獻、合核、單性生殖與 SCNT（Fig 11.6, Box 11.6, Table 11.1）</h3>
+<ul>
+  <li><b>非染色體貢獻與合核（Syngamy）</b>：精子額外貢獻 <b>PLCζ</b> 與<b>中心粒（centriole，囓齒類例外）</b>；<b>卵母細胞提供全部粒線體</b>（嚴格母系遺傳）與穀胱甘肽把精核<b>魚精蛋白置換回組蛋白</b>。雄原核通常大於雌原核，約 <b>18–24 小時</b>複製 DNA 並破膜匯合於第一有絲紡錘體赤道板（Syngamy）。</li>
+  <li><b>非整倍體（Table 11.1）</b>：逾 50% 人類受精胚胎具染色體異常（40–60% 第一孕期自然流產）；多數三倍體（12–15/100）源自<b>多精入卵（80–90%）</b>；精子缺有效 DNA 修復機制使突變率比卵高 <b>3 倍</b>（「演化引擎」）。</li>
+  <li><b>單性生殖（Parthenogenesis）與親源銘印（Parental imprinting）</b>：酒精或電擊引發 Ca<sup>2+</sup> 可人為啟動，但除缺中心粒外，因存在約 <b>100 個親源銘印基因</b>（父源促胎兒／胎盤生長、母源節制生長以保母體），唯有擦除銘印才可能發育至足月！人染色體 <b>15q11–q13</b> 缺父源複本致 <b>Prader–Willi 症候群</b>，缺母源致 <b>Angelman 症候群</b>；<b>11p15</b> 異常致 Beckwith–Wiedemann 症候群。</li>
+  <li><b>體細胞核轉殖（SCNT，Fig 11.6）</b>：G₀ 靜止體細胞核融合去核 MII 卵母細胞，因<b>發展性／親源表觀銘印抹除不完全</b>及母－體細胞<b>粒線體異質性（heteroplasmy）</b>衝突，導致極高胚胎死亡率與胎盤肥大等病理。</li>
+</ul>`,
+  quiz: [
+    { q: '獲能（capacitation）期間精子胞膜與內在細胞骨架同時發生的兩項相反精密調控機制為何，目的是確保「不要在抵達卵丘／透明帶前就過早發生頂體反應」？（p.190–191, Box 11.1）', o: ['膽固醇大量外流使細胞膜流動性增加並重組脂質蛋白筏，同時在細胞膜與外頂體膜之間由 PI4K 誘導 F-actin 聚合充當物理間隔', '大量增加胞膜膽固醇把膜徹底凍僵', '直接溶解全部頂體酶並排出', '把胞內 pH 酸化至 4.0 並將鈣離子全部泵出'], a: 0, e: 'Ch11 p.190–191 & Boxes 11.1–11.2：直到結合透明帶引發更大幅度 Ca²⁺ 上升與 PI3K→PIP3 活化，Ca²⁺ 切斷蛋白把 F-actin 解聚後兩膜才能融合！' },
+    { q: '關於人類與小鼠透明帶（zona pellucida）糖蛋白及精子專一性結合蛋白的作用，下列何者正確？（p.193, Box 11.3）', o: ['小鼠有 ZP1–ZP3（主要靠 ZP2/3），人類有 ZP1–ZP4（主要靠 ZP3/4）；Zonadhesin 基因剔除小鼠精子仍可結合且「喪失物種界線」能跨物種結合他種卵子透明帶', '小鼠完全沒有透明帶', '一旦發生頂體反應，精子與 ZP3 的結合受體就會永久加固貼死於透明帶表面', '透明帶只靠純脂質完全不含任何糖蛋白'], a: 0, e: 'Ch11 p.193 & Box 11.3：頂體反應會把 ZP2/3 受體囊泡化脫落並釋出 β-hexosaminidase B 分解局部 ZP3，讓暴露的 acrosin 能繼續切開透明帶通路。' },
+    { q: '當已經穿透透明帶的精子躺在卵周隙準備進行「精卵結合與融合」時，哪幾個分子是核心關鍵？為何卵膜絕不會在第二減數紡錘體正上方讓精子進入？（p.194–195, 198）', o: ['結合涉精子 ADAM1/2/3 與卵膜 integrins；融合涉精子赤道部暴露的 Izumo1 與卵膜四跨膜蛋白 CD9/CD81 及 GPI 錨定蛋白（CD55/CD59）；MII 紡錘體上方質膜缺微絨毛、整合素與 CD9 以避免干擾第二極體排出造成非整倍體', '精子靠頂體囊內的 acrosin 直接與粒線體融合', 'Izumo1−/− 雄鼠就算用卵細胞質內單精子注射（ICSI）也永遠無法產生後代', '所有精子都優先由第二極體排出口直接鑽入'], a: 0, e: 'Ch11 p.194–195, 198：Izumo1 剔除與 CD9/CD81 雙剔除小鼠雖能綁定卻無法融合，皆可用 ICSI 直接注精入胞質救援！' },
+    { q: '精子融合後引發卵母細胞數小時連續 Ca<sup>2+</sup> 振盪的直接觸發分子及其下游雙重路徑為何？（Fig 11.4, p.195–196）', o: ['精子釋放磷脂酶 Cζ（PLCζ）切割 PIP₂ 產生 IP₃（開內質網鈣庫產生波）與 DAG（活化 PKC 磷酸化發育蛋白）', '精子帶入的睪固酮直接綁定粒線體', '透明帶分泌 GnRH 激活垂體', '僅靠外來鈉離子滲入便足夠，完全不需要鈣離子'], a: 0, e: 'Ch11 p.195–196, Fig 11.4：注射 PLCζ mRNA 或重組蛋白即可單獨引發典型 Ca²⁺ 振盪與卵啟動。' },
+    { q: '卵母細胞內的 Ca<sup>2+</sup> 脈衝是如何一步步解除「第二次減數分裂中期（MII）停滯」並阻止雌核性三倍體形成？（Fig 11.5, Box 11.5）', o: ['Ca²⁺ 活化 CaMKII 磷酸化 Emi2（CSF 核心），接著 Plx1 標記並促成 Emi2 降解 → 解除對 APC/C 的抑制 → APC/C 泛素化降解 Cyclin B → MPF（cdk1+cyclin B）失去活性 → 完成減數分裂排出第二極體', 'Ca²⁺ 直接加強 Cyclin B 合成使 MPF 永久倍增', 'Ca²⁺ 溶解兩套染色體僅保留粒線體', '第二極體是由父親精子在射精前於副睪排出的'], a: 0, e: 'Ch11 Box 11.5：MPF = cdk1 + cyclin B；CSF 的關鍵元件為 Emi2。若未排出第二極體即發生雌核性三倍體（gynogenetic triploidy）。' },
+    { q: '在受精建立的合核（syngamy）過程中，母體卵子與父本精子各自提供哪些關鍵「非染色體」遺傳資產？（p.198）', o: ['兩者貢獻完全相同：精卵各提供一半粒線體與一半中心粒', '精子（除囓齒類外）提供中心粒組織有絲分裂紡錘體及 PLCζ；卵子提供質膜、胞質蛋白/mRNA 與全部粒線體 DNA（嚴格母系遺傳）', '只有父親會遺傳粒線體 DNA 給子代', '精子在受精後不需要將魚精蛋白換成組蛋白'], a: 1, e: 'Ch11 p.198：精子粒線體即使進入卵質也會被清除；精核需靠卵質（含高量穀胱甘肽還原環境）將魚精蛋白換回組蛋白形成較大的雄原核。' },
+    { q: '哺乳動物為何無法像部分兩生類或爬蟲類那樣單靠「單性生殖（parthenogenesis）」繁殖到足月？（除囓齒類外的中心粒原因之外的普適根本原因）（p.200–201, Box 11.6）', o: ['因為母體子宮一定會免疫排斥所有 100% 同源二倍體', '因為有約 100 個基因具「親源基因銘印（parental imprinting）」——父源與母源染色體功能不對等（父源傾向促胎盤／胎兒生長，母源傾向節制生長以保護母體），單親兩套染色體缺乏另一親的互補活性複本', '因為卵子只能提供 X 染色體而雌性在子宮內根本無法活過胚胎期', '因為卵子缺所有細胞骨架蛋白質'], a: 1, e: 'Ch11 p.200–201 & Box 11.6：僅有當遺傳銘印被實驗性同時抹除時（Kono et al. 2004），單性小鼠才可能發育至足月！人 15q11-q13 父源缺損為 Prader-Willi、母源缺損為 Angelman。' },
+    { q: '體細胞核轉殖（SCNT，例如複製羊桃莉）為何在妊娠中期出現極高胚胎死亡率、胎兒與胎盤肥大且存活後常早衰？（Fig 11.6, p.201–202）', o: ['卵質在短時間內無法完全抹除已分化體細胞核的「發育期表觀遺傳銘印」且常干擾親源銘印，再加上體細胞帶入的異源粒線體造成核－粒線體不相容', '因為電擊融合必會切斷一半染色體成為單倍體', '因為 G₀ 期細胞核完全不含 DNA', '因為去核過程移除了所有卵膜磷脂質'], a: 0, e: 'Ch11 p.201–202：序列化兩次核轉殖給卵質更多重編程時間可略提高成功率；且複製動物與核捐贈者仍存在粒線體 DNA 差異。' }
+  ]
+};
+</script>
+<script src="scenes/ch11.js"></script>
+<script src="lib/main.js"></script>
+</body>
+</html>

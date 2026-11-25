@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>動物繁殖學 3D 互動圖解｜Essential Reproduction 7e</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='28' fill='%2312233a' stroke='%23ffd479' stroke-width='4'/><text x='32' y='44' font-size='34' text-anchor='middle'>🧬</text></svg>">
+<style>
+:root{--bg:#0b1726;--card:#12233a;--line:#24405f;--txt:#e8eef5;--mut:#9fb6c8;--gold:#ffd479}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--txt);font-family:"Microsoft JhengHei","PingFang TC","Noto Sans TC",sans-serif}
+#bg{position:fixed;inset:0;z-index:0;opacity:.52;pointer-events:none}
+main{position:relative;z-index:1;max-width:1260px;margin:0 auto;padding:36px 20px 60px}
+header h1{font-size:clamp(26px,4vw,40px);margin:0;letter-spacing:.02em}
+header h1 span{color:var(--gold)}
+header p{color:var(--mut);margin:8px 0 0;font-size:15px;line-height:1.7}
+.how{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 22px}
+.how span{background:#12233acc;border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:13px;color:#cfe3f5}
+.scope{background:#101f33dd;border:1px solid #2b4b70;border-left:4px solid var(--gold);border-radius:12px;padding:12px 16px;margin-bottom:24px;font-size:13.5px;line-height:1.75;color:#cfe3f5}
+.scope b{color:var(--gold)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(285px,1fr));gap:16px;perspective:1200px}
+.card{position:relative;display:block;text-decoration:none;color:inherit;background:linear-gradient(160deg,#152b46ee,#0f1f33ee);border:1px solid var(--line);border-radius:16px;padding:18px 18px 14px;transition:transform .25s ease,border-color .25s,box-shadow .25s;transform-style:preserve-3d;min-height:205px}
+.card:hover,.card:focus-within{border-color:var(--c);box-shadow:0 12px 40px #0008,0 0 0 1px var(--c) inset}
+.card .cover{position:absolute;inset:0;border-radius:16px;z-index:0}
+.card .cover:focus-visible{outline:2px solid var(--c);outline-offset:2px}
+.card .top,.card h2,.card .en,.chips{position:relative;pointer-events:none}
+.chips a{pointer-events:auto}
+.card .top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.card .no{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.08em;background:var(--c);color:#0b1726;border-radius:6px;padding:2px 8px}
+.card .part{font-size:11.5px;color:#8faac2}
+.card h2{font-size:20px;margin:10px 0 4px}
+.card .en{font-size:12px;color:var(--mut);margin-bottom:10px}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chips a{font-size:12px;color:#cfe3f5;text-decoration:none;background:#1c3552;border:1px solid #2a4a6c;border-radius:6px;padding:3px 7px}
+.chips a:hover{background:var(--c);color:#0b1726;border-color:var(--c)}
+.chips a.q{background:#3a3010;border-color:#7a6420;color:#ffe7a8}
+footer{color:var(--mut);font-size:12.5px;margin-top:30px;line-height:1.75}
+footer b{color:#cfe3f5}
+@media (prefers-reduced-motion:reduce){.card{transition:none}}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<main>
+<header>
+  <h1>動物繁殖學 <span>3D</span> 互動圖解</h1>
+  <p>Martin H. Johnson《Essential Reproduction》7th Edition 精選 16 章空間解剖與分子路徑互動模型 · 每章均含 3–5 個可旋轉／剖視 3D 場景、即時生理圖表與隨機排序自我測驗。</p>
+</header>
+<div class="how">
+  <span>🖱 左鍵拖曳旋轉</span>
+  <span>🖲 滾輪縮放</span>
+  <span>右鍵拖曳平移</span>
+  <span>👆 點選構造查看原文詳解</span>
+  <span>☑ 勾選隱藏／顯示器官層次</span>
+  <span>📌 每章附重點＋隨機選項測驗</span>
+</div>
+<div class="scope">
+  <b>選章標準說明（精選 16 章立體解剖／生理機轉章節）：</b>全書共 22 章，本書中之 <b>Ch 01–03、06–14、16–18、21</b> 具高度三維構造、解剖遷移或定量回饋迴路，已全部製成 3D 互動模型。其餘 6 章因內容以社會／性別認同心理（<b>Ch 04</b> Gender）、演化行為選擇（<b>Ch 05</b> Sexual selection）、產科流病與免疫倫理統計（<b>Ch 15</b> Fetal challenges）、育兒親子行為（<b>Ch 19</b> Postnatal care）、避孕統計法規（<b>Ch 20</b> Regulating fertility）及社會生殖倫理法律（<b>Ch 22</b> Society and reproduction）為主，較不具 3D 空間建模意義，故未強行製圖。
+</div>
+<div class="grid" id="grid"></div>
+<footer>
+  <b>參考教材：</b>Martin H. Johnson, <i>Essential Reproduction</i>, 7th Edition (2013, Wiley-Blackwell). 內文物種比較表、數值範圍與實驗機制均核對自第七版原廠章節內容。<br>
+  <b>技術架構：</b>純前端 HTML / Three.js（r128）離線可用架構，含即時物理受光、互動 2D 生理曲線繪圖，以及重點整理與自我測驗模式（<code>#sum</code>）。
+</footer>
+</main>
+<script>
+const CH = [
+  [1,  'Part 1 · 基礎核心', '什麼是生殖', 'What is reproduction?', '#7dd3fc', ['① 有絲 vs 減數分裂', '② 卵策略與印記', '③ 下視丘–腦垂腺軸', '④ 類固醇與受體']],
+  [2,  'Part 1 · 基礎核心', '性別決定與生殖道分化', 'Sex', '#a78bfa', ['① 性腺原基分化', '② SRY/SOX9 分子開關', '③ 內生殖道分化', '④ 外生殖器分化']],
+  [3,  'Part 1 · 基礎核心', '性成熟、睪丸下降與發身', 'Sexual maturation', '#38bdf8', ['① 睪丸下降遷徙', '② 蔓狀靜脈叢散熱', '③ 發身神經啟動', '④ 松果體光週期']],
+  [6,  'Part 2 · 雄性生殖', '精子生成', 'Making sperm', '#4ade80', ['① 四分區與血睪障壁', '② 胞質橋與魚精蛋白', '③ 精子形成變形', '④ 精子超微構造', '⑤ 生精週期與波']],
+  [7,  'Part 2 · 雄性生殖', '雄性內分泌與生殖腺調節', 'Men', '#60a5fa', ['① Leydig Δ⁵ 與 Sertoli 協同', '② 抑制素與負回饋', '③ 雄性附屬腺體']],
+  [8,  'Part 3 · 雌性生殖', '卵形成、濾泡發育與排卵黃體', 'Making eggs', '#f472b6', ['① 卵巢與濾泡階段', '② 兩細胞類固醇合作', '③ 減數重啟與排卵口', '④ 逆流溶黃體實驗']],
+  [9,  'Part 3 · 雌性生殖', '女性生殖週期與子宮調節', 'Women', '#fb7185', ['① 物種卵巢週期', '② 雙相回饋與自體預敏', '③ 內膜與子宮頸黏液']],
+  [10, 'Part 4 · 配子受精', '精子成熟、交配生理與配子運輸', 'Sperm and Eggs', '#4db8e8', ['① 輸出管與副睪成熟', '② 勃起血液動力與藥理', '③ 雌道雙向運輸']],
+  [11, 'Part 4 · 配子受精', '受精、鈣離子振盪與親源銘印', 'Fertilization', '#f09a4a', ['① 獲能與頂體反應', '② 鈣波與防多精入卵', '③ 合核、單性生殖與SCNT']],
+  [12, 'Part 4 · 配子受精', '早期分裂、著床與母體妊娠辨識', 'Initiating Pregnancy', '#e56b92', ['① 緊實化與囊胚孵化', '② 著床窗口分子對話', '③ 比較胎盤與妊娠辨識']],
+  [13, 'Part 5 · 妊娠維持', '胎膜演化、胎盤血流與內分泌協作', 'Supporting the Embryo & Fetus', '#45c49e', ['① 胚外膜與胎盤演化', '② EVT轉換與低氧防護', '③ 母胎胎盤協作工廠']],
+  [14, 'Part 5 · 妊娠維持', '胎兒生長、胎盤運輸與生理代謝', 'Growing the Fetus', '#7c8cf8', ['① 胎兒生長與羊水/棕脂', '② 胎盤 5 型跨膜運輸', '③ 雙波爾效應與膽紅素']],
+  [16, 'Part 6 · 分娩泌乳', '分娩前胎兒準備：循環分流與器官成熟', 'Preparing for Birth', '#38bdf8', ['① 胎兒三道分流', '② 肺表面張力素與皮質醇', '③ 神經痛覺與 T4/PTHrP']],
+  [17, 'Part 6 · 分娩泌乳', '分娩機制、子宮頸重塑與計時開關', 'Giving Birth', '#f97316', ['① 宮縮滯留與頸重塑', '② Ferguson正回饋', '③ 綿羊vs人類定時器']],
+  [18, 'Part 6 · 分娩泌乳', '泌乳啟動、雙神經內分泌反射與乳汁免疫', 'Lactation', '#e8b84b', ['① 腺泡構造與P4煞車', '② PRL與MER雙神經反射', '③ 乳汁成分與HIV權衡']],
+  [21, 'Part 7 · 臨床調控', '老化更年期、不孕診治與輔助生殖技術', 'Restoring Fertility', '#a78bfa', ['① 老化、更年期與病因', '② ART (IVF/ZD/SUZI/ICSI)', '③ 原核粒線體置換與PGD']]
+];
+const grid = document.getElementById('grid');
+CH.forEach(([n, part, zh, en, c, sc]) => {
+  const f = 'ch' + String(n).padStart(2, '0') + '.html';
+  const a = document.createElement('div');
+  a.className = 'card';
+  a.style.setProperty('--c', c);
+  a.innerHTML = `<a class="cover" href="${f}" aria-label="第 ${n} 章 ${zh}"></a><div class="top"><span class="no">CH ${String(n).padStart(2, '0')}</span><span class="part">${part}</span></div><h2>${zh}</h2><div class="en">${en}</div><div class="chips">${sc.map((s, i) => `<a href="${f}#${i}">${s}</a>`).join('')}<a class="q" href="${f}#sum">📌 重點＋測驗</a></div>`;
+  a.addEventListener('mousemove', e => {
+    const r = a.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
+    a.style.transform = `rotateY(${x * 10}deg) rotateX(${-y * 10}deg) translateY(-3px)`;
+  });
+  a.addEventListener('mouseleave', () => a.style.transform = '');
+  grid.appendChild(a);
+});
+</script>
+<script src="lib/three.min.js"></script>
+<script>
+// 背景：旋轉的 3D 囊胚球＋細胞核軌跡
+(function () {
+  if (!window.THREE) return;
+  const cv = document.getElementById('bg'), r = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true });
+  r.setPixelRatio(Math.min(devicePixelRatio, 2));
+  const sc = new THREE.Scene(), cam = new THREE.PerspectiveCamera(42, 1, 0.1, 400); cam.position.set(0, 0, 48);
+  sc.add(new THREE.HemisphereLight(0xffffff, 0x1b2b3f, 0.95));
+  const dl = new THREE.DirectionalLight(0xffeedd, 0.7); dl.position.set(8, 12, 10); sc.add(dl);
+  const g = new THREE.Group(); sc.add(g);
+  const sg = new THREE.SphereGeometry(1, 20, 14);
+  const mOuter = new THREE.MeshStandardMaterial({ color: 0xe56b92, roughness: 0.45, transparent: true, opacity: 0.55 });
+  const mInner = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.35 });
+  const mGold  = new THREE.MeshStandardMaterial({ color: 0xffd479, roughness: 0.35 });
+  const nOuter = 42, gr = (1 + Math.sqrt(5)) / 2;
+  for (let i = 0; i < nOuter; i++) {
+    const th = Math.acos(1 - 2 * (i + 0.5) / nOuter), ph = 2 * Math.PI * i / gr;
+    const m = new THREE.Mesh(sg, mOuter);
+    m.position.set(Math.sin(th) * Math.cos(ph) * 10.5, Math.cos(th) * 10.5, Math.sin(th) * Math.sin(ph) * 10.5);
+    m.scale.setScalar(1.55);
+    g.add(m);
+  }
+  for (let i = 0; i < 12; i++) {
+    const a = i * 2.1, m = new THREE.Mesh(sg, i < 5 ? mGold : mInner);
+    m.position.set(Math.cos(a) * 2.8, 3.8 + (i % 3) * 1.1, Math.sin(a) * 2.8);
+    m.scale.setScalar(1.35);
+    g.add(m);
+  }
+  const ringGeo = new THREE.TorusGeometry(14.5, 0.14, 12, 96);
+  const ringMat = new THREE.MeshStandardMaterial({ color: 0x7dd3fc, roughness: 0.4, transparent: true, opacity: 0.45 });
+  const r1 = new THREE.Mesh(ringGeo, ringMat), r2 = new THREE.Mesh(ringGeo, ringMat);
+  r1.rotation.set(0.6, 0.3, 0); r2.rotation.set(-0.5, 1.1, 0.4);
+  g.add(r1, r2);
+  g.position.x = 14;
+  const size = () => { const w = innerWidth, h = innerHeight; r.setSize(w, h, false); cv.style.width = w + 'px'; cv.style.height = h + 'px'; cam.aspect = w / h; cam.updateProjectionMatrix(); };
+  addEventListener('resize', size); size();
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  (function loop() { requestAnimationFrame(loop); if (!reduce) { g.rotation.y += 0.0028; g.rotation.x = Math.sin(Date.now() * 0.0003) * 0.12; } r.render(sc, cam); })();
+})();
+</script>
+</body>
+</html>

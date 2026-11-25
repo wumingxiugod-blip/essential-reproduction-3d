@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ch2 性別決定與分化｜動物繁殖 3D</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='28' fill='%2312233a' stroke='%23ffd479' stroke-width='4'/><text x='32' y='44' font-size='34' text-anchor='middle'>🧬</text></svg>">
+<link rel="stylesheet" href="lib/style.css">
+</head>
+<body>
+<script src="lib/three.min.js"></script>
+<script src="lib/OrbitControls.js"></script>
+<script src="lib/core.js"></script>
+<script src="lib/util.js"></script>
+<script>window.REAL_PROFILE = "tissue";</script>
+<script src="lib/realism.js"></script>
+<script src="lib/hx.js"></script>
+<script src="lib/mols.js"></script>
+<script src="lib/kit_extra.js"></script>
+<script>
+window.CHAPTER = {
+  no: 2, zh: '性別決定與生殖道分化', en: 'Sex', color: '#a78bfa',
+  summary: `
+<h3>2-1 遺傳性別決定與 Y 染色體 Sry 開關</h3>
+<ul>
+  <li><b>染色體決定性別</b>（Table 2.1）：雌性為同配子性別（XX），雄性為異配子性別（XY）。只要存在具有功能的 <b>SRY</b> 基因（位於人類 Yp 短臂末端），無差別性腺便分化為睪丸；缺失則發育為卵巢。</li>
+  <li><b>三波細胞遷徙進入生殖嵴（Genital ridge，3.5–4.5 週）</b>（Fig 2.2）：
+    <ol>
+      <li><b>始基生殖細胞（PGCs）</b>：第 3 週在卵黃囊近尿囊基部由 BMP4 誘導形成（表現 <i>fragilis</i>、<i>Stella</i>），以阿米巴運動於第 6 週遷入生殖嵴；<b>PGCs 本身不表現 Sry</b>。</li>
+      <li><b>原始性索（Primitive sex cords）</b>：來自體腔（生殖）上皮，是<b>唯一表現 Sry 的細胞群</b>（「製造一個塞透力氏細胞」）。在雄性深入髓質形成睪丸索並以<b>白膜（tunica albuginea）</b>與表面隔離；在雌性停留於皮質圍繞卵原細胞成<b>原始濾泡</b>。</li>
+      <li><b>中腎細胞（Mesonephric cells）</b>：形成睪丸血管、間質<b>來狄吉細胞（Leydig cells）</b>、管周<b>肌樣細胞（myoid cells）</b>與睪丸網（rete testis）；在雌性則形成血管與濾泡膜（theca）。</li>
+    </ol>
+  </li>
+</ul>
+<h3>2-2 SRY–SOX9 正回饋 vs WNT4–FOXL2 終生對抗</h3>
+<ul>
+  <li><b>SRY → SOX9 三重正回饋</b>：SRY（DNA 結合轉錄因子）僅短暫啟動體染色體基因 <b>SOX9</b>，SOX9 自我維持並促進：① <b>PGD₂</b>（旁分泌促鄰近前塞透力氏細胞表現 SOX9，防止卵睪症 ovo-testis）、② <b>FGF9</b>（吸引中腎細胞遷入並正回饋 SOX9）、③ <b>AMH</b>（抗穆勒氏管激素，TGFβ 二聚體，結合 AMHR2+RI 活化 Smad 促使穆勒氏管凋亡）。</li>
+  <li><b>卵巢主動程序與終生維持</b>：缺失 Sry 時，<b>WNT4</b> 與 <b>FOXL2</b> 驅動顆粒／膜細胞發育。成年雌鼠剔除 <i>Foxl2</i> 卵巢可轉分化為睪丸構造；成年雄鼠剔除 <i>Dmrt1</i> 塞透力氏細胞會下降 Sox9、上升 Foxl2 並產雌激素。</li>
+  <li><b>生殖細胞與生育力</b>：Turner 症候群（XO）雖有卵巢但需雙條 X 才可維持卵母細胞；Klinefelter 症候群（XXY）雖有睪丸但多餘的 X 在減數分裂時導致生殖細胞死亡。</li>
+</ul>
+<h3>2-3 內生殖道（雙管選一）與外生殖器（單一原基）分化</h3>
+<table>
+  <tr><th>條件／症候群</th><th>性腺</th><th>內生殖道（Wolffian vs Müllerian）</th><th>外生殖器</th></tr>
+  <tr><td><b>正常男性（XY）</b></td><td>睪丸</td><td>睪固酮維持<b>吳爾夫氏管</b>（副睪、輸精管、儲精囊）；AMH 使<b>穆勒氏管退化</b></td><td>DHT 使尿道褶融合為陰莖陰囊</td></tr>
+  <tr><td><b>正常女性（XX）</b></td><td>卵巢</td><td>無高濃度 T → 吳爾夫氏管退化；無 AMH → <b>穆勒氏管</b>成輸卵管、子宮、子宮頸、陰道上段</td><td>陰蒂、大小陰唇、陰道口分開</td></tr>
+  <tr><td><b>完全雄性素不敏（CAIS, XY）</b></td><td>腹腔睪丸</td><td>有 AMH → <b>無子宮與輸卵管</b>；AR 失能 → 吳爾夫氏管亦退化</td><td><b>女性外觀</b>（無腋毛／陰毛，短盲端陰道）</td></tr>
+  <tr><td><b>先天腎上腺增生（CAH/AGS, XX）</b></td><td>卵巢</td><td>無 AMH → 保留女性子宮／輸卵管；高腎上腺雄性素可部分維持吳爾夫氏管</td><td><b>部分或完全男性化</b>（陰蒂肥大或似陰莖／空陰囊）</td></tr>
+  <tr><td><b>持續性穆勒氏管（PMDS, XY）</b></td><td>睪丸</td><td>AMH 或 AMHR2 突變 → 同時保留男性與女性內生殖道</td><td>正常男性外生殖器（常伴隱睪）</td></tr>
+</table>`,
+  quiz: [
+    { q: '胚胎發育期間，決策基因 <i>Sry</i> 主要在哪一種細胞內表現以啟動睪丸分化？', o: ['遷徙中的始基生殖細胞（PGCs）', '源自體腔上皮之原始性索（前塞透力氏細胞 pre-Sertoli cells）', '間質來狄吉細胞（Leydig cells）', '吳爾夫氏管上皮細胞'], a: 1, e: 'Ch2 p.39–40：Sry 並不表現在 PGCs 或中腎細胞，而是專一表現在原始性索的前塞透力氏細胞中。' },
+    { q: 'SOX9 透過下列哪三項關鍵下游分子防止卵睪症（ovo-testis）並完成睪丸構築？', o: ['E₂、P₄ 與催產素', 'PGD₂（旁分泌正回饋鄰近細胞）、FGF9（吸引中腎細胞遷入）與 AMH（抑制穆勒氏管）', 'GnRH、LH 與 FSH', 'Insl3、瘦體素與泌乳素'], a: 1, e: 'Ch2 p.40：SOX9 啟動 PGD₂（局部正回饋）、FGF9（招募中腎肌樣／血管細胞並正回饋 SOX9）與 AMH。' },
+    { q: '一名染色體為 46,XY 的成年女性就診檢查發現：外生殖器為典型女性、乳房發育正常，但超音波看不到子宮與輸卵管，腹股溝或腹腔內有睪丸，血中睪固酮濃度位於男性範圍。最可能的診斷為何？', o: ['Turner 症候群（45,XO）', '完全雄性素不敏症候群（CAIS / Testicular feminization）', '先天性腎上腺增生（CAH）', '持續性穆勒氏管症候群（PMDS）'], a: 1, e: 'Ch2 p.43, Fig 2.7a：XY 睪丸正常分泌 AMH（使穆勒氏管退化故無子宮輸卵管）與睪固酮，但因雄性素受體（AR）失能而無法維持吳爾夫氏管與男性化外生殖器。' },
+    { q: '女性 46,XX 胎兒因腎上腺皮質 21α-羥化酶（21α-hydroxylase）基因缺陷導致皮質醇不足而產生先天性腎上腺增生（CAH），其生殖道最可能呈現何種表現？', o: ['無子宮、有睪丸', '擁有卵巢與子宮（因無 AMH），但過量腎上腺雄性素導致外生殖器不同程度男性化', '卵巢與男性外生殖器皆發育退化為無性別外觀', '只發育吳爾夫氏管而完全沒有卵巢'], a: 1, e: 'Ch2 Fig 2.7b：XX 胎兒無 SRY 故有卵巢與子宮（無 AMH），但堆積的 17α-OHP 轉化為過量雄性素使外生殖器男性化。' },
+    { q: '在人類胚胎分化中，下列哪一組構造起源於「單潛能成對原基（兩套獨立管腔選一保留）」而非「單一雙潛能原基」？', o: ['外生殖器（生殖結節、尿道褶、生殖隆起）', '性腺原基（生殖嵴）', '內生殖道（吳爾夫氏管與穆勒氏管）', '始基生殖細胞（PGCs）'], a: 2, e: 'Ch2 p.42：性腺與外生殖器各來自單一雙潛能原基（bipotential）；內生殖道則同時存在兩對單潛能原基（unipotential），依 T 與 AMH 決定誰留誰退。' },
+    { q: '始基生殖細胞（PGCs）在哺乳類胚胎最早於何處被誘導產生，且依賴何種誘導訊號？', o: ['第 3 週卵黃囊近尿囊基部（上胚層鄰近胚外組織），受 BMP4 誘導表現 <i>fragilis</i> 與 <i>Stella</i>', '第 12 週骨髓幹細胞經血流遷入', '胚胎腦垂腺前葉遷移而來', '由成人期的中腎小管自行轉分化'], a: 0, e: 'Ch2 Box 2.2 & Fig 2.2：約第 2–3 週於上胚層受胚外 BMP4 訊號誘導產生，於卵黃囊近尿囊基部可辨識約 100 顆細胞，第 6 週阿米巴爬行遷入生殖嵴。' },
+    { q: '下列何者為男性體內已退化的「穆勒氏管殘留物」，以及女性體內已退化的「吳爾夫氏管殘留物」之正確配對？', o: ['男性：副睪；女性：輸卵管', '男性：睪丸附件（appendix testis）與前列腺囊（utriculus prostaticus）；女性：卵巢冠（epoophoron）與 Gartner 囊腫', '男性：精索靜脈叢；女性：闊韌帶', '兩性所有殘留結構皆在出生前完全消失無蹤'], a: 1, e: 'Ch2 Fig 2.5 圖說：男性穆勒氏管殘留為 appendix testis 與 utriculus prostaticus；女性吳爾夫氏管殘留為 epoophoron、paroophoron 與 Gartner’s cyst。' },
+    { q: '關於成年性腺維持（Wnt4/Foxl2 vs Sox9/Dmrt1）的敘述，下列何者正確？', o: ['一旦胚胎期性腺分化完成，成體性腺細胞便永遠無法改變命運', '成年雌鼠顆粒細胞若剔除 <i>Foxl2</i>，卵巢可轉分化出類似睪丸的結構與 Sox9 表現', '只有胚胎期的生殖細胞需要兩條 X 染色體，Turner 症候群（XO）卵母細胞在成年期完全不受影響', 'Klinefelter（XXY）男性因有雙份 X 基因而具備更高精子產量'], a: 1, e: 'Ch2 p.41：成人卵巢剔除 <i>Foxl2</i> 可轉分化為類睪丸構造，成人睪丸剔除 <i>Dmrt1</i> 亦會降 Sox9 而轉出顆粒細胞與雌激素；另外 XO 導致卵母細胞死亡，XXY 導致精原細胞減數分裂時死亡。' }
+  ]
+};
+</script>
+<script src="scenes/ch02.js"></script>
+<script src="lib/main.js"></script>
+</body>
+</html>

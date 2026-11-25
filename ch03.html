@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ch3 性成熟、睪丸下降與發身｜動物繁殖 3D</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='28' fill='%2312233a' stroke='%23ffd479' stroke-width='4'/><text x='32' y='44' font-size='34' text-anchor='middle'>🧬</text></svg>">
+<link rel="stylesheet" href="lib/style.css">
+</head>
+<body>
+<script src="lib/three.min.js"></script>
+<script src="lib/OrbitControls.js"></script>
+<script src="lib/core.js"></script>
+<script src="lib/util.js"></script>
+<script>window.REAL_PROFILE = "tissue";</script>
+<script src="lib/realism.js"></script>
+<script src="lib/hx.js"></script>
+<script src="lib/mols.js"></script>
+<script src="lib/kit_extra.js"></script>
+<script>
+window.CHAPTER = {
+  no: 3, zh: '性成熟、睪丸下降與發身', en: 'Sexual maturation', color: '#38bdf8',
+  summary: `
+<h3>3-1 青春期前發育與睪丸下降（Testis Migration）</h3>
+<ul>
+  <li><b>睪丸兩階段下降</b>（Fig 3.1）：初位於腎臟附近腹後壁，10–15 週經腹腔下降至骨盆緣（<b>雄性素</b>使上方懸韌帶鬆弛退化，<b>Insl3 [RXFP2 受體]</b> 使下方引帶 gubernaculum 成熟穩定）；第 25–28 週沿腹股溝管與腹膜鞘突（processus vaginalis）跨過恥骨，第 35–40 週抵達陰囊（殘餘雙層膜稱鞘膜 tunica vaginalis）。</li>
+  <li><b>隱睪症（Cryptorchidism）</b>：睪丸滯留腹腔將因高溫導致造精停滯並大幅增加睪丸腫瘤風險（唯內分泌活性影響較小）。</li>
+  <li><b>蔓狀靜脈叢逆流散熱（Pampiniform plexus）</b>（Fig 3.2）：盤曲的內精動脈緊貼回流冷卻之靜脈網形成<b>逆流熱交換</b>，配合陰囊汗腺使人類陰囊睪丸溫度低於核心體溫 <b>4–7 °C</b>。</li>
+  <li><b>發身前激素波動</b>：男嬰於胎兒 13–15 週（~2 ng/ml）及產後 3 個月（2–3 ng/ml）出現短暫高峰；隨後進入兒童期低谷直至發身。卵巢於青春期前僅緩慢生長，切除卵巢不影響幼年女性發育。</li>
+</ul>
+<h3>3-2 青春期與發身（Puberty & Adolescence）</h3>
+<ul>
+  <li><b>生長衝刺與體組成（Fig 3.4）</b>：男孩生長突增起點（take-off）比女孩晚約 2 年（女 PHV ~9 cm/年，男 ~10 cm/年；成年男性淨身高多約 10 cm 主因起跳前身高較高），需<b>性類固醇與生長激素（GH）</b>共同參與。</li>
+  <li><b>腎上腺初現（Adrenarche）</b>：僅見於類人猿與人類（約 8–15 歲），腎上腺雄性素 <b>DHEA/DHEAS</b> 上升，驅動女性陰毛與腋毛發育（Fig 3.6），並非啟動發身的必要開關。</li>
+  <li><b>次序恆定但年齡變異大</b>（Fig 3.8–3.9）：女孩初經（menarche）與男孩初精不代表立即具備完全生育力；骨齡（bone age）較實足年齡更準確反映發身進度。</li>
+</ul>
+<h3>3-3 中樞啟動機制：GnRH 脈衝、KNDy 與代謝／光週期時鐘</h3>
+<ul>
+  <li><b>GnRH 脈衝分泌是發身啟動的唯一最終共同路徑</b>（Fig 3.10–3.12）：幼年期即存在脈衝能力，但受中樞抑制；發身早期先出現<b>睡眠期間夜間 LH 脈衝增強</b>，後漸轉為全天候約每小時一次（circhoral）脈衝。連續不間斷輸注 GnRH 反而會造成受體內化與降調，唯有脈衝輸注能啟動發身。</li>
+  <li><b>下視丘神經網絡</b>（Box 3.2, Fig 3.13）：
+    <ul>
+      <li><b>抑制系統</b>：視前區與內側基底下視丘之 <b>GABA</b>（青春期時釋放下降、解除抑制）與弓狀核 <b>β-內啡肽</b>。</li>
+      <li><b>促進系統</b>：<b>Kisspeptin 1（KISS1 / KISS1R=GPR54）</b> 與共表現的 <b>Neurokinin B（TAC3 / TACR3）</b>、<b>麩胺酸（glutamate）</b>及延腦去甲腎上腺素路徑。KISS1/KISS1R 或 TAC3/TACR3 功能缺失突變會導致青春期完全失敗。</li>
+    </ul>
+  </li>
+  <li><b>臨界體重與瘦體素（Leptin）</b>（Fig 3.15, Box 3.4）：過去百餘年初經年齡提早但初經體重恆定約 <b>47 kg</b>（男孩約 55 kg）。脂肪分泌的 <b>Leptin（167 aa）</b>是發身必需的<b>「許可性背景訊號（permissive signal）」</b>（與甲狀腺素 T₃/T₄ 協同），透過 Kisspeptin 反映能量儲備，但單獨給予不能提早誘發發身。</li>
+  <li><b>光週期與松果體褪黑素（Melatonin）</b>（Box 3.3）：視交叉上核（SCN）受視網膜光訊號調控，夜間經交感神經刺激松果體分泌褪黑素（精確編碼「黑夜長度」），決定季節性繁殖動物（如短日照綿羊 vs 長日照倉鼠）的 GnRH 脈衝頻率。</li>
+</ul>`,
+  quiz: [
+    { q: '胎兒期睪丸經腹腔移至骨盆及陰囊的過程中，下列哪一對荷爾蒙與構造的配對正確？', o: ['AMH 使懸韌帶延長；PRL 使陰囊融合', '雄性素使上方懸韌帶鬆弛退化；來狄吉細胞分泌的 Insl3（作用於 RXFP2 受體）使下方引帶（gubernaculum）成熟穩定', 'FSH 牽引鞘膜進入腹股溝管', '只有腎上腺皮質素決定睪丸下降'], a: 1, e: 'Ch3 p.51 & Box 3.1：睪丸下降需來狄吉細胞的兩個激素：雄性素（鬆弛懸韌帶）與 Insl3（經 RXFP2 使引帶穩定成熟）；Insl3 基因剔除會導致雙側隱睪。' },
+    { q: '成年男性陰囊內的睪丸能維持較腹腔核心溫度低 4–7 °C，最關鍵的血管解剖構造為何？', o: ['肝門靜脈循環', '蔓狀靜脈叢（pampiniform plexus）緊密包繞盤曲的內精動脈進行逆流熱交換', '腹下動脈直接貫穿白膜降溫', '膀胱靜脈叢的蒸發作用'], a: 1, e: 'Ch3 p.51 & Fig 3.2：經陰囊表層冷卻的靜脈血回流經蔓狀靜脈叢時，帶走盤曲內精動脈的熱量，形成高效逆流熱交換。' },
+    { q: '為何在治療下視丘性青春期延遲或誘發幼猴提早發身（Fig 3.12）時，必須以「每小時脈衝」輸注 GnRH 而非「連續恆速」輸注？', o: ['連續輸注會讓血中 GnRH 結晶沈澱', '連續暴露於 GnRH 會引起腦垂腺前葉 GnRH 受體持續佔據、大量內化（internalization）與降調（down-regulation），使促性腺細胞失去反應', '脈衝輸注才能穿過血腦障壁進入下視丘', '連續輸注只會刺激泌乳素'], a: 1, e: 'Ch3 p.60：正常約每小時一次脈衝可觸發自體預敏（self-priming）並保留受體；持續給藥（如臨床 GnRH 促效劑長效用法）反而會受體下調抑制性腺軸。' },
+    { q: '下列哪一組基因突變與青春期神經內分泌調控異常的配對正確？', o: ['<i>KISS1</i>、<i>KISS1R (GPR54)</i> 或 <i>TAC3/TACR3</i>（神經激肽 B）功能缺失突變 → 嚴重先天性青春期失敗', '<i>KISS1R</i> 功能增益突變 → 青春期延遲', 'GABA 受體阻斷劑 bicuculline → 延遲大鼠與猴發身', '<i>OB (Leptin)</i> 基因突變 → 早熟性發身'], a: 0, e: 'Ch3 p.61 & Box 3.2：KISS1/KISS1R 與 Neurokinin B (TAC3/TACR3) 均為 GnRH 正向核心調控因子；GABA 則為幼年期抑制因子，解除 GABA 抑制有助啟動發身。' },
+    { q: '關於脂肪激素瘦體素（Leptin）在人類青春期啟動的角色，下列敘述何者最精確（Box 3.4 & p.66）？', o: ['Leptin 是直接「點火觸發」青春期早熟的唯一開關，注射即可讓幼兒立刻進入發身', 'Leptin 作為反映體脂儲備的「許可性背景訊號（permissive signal）」，缺乏會導致不孕與無發身（可用 Leptin 治療恢復），但本身不足以提早啟動發身', 'Leptin 只由卵巢粒性細胞分泌', 'Leptin 直接抑制下視丘所有 Kisspeptin 表現'], a: 1, e: 'Ch3 p.66：Leptin 缺失突變會無法發身且注射可恢復，但它無法使正常幼體提早發身，屬於許可性因子（permissive factor）。' },
+    { q: '觀察人類發身早期最先出現的荷爾蒙節律特徵為何（Fig 3.10）？', o: ['24 小時全天候持續平坦高濃度的 LH', '在夜間「睡眠期間」出現脈衝性 LH 分泌大幅增強（早中期青春期最顯著）', '只有在清晨覺醒後分泌 FSH 單峰', '女童最早上升的是睪固酮 9 ng/ml'], a: 1, e: 'Ch3 Fig 3.10：早期至中期青春期最先出現睡眠增強的夜間 LH 脈衝，至青春期晚期與成年才消退日夜落差，呈穩定每小時脈衝。' },
+    { q: '季節性繁殖動物如何利用松果體（pineal gland）與褪黑素（melatonin）偵測季節變化（Box 3.3）？', o: ['褪黑素只在白天強光下大量分泌', '褪黑素僅在黑暗時由 SCN 經交感神經驅動分泌，其「夜間分泌持續時間」精確反映黑夜長度，進而調控綿羊（短日照啟動）或倉鼠（長日照啟動）的 GnRH 脈衝頻率', '松果體切除後動物仍可精準隨日照長短改變發情季節', '人類也是嚴格受褪黑素調控的季節性發情動物'], a: 1, e: 'Ch3 Box 3.3：松果體 N-乙醯轉移酶在夜間活性大增，使血中褪黑素波寬直接對應黑夜長度；人類全年可生殖，無顯著季節褪黑素生殖調控。' },
+    { q: '男孩與女孩在青春期身高成長突增（growth spurt）的主要差異為何（Fig 3.4）？', o: ['女孩比男孩晚 2 年起跳（take-off）', '男孩平均比女孩晚約 2 年起跳，且突增期間淨增高量相似（男 ~28 cm vs 女 ~25 cm），因此成年男性高約 10 cm 主要來自「起跳前」額外累積的 2 年兒童期生長', '成長突增只靠雄性素，不需要生長激素', '女孩的體脂比例最終為男性的 0.5 倍'], a: 1, e: 'Ch3 p.55–56 & Fig 3.4：男晚 2 年起跳、PHV 約 10 cm/y vs 女 9 cm/y，男女成年體組成差距亦顯著（男瘦體重 1.5 倍、女脂肪 2 倍）。' }
+  ]
+};
+</script>
+<script src="scenes/ch03.js"></script>
+<script src="lib/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ch7 雄性內分泌與生殖腺調節｜動物繁殖 3D</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='28' fill='%2312233a' stroke='%23ffd479' stroke-width='4'/><text x='32' y='44' font-size='34' text-anchor='middle'>🧬</text></svg>">
+<link rel="stylesheet" href="lib/style.css">
+</head>
+<body>
+<script src="lib/three.min.js"></script>
+<script src="lib/OrbitControls.js"></script>
+<script src="lib/core.js"></script>
+<script src="lib/util.js"></script>
+<script>window.REAL_PROFILE = "tissue";</script>
+<script src="lib/realism.js"></script>
+<script src="lib/hx.js"></script>
+<script src="lib/mols.js"></script>
+<script src="lib/kit_extra.js"></script>
+<script>
+window.CHAPTER = {
+  no: 7, zh: '雄性內分泌與生殖腺調節', en: 'Men', color: '#60a5fa',
+  summary: `
+<h3>7-1 睪丸類固醇合成、三出口與 Sertoli 雙激素協同（Fig 7.1）</h3>
+<ul>
+  <li><b>人類睪丸 Δ⁵ 優勢路徑</b>（Fig 7.1）：間質<b>來狄吉細胞（Leydig cells）</b>在 LH 刺激下（60 秒內 cAMP↑、20–30 分鐘睪固酮分泌↑），主要經 <b>Δ⁵ 路徑</b>（膽固醇 → 孕烯醇酮 → 17α-OH-孕烯醇酮 → DHEA → 雄烯二醇 → <b>睪固酮</b>，男性每日分泌 4–10 mg）合成雄性素（少量雄烯二酮 10% 與 DHEA 6% 亦入血）；部分睪固酮於成熟來狄吉細胞轉為雌素二醇。</li>
+  <li><b>三條輸出路徑</b>：① <b>血液（17 ml/min）</b>全身作用與負回饋；② <b>淋巴（0.2 ml/min）</b>送往鄰近附屬腺與輸出管；③ <b>管腔液（外分泌）</b>結合 Sertoli 細胞分泌之<b>雄性素結合蛋白（ABP）</b>送往副睪（管內雄性素濃度高出血漿 25–100 倍！）。</li>
+  <li><b>局部三目標細胞具 AR</b>：來狄吉細胞（自分泌負回饋）、肌樣細胞（管收縮）、<b>塞透力氏細胞</b>（含 5α-還原酶轉為更強效之 <b>DHT</b>；生殖細胞本身無 AR！）。睪固酮在 Sertoli 細胞內負責：① 維持 <b>BTB</b>、② 維繫 Sertoli–精細胞黏附、③ 促進<b>排精</b>。</li>
+  <li><b>FSH 與睪固酮反相節律協同</b>：FSH 促 Sertoli 表現 AR，雄性素促 FSH-R，兩者呈反相振盪（AR 在第 6–8 期排精前後最高，FSH-R 此時最低）；維生素 A（視黃酸）亦為啟動減數分裂所必需。</li>
+</ul>
+<h3>7-2 抑制素／活化素雙聚體與 HPG 負回饋（Figs 7.2–7.4）</h3>
+<ul>
+  <li><b>三基因組合</b>（Fig 7.2）：1 個 α 前蛋白＋2 個 β 前蛋白（βA、βB）形成二硫鍵雙聚體：<b>抑制素 A（α–βA）與 B（α–βB，人類男性主型）</b>、<b>活化素 A（βA–βA）／B（βB–βB）／AB（βA–βB）</b>；<b>濾泡抑素（Follistatin）</b>可高親和力螯合活化素。</li>
+  <li><b>雙重負回饋</b>：
+    <ul>
+      <li><b>睪固酮</b>：抑制下視丘 GnRH 脈衝頻率與振幅，並降低垂體敏感度 → 主要抑制 <b>LH</b>（亦可微抑 FSH）。</li>
+      <li><b>抑制素 B</b>：由 Sertoli 細胞分泌（反映生精效率），專門作用於腦垂腺前葉，選擇性抑制 <b>FSH</b>（不影響 GnRH）。</li>
+    </ul>
+  </li>
+</ul>
+<h3>7-3 雄性骨盆與附屬生殖腺物種差異（Figs 7.5–7.6, Table 7.1）</h3>
+<table>
+  <tr><th>物種（Table 7.1）</th><th>前列腺 Prostate</th><th>儲精囊 Seminal vesicle</th><th>壺腹 Ampulla</th><th>尿道球腺 Bulbourethral</th></tr>
+  <tr><td><b>人類 Human</b></td><td>+++</td><td>++</td><td>+</td><td>±</td></tr>
+  <tr><td><b>牛 Bull</b></td><td>+</td><td>+++</td><td>++</td><td>±</td></tr>
+  <tr><td><b>狗 Dog</b></td><td>+++</td><td>–</td><td>–</td><td>–</td></tr>
+  <tr><td><b>豬 Boar</b></td><td>++</td><td>+++</td><td>–</td><td>++</td></tr>
+  <tr><td><b>馬 Stallion</b></td><td>++</td><td>+</td><td>++</td><td>±</td></tr>
+  <tr><td><b>綿羊 Ram</b></td><td>++</td><td>+</td><td>++</td><td>++</td></tr>
+</table>
+<ul>
+  <li><b>決定性 vs 調節性作用</b>：雄性素具不可逆的「決定性作用」（胚胎分化、發身變聲骨骼）及可逆的「調節性作用」（維持成年附屬腺大小與分泌，去勢後萎縮、補 T 與 5α-DHT 加上<b>泌乳素協同</b>即可恢復，Figs 7.6, Box 1.3）。</li>
+</ul>`,
+  quiz: [
+    { q: '人類男性睪丸來狄吉細胞（Leydig cells）合成睪固酮（每日 4–10 mg）主要依循哪一條生合成路徑（Fig 7.1）？', o: ['僅靠 Δ⁴ 路徑經助孕酮合成', 'Δ⁵ 路徑為主（孕烯醇酮 → 17α-OH-孕烯醇酮 → DHEA → 雄烯二醇 → 睪固酮）', '由膽固醇直接一步轉為雄素二醇', '由塞透力氏細胞先合成雄固酮再轉給來狄吉細胞'], a: 1, e: 'Ch7 Fig 7.1：人類睪丸重線標示為 Δ⁵ 路徑；不同物種對 Δ⁴ 與 Δ⁵ 路徑偏好不同。' },
+    { q: '成年男性睪丸分泌的睪固酮在細胞層級的作用對象中，下列哪一種細胞「不表現」雄性素受體（AR），必須仰賴鄰近細胞旁分泌支持（p.123）？', o: ['來狄吉細胞（Leydig cells）', '管周肌樣細胞（myoid cells）', '生精細胞（精原細胞、精母細胞、精細胞）', '塞透力氏細胞（Sertoli cells）'], a: 2, e: 'Ch7 p.123：生精細胞本身並無 AR，雄性素透過結合 Sertoli 細胞內的 AR（及部分轉成 DHT）維持 BTB、細胞黏附與排精。' },
+    { q: '為什麼切除腦垂腺（hypophysectomy）且已發生無精症後，單獨給予大量睪固酮或 LH 往往無法完全恢復精子生成（p.125–126）？', o: ['睪固酮會破壞血睪障壁', '還必須有 FSH 作用於 Sertoli 細胞以重新誘導雄性素受體（AR）、ABP 與生精所需蛋白，兩者協同缺一不可', 'LH 只能作用於前列腺', '高劑量睪固酮會立刻變成抗雄性素'], a: 1, e: 'Ch7 p.126：FSH 與睪固酮相互誘導對方受體並反相振盪協同，青春期啟動與萎縮後復原均同時需要 FSH 與雄性素。' },
+    { q: '人類男性血中的抑制素（Inhibin B）主要如何構成，其主要的負回饋標的位置與目標激素為何（Fig 7.2, p.127）？', o: ['βA–βB 雙聚體；在下視丘刺激 GnRH', 'α 與 βB 次單位組成的雙聚體；直接作用於腦垂腺前葉，選擇性抑制 FSH 分泌', '單體類固醇；抑制 LH 脈衝頻率', 'α–α 同源雙聚體；刺激泌乳素分泌'], a: 1, e: 'Ch7 Fig 7.2 & p.127：抑制素含 α 鏈（人為 α-βB 即抑制素 B），僅在腦垂腺前葉選擇性抑制 FSH 分泌，是評估生精完整性的指標。' },
+    { q: '關於公犬（Dog）與公豬（Boar）雄性附屬生殖腺解剖的物種差異（Table 7.1），下列敘述何者正確？', o: ['公犬擁有極巨大的儲精囊與尿道球腺', '公犬僅有發達的前列腺（+++），缺乏儲精囊、壺腹與尿道球腺；公豬缺乏壺腹但具有發達的儲精囊（+++）與尿道球腺（++）', '公牛完全沒有儲精囊', '所有家畜的附屬生殖腺大小比例完全相同'], a: 1, e: 'Ch7 Table 7.1：Dog 僅有前列腺（+++）；Boar 沒有 ampulla，但擁有巨大儲精囊（+++）與尿道球腺（++）。' },
+    { q: '來狄吉細胞除了分泌雄性素與少量雌激素外，亦分泌何種胜肽激素以刺激管周肌樣細胞收縮並幫助液體與精子推向輸出管（p.123）？', o: ['催產素（Oxytocin）', '鬆弛素（Relaxin）', '促甲狀腺素（TSH）', '人體絨毛膜促性腺激素（hCG）'], a: 0, e: 'Ch7 p.123：來狄吉細胞亦合成催產素（OT），經旁分泌／淋巴作用於肌樣細胞及副睪平滑肌收縮。' },
+    { q: '泌乳素（PRL）在雄性生殖腺與附屬腺中被稱為「協同激素（co-hormone）」，其具體功能為何（p.125, 129 & Box 1.3）？', o: ['抑制前列腺 5α-還原酶活性', '增強 LH 對來狄吉細胞之刺激，並在前列腺與儲精囊提升雄性素攝取與 5α-還原酶活性（具雄性素依賴性 PRL 受體）', '使精原細胞停止有絲分裂', '阻斷 GnRH 脈衝分泌'], a: 1, e: 'Ch7 p.125, 129：PRL 與抑製素皆協助 LH 促來狄吉產 T，且前列腺／儲精囊受 PRL 與雄性素雙向正協同。' },
+    { q: '下列何者屬於雄性素在雄體內的「調節性作用（regulatory action）」而非「決定性作用（determinative action）」（p.127–128）？', o: ['胎兒期誘導吳爾夫氏管發育為輸精管', '胎兒期促使尿道褶融合形成陰莖與陰囊', '青春期發聲與喉部軟骨不可逆增大', '維持成年期前列腺與儲精囊上皮高度及精漿分泌（去勢後萎縮、補雄性素即可可逆恢復）'], a: 3, e: 'Ch7 p.127–128 & Fig 7.6：調節性作用是可逆的（如成年附屬腺分泌與季節性繁殖變化），去勢後補回 T 即可完全復原。' }
+  ]
+};
+</script>
+<script src="scenes/ch07.js"></script>
+<script src="lib/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ch1 什麼是生殖｜動物繁殖 3D</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='28' fill='%2312233a' stroke='%23ffd479' stroke-width='4'/><text x='32' y='44' font-size='34' text-anchor='middle'>🧬</text></svg>">
+<link rel="stylesheet" href="lib/style.css">
+</head>
+<body>
+<script src="lib/three.min.js"></script>
+<script src="lib/OrbitControls.js"></script>
+<script src="lib/core.js"></script>
+<script src="lib/util.js"></script>
+<script>window.REAL_PROFILE = "tissue";</script>
+<script src="lib/realism.js"></script>
+<script src="lib/hx.js"></script>
+<script src="lib/mols.js"></script>
+<script src="lib/kit_extra.js"></script>
+<script>
+window.CHAPTER = {
+  no: 1, zh: '什麼是生殖', en: 'What is reproduction?', color: '#7dd3fc',
+  summary: `
+<h3>1-1 哺乳動物的生殖策略（Reproductive Strategies）</h3>
+<ul>
+  <li><b>有性生殖（Sexual reproduction）</b>：配子（精子與卵子）各帶單套染色體（人類 n = 23），經<b>減數分裂（meiosis）</b>在粗絲期（pachytene）發生同源染色體互換（chiasmata）與隨機分離，受精後形成基因全新的二倍體（2n = 46）合子。</li>
+  <li><b>高投資、低產量策略</b>：<b>體內受精（internal fertilization）</b>大幅減少排卵數；除卵生單孔目（鴨嘴獸、針鼴）外皆為<b>胎生（viviparity）</b>。</li>
+  <li><b>卵大小與分裂速率差異</b>（Fig 1.3）：哺乳動物卵直徑約 <b>70–90 µm</b>（人、鼠、象相近），受精後約 <b>24 小時</b>才分裂至 2 細胞；蛙卵約 <b>1500 µm</b>，24 小時已發育為可游動的蝌蚪。</li>
+  <li><b>哺乳與育幼</b>：乳汁哺育（lactation）是所有哺乳動物共有且獨有的特徵。</li>
+</ul>
+<h3>1-2 體細胞週期、生殖細胞週期與表觀遺傳印記</h3>
+<ul>
+  <li><b>生殖世代週期（Generative life cycle）</b>：早期胚胎多能性（pluripotent）細胞保留為始基生殖細胞（PGCs），體細胞則如載具。</li>
+  <li><b>體細胞核轉殖（SCNT）</b>證明分化體細胞仍保有完整基因組；不同細胞的差異來自<b>表觀遺傳（epigenetics）</b>：DNA CpG 島胞嘧啶甲基化（阻斷轉錄）、組蛋白變體與乙醯化／甲基化修飾（鬆散染色質 euchromatin vs 緊密異染色質）。</li>
+  <li><b>親代印記（Parental imprinting）</b>：約 100–200 個基因在配子包裝時被標上父源或母源印記，因此哺乳動物<b>無法行單性生殖（parthenogenesis）</b>。</li>
+</ul>
+<h3>1-3 下視丘與腦垂腺的解剖連結（Figs 1.9–1.12）</h3>
+<ul>
+  <li><b>腦垂腺前葉（Adenohypophysis）</b>：源自胚胎咽部上皮，受下視丘<b>小細胞神經分泌系統（parvocellular）</b>（弓狀核 ARC、視前區 POA、前下視丘區）分泌至正中隆起（median eminence）之 <b>GnRH</b> 與 <b>TIDA 多巴胺（PIF）</b>經<b>下視丘–腦垂腺門脈系統（長門脈靜脈）</b>調控，分泌 LH、FSH 與泌乳素（PRL）。</li>
+  <li><b>腦垂腺後葉（Neurohypophysis）</b>：源自腦部延伸，由下視丘<b>視上核（SON）與室旁核（PVN）之大細胞神經分泌系統（magnocellular）</b>經<b>下視丘–腦垂腺神經束（hypothalamo–hypophyseal tract）</b>直接軸突運輸催產素（OT，與 neurophysin 結合）與血管加壓素至後葉微血管釋放。</li>
+</ul>
+<h3>1-4 生殖激素家族與受體訊息傳遞（Tables 1.1–1.7, Figs 1.14–1.16）</h3>
+<table>
+  <tr><th>家族</th><th>代表與碳數</th><th>血中半衰期</th><th>主要受體與機轉</th></tr>
+  <tr><td><b>性類固醇（由膽固醇 C27 衍生）</b></td><td>助孕素 C21（P₄ 100%）<br>雄性素 C19（DHT 100% &gt; T 50% &gt; A₄ 8%）<br>雌性素 C18（E₂ 100% &gt; E₃ 10% &gt; E₁ 1%）</td><td>2–3 分鐘（多結合白蛋白、CBG 或 SHBG，游離僅 ~1–2%）</td><td>類型 1：胞內核受體（去 HSP90 → 結合 SRE 如 ARE/ERE/PRE）</td></tr>
+  <tr><td><b>醣蛋白促性腺激素</b></td><td>LH (28 kDa)、FSH (28 kDa)、hCG (37 kDa)；共用 α 鏈，β 鏈決定專一性</td><td>LH 30 分；FSH 3–4 時；hCG ~24 時（β 尾 O-糖鏈穩定）</td><td>類型 4：GPCR → Gs/AC → cAMP（或 Gq/PLCβ → IP₃/DAG/Ca²⁺）</td></tr>
+  <tr><td><b>體乳促素家族</b></td><td>PRL (23 kDa)、PL (22 kDa)、GH/GH-V (22 kDa)</td><td>10–20 分 / 24 時（雙相）</td><td>類型 2：細胞激素受體雙聚化 → JAK-STAT</td></tr>
+  <tr><td><b>生長因子</b></td><td>EGF/IGF（RTK）、TGFβ 超家族（AMH、活化素、抑制素、BMPs）</td><td>局部旁分泌／自分泌</td><td>類型 3：受體激酶（酪胺酸激酶或絲/蘇胺酸激酶 → Smad）</td></tr>
+</table>`,
+  quiz: [
+    { q: '為什麼哺乳動物（包括人類）在自然條件下無法成功進行單性生殖（parthenogenesis）發育至足月？', o: ['卵子缺乏細胞核 DNA', '親代基因印記（parental imprinting）使母源與父源基因各有約 100–200 個基因呈現互補性沉默', '卵子缺少粒線體', '單套染色體無法進行任何有絲分裂'], a: 1, e: 'Ch1 p.10：即使人為激活未受精卵，因母源染色體攜帶母源印記，缺少僅在父源染色體表現的印記基因，胚胎必定失敗死亡。' },
+    { q: '下列關於哺乳動物與青蛙卵細胞及早期發育的比較，何者正確？', o: ['哺乳動物卵比蛙卵大 10 倍以儲存卵黃', '人類卵直徑約 70–90 µm，受精後約 24 小時才分裂為 2 細胞；蛙卵約 1500 µm，24 小時已成蝌蚪', '象的卵細胞比小鼠卵細胞大 100 倍', '哺乳動物體外受精故每次排卵數千顆'], a: 1, e: 'Ch1 Fig 1.3：小鼠、人、象的卵大小相近（約 70–90 µm），遠小於蛙卵（1500 µm），因為哺乳動物胚胎仰賴母體與胎盤供養。' },
+    { q: '下視丘視上核（SON）與室旁核（PVN）的大細胞神經元（magnocellular）如何將催產素（oxytocin）送至腦垂腺後葉？', o: ['經長門脈靜脈血液輸送', '沿下視丘–腦垂腺神經束（hypothalamo–hypophyseal tract）軸突直接運輸並與 neurophysin 共同釋放', '經第三腦室腦脊髓液擴散', '由腺垂腺促性腺細胞轉運'], a: 1, e: 'Ch1 Fig 1.12a & 1.19：大細胞神經元軸突直達神經垂腺（後葉），前體切出的 neurophysin 與 OT 一起包裝運輸並隨胞吐釋入血流。' },
+    { q: '在人類血漿中的性類固醇家族比較，下列效價與碳數配對何者正確？', o: ['雌素二醇 E₂ 為 C19，效價低於雌素酮 E₁', '5α-二氫睪固酮（DHT）為 C19，相對效價高於睪固酮（T）約一倍', '助孕素 P₄ 為 C18，具有芳香化 A 環', '動情素為 C21，是類固醇生合成的前驅物'], a: 1, e: 'Ch1 Tables 1.1–1.3 & Fig 1.15：助孕素為 C21、雄性素為 C19（DHT 相對效價 100% vs T 50%）、雌性素為 C18（具芳香化 A 環）。' },
+    { q: '為何絨毛膜促性腺激素（hCG）在血中的半衰期（約 24 小時）遠長於 LH（約 30 分鐘）？', o: ['hCG 的 α 亞基完全不同於 LH', 'hCG β 鏈 C 端多了 29 個胺基酸且帶有 O-連結醣鏈，顯著提升血液穩定性', 'hCG 是脂溶性分子與白蛋白緊密結合', 'hCG 分子量小於 5 kDa 不會被肝臟代謝'], a: 1, e: 'Ch1 Table 1.4 & 1.6：LH 與 hCG 共用 α 鏈並結合同一受體，但 hCG β 鏈 C 端額外延伸的 29 aa 含 O-linked 醣鏈，使其半衰期長達 ~24 小時。' },
+    { q: '下列哪一類受體與第二傳訊系統（Figure 1.16）的配對<b>錯誤</b>？', o: ['LH／FSH／GnRH — G 蛋白偶聯受體（GPCR）→ cAMP 或 IP₃/DAG', '泌乳素（PRL）／瘦體素（Leptin） — 受體雙聚化 → JAK-STAT 路徑', 'AMH／活化素（Activin）／BMP — 絲胺酸／蘇胺酸激酶受體四聚體 → Smad 磷酸化', '性類固醇（T／E₂／P₄） — 必須依賴細胞膜表面的酪胺酸激酶受體才能結合 DNA'], a: 3, e: 'Ch1 Fig 1.16：性類固醇主要（類型 1）自由擴散進入細胞，與胞內／核內受體結合並脫離 HSP90 後直接結合 DNA 的 SRE。' },
+    { q: '下視丘弓狀核（arcuate nucleus）的 TIDA 神經元分泌多巴胺至門脈血液，其對腦垂腺前葉泌乳細胞（lactotrophs）的主要作用為？', o: ['持續刺激泌乳素大量分泌', '作為泌乳素抑制因子（PIF），經 D₂ 受體持續抑制泌乳素分泌', '促進 LH 脈衝釋放', '將雄性素芳香化為雌素二醇'], a: 1, e: 'Ch1 Box 1.3：不同於其他前葉激素，PRL 受下視丘多巴胺（PIF）經 D₂ 受體持續性抑制。' },
+    { q: '睪固酮在目標組織（如外生殖器、前列腺）或大鼠下視丘中發生的局部轉化（Box 1.5），下列敘述何者正確？', o: ['僅能在肝臟發生代謝失活', '5α-還原酶將 T 轉為更強效的 DHT；囓齒類下視丘則可用芳香酶（aromatase）將 T 轉為 E₂ 來男性化腦部', '5α-還原酶會使雄性素完全失去活性', '芳香酶把 DHT 轉為助孕素'], a: 1, e: 'Ch1 Box 1.5：5α-reductase 將 T 轉為親和力更高的 DHT（缺失會導致 penis-at-twelve 症候群）；局部芳香化說明「雄/雌激素」並非絕對二分。' }
+  ]
+};
+</script>
+<script src="scenes/ch01.js"></script>
+<script src="lib/main.js"></script>
+</body>
+</html>
