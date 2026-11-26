@@ -540,4 +540,170 @@
       checkbox(box, '播放時間週期與波推進', true, v => S5.play = v);
     }
   });
+
+  /* ===== 場景⑥：睪丸內部剖面：縱隔、小葉、生精細管、睪丸網與附睪（整合比較大體解剖） ===== */
+  SCENES.push({
+    name: '⑥ 睪丸內部與附睪',
+    title: '睪丸剖面：縱隔、小葉、生精細管、睪丸網與附睪',
+    camera: { pos: [0.3, 0.3, 4.0], target: [-0.1, 0.05, 0], fit: [1.9, 1.8] },
+    controls: [{ label: '🔍 睪丸剖面全覽', fn() { flyHome(); } }],
+    desc: `
+<p><b>精子輸出路徑</b>：生精細管（曲管部 → 直管部）→ <b>睪丸網</b> → <b>睪丸輸出小管</b> → <b>附睪管（頭 → 體 → 尾）</b> → 輸精管 → 射精管 → 尿道。</p>
+<p>白膜向內發出<b>睪丸中隔</b>，連到中央的<b>睪丸縱隔</b>（豬、牛、山羊、犬明顯），把睪丸分隔成許多<b>睪丸小葉</b>（功能單位）。小葉內為屈曲迴環狀生精細管，管間為含來狄吉細胞的間隙組織。</p>
+<p class="src">雷弟生物學 3D 比較解剖整合（對應 Essential Reproduction Ch.6 &amp; Ch.10）</p>`,
+    build() {
+      const P = Math.PI, A = [0.5, 0.72, 0.5];
+      const thinShell = (r, sc, col, o, phiStart, phiLen) => {
+        const g = new THREE.SphereGeometry(r, 48, 32, phiStart, phiLen);
+        const m = new THREE.Mesh(g, mat(col, o));
+        m.scale.set(sc[0], sc[1], sc[2]);
+        return m;
+      };
+      reg('睪丸被膜', '睪丸白膜（剖開）', 'Tunica albuginea', '緻密白色纖維膜，含平滑肌，收縮具幫浦作用；向內發出睪丸中隔。',
+        thinShell(1, A, 0xf8f4e6, 0.35, 0.9 * P, 1.2 * P), { anchor: [-0.4, 0.45, -0.3] });
+      reg('睪丸被膜', '血管層', 'Tunica vasculosa', '緊貼白膜內面的薄血管層。',
+        thinShell(0.96, A, 0xd9605a, 0.18, 0.9 * P, 1.2 * P), { anchor: [0.35, -0.45, -0.35], nolabel: true });
+      reg('縱隔與小葉', '睪丸縱隔', 'Mediastinum testis', '睪丸中央的結締組織索（近極至遠極），橫切面呈放射狀，內含<b>睪丸網</b>。',
+        cyl([0, -0.66, 0], [0, 0.66, 0], 0.05, 0xffffff, 0.75), { anchor: [0.0, -0.3, 0.05] });
+      const SP = [];
+      for (let k = 0; k < 12; k++) {
+        const a = k / 12 * 2 * P, m = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 1.0), mat(0xe7efe0, 0.22));
+        m.geometry.translate(0.26, 0, 0); m.rotation.y = -a; SP.push(m);
+      }
+      reg('縱隔與小葉', '睪丸中隔（小葉間隔）', 'Septula testis', '由縱隔放射狀發出的結締組織間隔，連到白膜，把睪丸分隔為許多小葉。', SP, { anchor: [0.3, -0.5, 0.2] });
+      const rr = rnd(5), ST = [];
+      for (let row = 0; row < 3; row++) for (let k = 0; k < 12; k++) {
+        const a0 = k / 12 * 2 * P, y0 = (row - 1) * 0.38, pts = [];
+        const n = 70, ph = rr() * 6, am = 0.08 + rr() * 0.05;
+        const f = (t, side) => {
+          const r = 0.08 + 0.34 * Math.sin(Math.min(1, t * 1.15) * P * 0.5) * 0.999 + Math.sin(t * 17 + ph) * 0.03;
+          const a = a0 + (0.12 + side * 0.15 * Math.sin(t * P)) + Math.sin(t * 23 + ph) * 0.05;
+          const y = y0 + side * (t - 0.5) * 0.08 + Math.sin(t * 29 + ph) * am * 0.5;
+          return V(Math.cos(a) * r, y, Math.sin(a) * r);
+        };
+        for (let i = 0; i <= n; i++) pts.push(f(i / n, 1));
+        for (let i = n; i >= 0; i--) { const q = f(i / n, -1); q.y += 0.07; pts.push(q); }
+        ST.push(tube(pts, 0.014, 0xf0d890, 1, 3));
+      }
+      reg('縱隔與小葉', '生精細管', 'Seminiferous tubules', '產生精子的處所，高度屈曲的圈環，兩端接睪丸網；<b>曲管部</b>進行生精作用，<b>直管部</b>與睪丸網相連。管外有類肌細胞，內襯生精上皮（生殖細胞＋賽透力氏細胞）。',
+        ST, { anchor: [0.35, 0.3, 0.2] });
+      const ley = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 8, 6), mat(0xffc400, 1), 160), M = new THREE.Matrix4();
+      for (let i = 0; i < 160; i++) {
+        const a = rr() * 6.28, r = 0.1 + rr() * 0.36, y = (rr() - 0.5) * 1.1;
+        M.compose(V(Math.cos(a) * r, y, Math.sin(a) * r), new THREE.Quaternion(), V(0.017, 0.017, 0.017)); ley.setMatrixAt(i, M);
+      }
+      ley.instanceMatrix.needsUpdate = true; ley.frustumCulled = false;
+      reg('縱隔與小葉', '間隙組織／來狄吉細胞', 'Interstitial tissue / Leydig cells', '生精細管之間的結締組織，含血管、淋巴管、神經與成群的多角形<b>來狄吉細胞</b>（核大而圓），為<b>分泌雄性素</b>的處所。',
+        ley, { anchor: [-0.3, 0.45, 0.3] });
+      const RT = [];
+      for (let i = 0; i < 18; i++) {
+        const a = rr() * 6.28, b = rr() * 6.28;
+        RT.push(tube([[Math.cos(a) * 0.06, 0.2 + rr() * 0.4, Math.sin(a) * 0.06], [Math.cos(b) * 0.08, 0.2 + rr() * 0.4, Math.sin(b) * 0.08], [Math.cos(a + 2) * 0.06, 0.2 + rr() * 0.4, Math.sin(a + 2) * 0.06]], 0.012, 0x4aa3df, 1, 6));
+      }
+      reg('輸出管道', '睪丸網', 'Rete testis', '縱隔內互相吻合的複雜小管網，襯以具少數微絨毛與單一鞭毛的方形／扁平細胞，是精子輸往<b>睪丸輸出小管</b>的通道。',
+        RT, { anchor: [0.08, 0.5, 0.06] });
+      const EF = [];
+      for (let i = 0; i < 6; i++) {
+        const o = (i - 2.5) * 0.04;
+        EF.push(tube([[0, 0.5, o], [0, 0.7, o], [-0.12, 0.84 + i * 0.012, o * 2], [-0.3, 0.86, o * 2]], 0.014, 0x3f7fc0, 1, 8));
+      }
+      reg('輸出管道', '睪丸輸出小管', 'Ductuli efferentes testis', '連接睪丸網與附睪頭。內襯偽複層柱狀上皮：<b>無纖毛細胞</b>（刷狀緣）重吸收睪丸液以濃縮精子，<b>纖毛細胞</b>與外圍平滑肌將精子推向附睪。',
+        EF, { anchor: [-0.1, 0.9, 0] });
+      const hc = new THREE.CatmullRomCurve3(PV([[-0.3, 0.9, 0], [-0.5, 0.78, 0], [-0.62, 0.35, 0], [-0.64, -0.1, 0], [-0.58, -0.55, 0], [-0.4, -0.8, 0]]));
+      const part = (a, b) => { const sub = []; for (let i = a; i <= b + 1e-6; i += 0.01) sub.push(hc.getPointAt(Math.min(i, 1))); return new THREE.CatmullRomCurve3(sub); };
+      const hs = [[0, 0.22, 0.1, 0xdca880], [0.22, 0.75, 0.07, 0xd09068], [0.75, 1, 0.095, 0xc07c58]];
+      const names = [
+        ['附睪頭', 'Caput epididymidis', '扁平杯狀、覆蓋睪丸近極，輸出小管由此進入。主細胞約占80%，靜纖毛最長。'],
+        ['附睪體', 'Corpus epididymidis', '沿睪丸背緣下行，狹長，為附睪管迂曲處；主細胞約69%，澄清細胞出現。'],
+        ['附睪尾', 'Cauda epididymidis', '位於睪丸遠極，精子貯存主要處所；管周平滑肌最厚，管徑隨之變大。']
+      ];
+      hs.forEach((h, i) => {
+        const cv = part(h[0], h[1]);
+        const cap = new THREE.Mesh(new THREE.TubeGeometry(cv, 30, h[2], 12, false), mat(h[3], 0.45));
+        const coil = tube(helixAlong(cv, h[2] * 0.55, 22 + i * 4, 0, 400), 0.014, 0xffe3c9, 1, 2);
+        reg('輸出管道', names[i][0], names[i][1], names[i][2] + '<br>附睪管為偽複層柱狀上皮，細胞間緊密接合構成<b>血–附睪障壁</b>。',
+          [cap, coil], { anchor: [cv.getPointAt(0.5).x - 0.05, cv.getPointAt(0.5).y, 0.08] });
+      });
+      reg('輸出管道', '輸精管起始', 'Vas deferens (start)', '附睪尾接近陰囊韌帶處管徑變粗，環繞睪丸韌帶後向上延續為輸精管，肌肉層厚，靠蠕動收縮輸送精子。',
+        tube([[-0.4, -0.8, 0], [-0.55, -0.7, -0.05], [-0.78, -0.2, -0.05], [-0.8, 0.5, -0.02], [-0.7, 1.1, 0]], 0.03, 0xffffff), { anchor: [-0.8, 0.5, -0.02] });
+      reg('輸出管道', '陰囊韌帶／睪丸韌帶', 'Scrotal ligament', '在睪丸遠端，陰囊韌帶把鞘膜層牢固附著於陰囊。',
+        cyl([-0.05, -0.74, 0], [-0.05, -1.1, 0], 0.04, 0xe3d6b4), { anchor: [-0.05, -1.0, 0] });
+    }
+  });
+
+  /* ===== 場景⑦：生精細管完整橫切與血睪障壁（整合比較大體解剖） ===== */
+  SCENES.push({
+    name: '⑦ 生精細管橫切面',
+    title: '生精細管橫切（環狀全視角示意）與血睪障壁',
+    camera: { pos: [0, 0.2, 6.8], target: [0, 0, 0], fit: [2.9, 2.3] },
+    controls: [{ label: '🔍 橫切全覽', fn() { flyHome(); } }],
+    desc: `
+<p>相對於本頁場景①的縱向楔形剖面，本模型呈現<b>生精細管完整 360° 環狀橫切面</b>：由外圍<b>管周類肌細胞 → 基底膜 → 環狀緊密接合（血睪障壁）</b>分隔外圍基底區間與中央近腔區間（與放射狀排列之生殖細胞譜系）。</p>
+<p class="src">雷弟生物學 3D 比較解剖整合（對應 Essential Reproduction Ch.6 Figs 6.1–6.2）</p>`,
+    build() {
+      const P = Math.PI, TH = 0.6, RB = 1.3, NS = 10, rr = rnd(21);
+      const rad = (r, a) => V(Math.cos(a) * r, Math.sin(a) * r, 0);
+      const bmM = new THREE.Mesh(new THREE.CylinderGeometry(RB, RB, TH, 64, 1, true), mat(0x6fa0e0, 0.55));
+      bmM.rotation.x = P / 2;
+      reg('管壁與間質', '基底膜', 'Basement membrane', '生精細管最外的薄膜，賽透力氏細胞扁平的基部垂直附著其上。', bmM, { anchor: [RB * 0.7, RB * 0.7, 0.3] });
+      const my = new THREE.InstancedMesh(_sph, mat(0xe08a6a, 1), 30), M = new THREE.Matrix4(), Q = new THREE.Quaternion();
+      for (let i = 0; i < 30; i++) {
+        const a = i / 30 * 2 * P; Q.setFromAxisAngle(V(0, 0, 1), a + P / 2);
+        M.compose(rad(RB + 0.06, a), Q, V(0.17, 0.03, 0.28)); my.setMatrixAt(i, M);
+      }
+      my.instanceMatrix.needsUpdate = true; my.frustumCulled = false;
+      reg('管壁與間質', '管周類肌細胞', 'Peritubular myoid cells', '環繞生精細管、具收縮性的扁平細胞（齧齒類為完整一層半通透障壁，大型哺乳類則為點狀），收縮幫助精子移動。', my, { anchor: [-RB - 0.1, 0.1, 0.3] });
+      const ly = new THREE.InstancedMesh(_sph, mat(0xffc400, 1), 14);
+      for (let i = 0; i < 14; i++) {
+        const a = 0.3 + i * 0.07 + (i > 6 ? 3.0 : 0);
+        M.compose(rad(RB + 0.3 + rr() * 0.25, a + (i % 7) * 0.05), new THREE.Quaternion(), V(0.085, 0.085, 0.085)); ly.setMatrixAt(i, M);
+      }
+      ly.instanceMatrix.needsUpdate = true; ly.frustumCulled = false;
+      reg('管壁與間質', '來狄吉細胞（間質）', 'Leydig cells', '位於管間間隙組織，細胞核大而圓；<b>分泌雄性素</b>（睪固酮），維持生精作用與副性徵。', ly, { anchor: [RB + 0.5, 0.45, 0] });
+      reg('管壁與間質', '間質微血管', 'Interstitial capillary', '間隙組織中的血管，供應營養並運送雄性素；血液成分被血睪障壁阻擋，不能直接進入管腔。',
+        cyl([RB + 0.55, -0.9, -0.5], [RB + 0.55, -0.9, 0.5], 0.08, 0xe03030, 0.9), { anchor: [RB + 0.55, -0.9, 0.5] });
+      const SE = [];
+      for (let k = 0; k < NS; k++) {
+        const a = k / NS * 2 * P, len = 0.95;
+        const m = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.2, len, 14), mat(0xe8d0b0, 0.95));
+        m.position.copy(rad(RB - 0.02 - len / 2, a)); m.rotation.z = a + P / 2; m.scale.z = 1.4; SE.push(m);
+        const nuc = new THREE.Mesh(_sph, mat(0x7a5a8a, 1)); nuc.position.copy(rad(RB - 0.22, a)); nuc.scale.set(0.09, 0.15, 0.1); nuc.rotation.z = a + P / 2; SE.push(nuc);
+      }
+      reg('生精上皮', '賽透力氏細胞', 'Sertoli cell', '長柱狀細胞，扁平基部附著基底膜、頂部朝向管腔；圍繞增殖與分化中的生殖細胞形成小袋，<b>提供營養、胞噬精細胞多餘細胞質</b>，並分泌<b>抑制素 (inhibin)</b>。', SE, { anchor: [rad(0.95, 0.6).x, rad(0.95, 0.6).y, 0.35] });
+      const TJ = [new THREE.Mesh(new THREE.TorusGeometry(RB - 0.3, 0.025, 8, 80), mat(0xff3fa0, 0.9))];
+      for (let k = 0; k < NS; k++) {
+        const a = (k + 0.5) / NS * 2 * P;
+        const b = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.22, 0.45), mat(0xff3fa0, 1));
+        b.position.copy(rad(RB - 0.3, a)); b.rotation.z = a; TJ.push(b);
+      }
+      reg('生精上皮', '緊密接合（血睪障壁）', 'Tight junctions (blood-testis barrier)', '相鄰賽透力氏細胞<b>側底部</b>的連續緊密接合，限制大分子進出，把管腔分成基底與近腔區間；頂膜與底側膜的特異運輸蛋白進一步調控管腔微環境。', TJ, { anchor: [rad(RB - 0.3, 2.2).x, rad(RB - 0.3, 2.2).y, 0.25] });
+      reg('區間', '基底區間', 'Basal compartment', '障壁外側（靠基底膜）；<b>精原細胞更新、分化</b>及至前細絲期精母細胞之前的細胞週期在此進行。',
+        annulus(RB - 0.01, RB - 0.3, TH - 0.1, 0x5fd08a, 0.2, -(TH - 0.1) / 2), { anchor: [rad(RB - 0.15, -2.2).x, rad(RB - 0.15, -2.2).y, 0.2] });
+      reg('區間', '近腔區間', 'Adluminal compartment', '障壁內側（靠管腔）；<b>第一、二次減數分裂、精子形成與精子釋放</b>在此進行，受障壁保護。',
+        annulus(RB - 0.31, 0.45, TH - 0.1, 0xb9a0ff, 0.12, -(TH - 0.1) / 2), { anchor: [rad(0.75, -0.8).x, rad(0.75, -0.8).y, 0.2] });
+      const stage = (name, en, col, r, sc, cnt, desc, ang0) => {
+        const im = new THREE.InstancedMesh(_sph, mat(col, 1), cnt * NS);
+        for (let k = 0; k < NS; k++) for (let j = 0; j < cnt; j++) {
+          const a = (k + 0.5) / NS * 2 * P + (j - (cnt - 1) / 2) * 0.05, z = (j % 2 ? 0.1 : -0.1);
+          const rrad = r + (rr() - 0.5) * 0.04;
+          M.compose(V(Math.cos(a) * rrad, Math.sin(a) * rrad, z), new THREE.Quaternion(), V(sc, sc, sc)); im.setMatrixAt(k * cnt + j, M);
+        }
+        im.instanceMatrix.needsUpdate = true; im.frustumCulled = false;
+        reg('生殖細胞（由基底向管腔）', name, en, desc, im, { anchor: [Math.cos(ang0) * r, Math.sin(ang0) * r, 0.3] });
+      };
+      stage('精原細胞', 'Spermatogonium', 0x2fbf6f, RB - 0.14, 0.085, 1, '位於基底區間，有絲分裂更新並分化；一部分成為前細絲期精母細胞，穿越障壁進入近腔區間。', 0.314);
+      stage('初級精母細胞', 'Primary spermatocyte', 0x9a5fd0, RB - 0.5, 0.12, 2, '進入近腔區間後進行第一次減數分裂。', 0.314);
+      stage('圓形精細胞', 'Round spermatid', 0xf09a4a, RB - 0.78, 0.07, 2, '減數分裂完成後的單套染色體細胞，開始進行精子形成。', 0.314);
+      const SPm = [];
+      for (let k = 0; k < NS; k++) for (let j = 0; j < 2; j++) {
+        const a = (k + 0.5) / NS * 2 * P + (j - 0.5) * 0.12, r = RB - 0.95;
+        const h = new THREE.Mesh(_sph, mat(0xf2e24a, 1)); h.position.copy(rad(r, a)); h.position.z = j ? 0.12 : -0.12; h.scale.set(0.045, 0.026, 0.026); h.rotation.z = a; SPm.push(h);
+        const tl = cyl([Math.cos(a) * (r - 0.04), Math.sin(a) * (r - 0.04), h.position.z], [Math.cos(a) * 0.12, Math.sin(a) * 0.12, h.position.z * 0.5], 0.007, 0xf2e24a, 1); SPm.push(tl);
+      }
+      reg('生殖細胞（由基底向管腔）', '長形精細胞／精子', 'Elongating spermatid / spermatozoa', '精子形成後期的細胞，尾部朝向管腔，最後在<b>精子釋放</b>時脫離賽透力氏細胞進入管腔。',
+        SPm, { anchor: [rad(RB - 0.95, -0.4).x, rad(RB - 0.95, -0.4).y, 0.25] });
+      const lum = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.45, 32), mat(0x6fc8ff, 0.25)); lum.rotation.x = P / 2;
+      reg('管壁與間質', '管腔', 'Lumen', '含睪丸液與游離精子，精子隨管腔液及類肌細胞收縮被輸往睪丸網。', lum, { anchor: [0, 0, 0.3] });
+    }
+  });
 })();

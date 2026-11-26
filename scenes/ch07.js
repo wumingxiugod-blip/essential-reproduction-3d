@@ -212,4 +212,179 @@
       note(box, GL_TAB[SP3][5], 'big');
     }
   });
+
+  /* ===== 場景④：哺乳類雄性生殖系統比較解剖（以公牛為代表，整合比較大體解剖） ===== */
+  SCENES.push({
+    name: '④ 哺乳類解剖（公牛）',
+    title: '哺乳類雄性生殖系統比較解剖（側面示意，以公牛為代表）',
+    camera: { pos: [-0.2, 0.4, 8.6], target: [0.1, 0.45, 0], fit: [3.4, 2.7] },
+    controls: [{ label: '🔍 公牛全貌', fn() { flyHome(); } }],
+    desc: `
+<p>模型左側為<b>尾側</b>、右側為<b>頭側</b>，上為背側；左右成對構造皆已繪出。比較家畜（反芻類、豬）之<b>彈性纖維型陰莖（具 S 狀屈曲）</b>與人、馬、犬之<b>肌肉海綿型陰莖</b>，以及 Table 7.1 四對輔性腺物種差異。</p>
+<details open><summary>物種差異重點</summary><table>
+  <tr><th>陰莖型式</th><td>彈性纖維型：反芻獸、豬（S 狀屈曲，後拉肌發達）<br>肌肉海綿型：人、馬、肉食獸（勃起時變長變粗）</td></tr>
+  <tr><th>輔性腺</th><td>犬、貓：無囊腺，攝護腺發達<br>公牛、公豬：囊腺大，攝護腺本體小<br>公豬：無輸精管壺；尿道球腺豬最發達、犬缺乏</td></tr>
+  <tr><th>陰莖頭</th><td>豬：螺旋狀；馬/羊：尿道突；牛：龜頭帽；犬：陰莖頭球＋陰莖骨</td></tr>
+</table></details>
+<p class="src">雷弟生物學 3D 比較解剖整合（對應 Essential Reproduction Ch.7 Table 7.1）</p>`,
+    build() {
+      const SIDES = [1, -1];
+      const PP = [[0.50, 1.40, 0], [0.25, 1.18, 0], [-0.15, 0.97, 0], [-0.55, 0.78, 0], [-0.95, 0.50, 0], [-1.05, 0.05, 0],
+        [-0.95, -0.35, 0], [-0.65, -0.55, 0], [-0.40, -0.30, 0], [-0.15, -0.55, 0], [0.4, -0.65, 0], [1.5, -0.7, 0], [2.7, -0.7, 0]];
+      const curve = new THREE.CatmullRomCurve3(PV(PP), false, 'centripetal');
+      const N = 600, sp = curve.getSpacedPoints(N);
+      const near = (x, y) => { let b = 0, bd = 1e9; sp.forEach((p, i) => { const d = (p.x - x) ** 2 + (p.y - y) ** 2; if (d < bd) { bd = d; b = i; } }); return b; };
+      const segPts = (a, b, off) => { const pts = []; for (let i = a; i < b; i += 4) pts.push(sp[i].clone()); pts.push(sp[b].clone()); if (off) pts.forEach(p => p.add(V(...off))); return pts; };
+      const i1 = near(0.05, 1.08), i2 = near(-0.30, 0.88), i3 = near(-0.85, 0.62), i4 = near(-1.04, 0.20);
+      const iPre = near(1.2, -0.7), iFree = near(2.7, -0.7);
+      const tg = i => sp[Math.min(N, i + 3)].clone().sub(sp[Math.max(0, i - 3)]);
+
+      reg('尿道與膀胱', '膀胱', 'Urinary bladder', '儲存尿液。膀胱頸向後接尿道，雄性尿道是<b>尿液與精液最後的共同通道</b>。', ell([0.65, 1.85, 0], [0.55, 0.5, 0.45], 0xe8c27a, 0.7));
+      reg('尿道與膀胱', '內尿道括約肌', 'Internal urethral sphincter', '位於膀胱頸／攝護腺前尿道外圍之平滑肌，射精時收縮<b>阻止精液逆流入膀胱</b>。',
+        ring(sp[near(0.40, 1.31)], tg(near(0.40, 1.31)), 0.075, 0.025, 0xd96a6a), { anchor: [0.4, 1.31, 0.08] });
+      reg('尿道與膀胱', '攝護腺前尿道', 'Pre-prostatic urethra', '膀胱頸延伸到攝護腺的一小段尿道；上皮為變移上皮。', tube(segPts(0, i1), 0.04, 0xffe36e));
+      reg('尿道與膀胱', '攝護腺尿道', 'Prostatic urethra', '通過攝護腺的部分，中段膨大處為精阜，有射精管與攝護腺導管開口。', tube(segPts(i1, i2), 0.04, 0xffb347));
+      reg('尿道與膀胱', '膜性尿道', 'Membranous urethra', '起自攝護腺尖端至陰莖球部，外圍有外尿道括約肌（橫紋肌）。', tube(segPts(i2, i3), 0.04, 0xffe36e));
+      reg('尿道與膀胱', '球部尿道', 'Bulbar urethra', '尿道在坐骨弓彎曲的部分；尿道球腺導管注入此處。', tube(segPts(i3, i4), 0.042, 0xff9a3c));
+      reg('尿道與膀胱', '陰莖尿道（海綿體部）', 'Penile / spongy urethra', '外圍包有尿道海綿體；分佈尿道腺（Littre 氏腺）分泌黏液。', tube(segPts(i4, iFree), 0.035, 0xffe36e), { anchor: [0.9, -0.7, 0] });
+      reg('尿道與膀胱', '外尿道括約肌', 'External urethral sphincter', '圍繞膜性尿道的橫紋肌，受意志控制排尿。',
+        ring(sp[near(-0.62, 0.74)], tg(near(-0.62, 0.74)), 0.075, 0.028, 0xc0392b), { anchor: [-0.62, 0.74, 0.08] });
+
+      const prosPos = sp[near(-0.15, 0.97)];
+      reg('輔性腺', '攝護腺（本體）', 'Prostate gland (corpus prostatae)', '圍繞尿道的複管泡腺；牛、豬本體小，犬非常發達。', ell([prosPos.x, prosPos.y, 0], [0.2, 0.14, 0.17], 0xe07b6a, 0.6));
+      reg('輔性腺', '攝護腺分部', 'Pars disseminata prostatae', '攝護腺瀰散部分，散佈於骨盆部尿道壁內。', tube(segPts(i2, near(-0.72, 0.70)), 0.07, 0xf0a090, 0.45), { anchor: [-0.5, 0.82, 0.07] });
+      const colPos = sp[near(-0.10, 1.0)];
+      reg('輔性腺', '精阜', 'Colliculus seminalis', '攝護腺尿道背側壁隆起，射精管開口於其兩側裂孔。', ell([colPos.x, colPos.y + 0.03, 0], [0.04, 0.03, 0.04], 0xfff0a0), { anchor: [colPos.x, colPos.y + 0.05, 0] });
+      const A = [], VG = [], EJ = [], BG = [], BGD = [];
+      SIDES.forEach(s => {
+        A.push(tube([[0.30, 1.30, s * 0.15], [0.15, 1.2, s * 0.11], [0.05, 1.1, s * 0.08]], 0.052, 0x9fd18b));
+        EJ.push(tube([[0.05, 1.1, s * 0.08], [-0.10, 1.0, 0]], 0.022, 0xd9d97a));
+        const rr = rnd(7 + s);
+        for (let k = 0; k < 7; k++) VG.push(ell([0.04 + (rr() - 0.5) * 0.18, 1.2 + (rr() - 0.5) * 0.16, s * (0.32 + (rr() - 0.5) * 0.14)], [0.065, 0.065, 0.065], 0xd9a05b));
+        VG.push(tube([[0.02, 1.16, s * 0.28], [0.05, 1.1, s * 0.09]], 0.018, 0xd9a05b));
+        BG.push(ell([-0.72, 0.84, s * 0.17], [0.09, 0.09, 0.09], 0x7fb8d9));
+        BGD.push(tube([[-0.72, 0.8, s * 0.15], [-0.88, 0.62, 0.0]], 0.014, 0x7fb8d9));
+      });
+      reg('輔性腺', '輸精管壺', 'Ampulla ductus deferentis', '馬、牛、綿羊發育良好；豬與貓無。與囊腺排出管匯合成射精管。', A);
+      reg('輔性腺', '囊腺（儲精囊腺）', 'Vesicular gland', '分葉狀複管泡腺，分泌果糖與檸檬酸（牛、豬發達，犬貓缺如）。', VG, { anchor: [0.04, 1.28, 0.34] });
+      reg('輔性腺', '射精管', 'Ejaculatory duct', '穿過攝護腺於精阜兩側開口入尿道。', EJ, { anchor: [-0.02, 1.07, 0.05] });
+      reg('輔性腺', '尿道球腺（Cowper 氏腺）', 'Bulbourethral gland', '開口於球部尿道，分泌清澈黏液沖洗尿道（豬最發達，犬缺乏）。', BG, { anchor: [-0.72, 0.9, 0.17] });
+      BGD.forEach(m => { m.userData.part = null; CUR.root.add(m); });
+
+      reg('陰莖與包皮', '坐骨弓', 'Ischial arch', '骨盆底後緣骨弓，陰莖腳附著於此。', cyl([-0.92, 0.5, -0.38], [-0.92, 0.5, 0.38], 0.045, 0xe9e2cf), { anchor: [-0.92, 0.5, 0.38] });
+      const CR = [], CRM = [];
+      SIDES.forEach(s => {
+        const pts = [[-1.04, 0.12, s * 0.04], [-0.99, 0.35, s * 0.17], [-0.92, 0.5, s * 0.3]];
+        CR.push(tube(pts, 0.055, 0xc23b4d)); CRM.push(tube(pts, 0.082, 0xb04040, 0.4));
+      });
+      reg('陰莖與包皮', '陰莖腳', 'Crus penis', '陰莖海綿體左右分枝固定於坐骨弓（pizzle eye）。', CR, { anchor: [-0.99, 0.35, 0.17] });
+      reg('肌肉', '坐骨海綿肌', 'Ischiocavernosus muscle', '成對橫紋肌，壓迫陰莖腳協助維持勃起。', CRM, { anchor: [-0.95, 0.43, 0.24] });
+      const ib = near(-1.02, 0.30);
+      reg('陰莖與包皮', '陰莖球', 'Bulb of penis', '尿道海綿體近端膨大部。', ell([sp[ib].x, sp[ib].y, 0], [0.11, 0.17, 0.11], 0x8e5a9e));
+      const ib2 = near(-1.04, 0.14);
+      reg('肌肉', '球海綿肌', 'Bulbospongiosus muscle', '單一橫紋肌覆蓋陰莖球與腹側，協助排空射精並助勃起。', ell([sp[ib2].x - 0.01, sp[ib2].y, 0], [0.17, 0.3, 0.17], 0xc0504d, 0.4), { anchor: [-1.2, 0.14, 0.1] });
+      reg('陰莖與包皮', '陰莖體（白膜與筋膜）', 'Penile body (tunica albuginea / fasciae)', '彈性纖維型陰莖結締組織比例高，未勃起亦相當堅硬，大部分收藏於 S 狀屈曲。', tube(segPts(i4, iFree - 12), 0.1, 0xf2c9b8, 0.28), { anchor: [0.9, -0.55, 0] });
+      reg('陰莖與包皮', '陰莖海綿體', 'Corpus cavernosum penis', '背側成對勃起組織（詳見 Ch.10 ④陰莖橫切）。', tube(segPts(i4, iFree - 40, [0, 0.035, 0]), 0.055, 0xd9534f, 0.95), { anchor: [0.4, -0.6, 0] });
+      reg('陰莖與包皮', '尿道海綿體', 'Corpus spongiosum', '腹側圍繞尿道並於末端膨大成陰莖頭。', tube(segPts(i4, iFree - 8, [0, -0.03, 0]), 0.05, 0x8e5a9e, 0.95), { anchor: [1.3, -0.74, 0] });
+      reg('陰莖與包皮', 'S 狀屈曲', 'Sigmoid flexure', '反芻獸、豬彈性纖維型陰莖在兩股之間的 S 形屈曲；勃起時伸直推出（無需明顯脹大）。', ell([-0.62, -0.5, 0], [0.05, 0.05, 0.05], 0xffee00, 1), { anchor: [-0.65, -0.55, 0.12] });
+      const tip = sp[iFree];
+      reg('陰莖與包皮', '陰莖頭', 'Glans penis', '公牛、公綿羊為盔帽狀龜頭帽；馬有尿道突；公豬呈螺旋狀無陰莖頭；犬有陰莖頭球。', cone([tip.x - 0.18, tip.y, 0], [tip.x + 0.1, tip.y, 0], 0.075, 0xe58fa0), { anchor: [tip.x, tip.y + 0.1, 0] });
+      reg('陰莖與包皮', '包皮', 'Prepuce', '環繞游離端的皮膚皺褶；馬呈雙重皺褶，公豬背側有積存分泌物之憩室。', [tube(segPts(iPre, iFree), 0.17, 0xe9b090, 0.22), ring(V(tip.x + 0.1, tip.y, 0), V(1, 0, 0), 0.17, 0.03, 0xd49a7c)], { anchor: [2.2, -0.52, 0] });
+      const stp = sp[near(-0.2, -0.56)], RT = [];
+      SIDES.forEach(s => RT.push(tube([[-1.0, 2.35, s * 0.1], [-1.35, 1.8, s * 0.14], [-1.4, 1.0, s * 0.14], [-1.25, 0.1, s * 0.14], [-0.85, -0.7, s * 0.1], [stp.x, stp.y - 0.08, s * 0.06]], 0.032, 0xe8d8c8)));
+      reg('肌肉', '陰莖後拉肌', 'Retractor penis muscle', '起自第 1–2 尾椎腹面之平滑肌，勃起時鬆弛伸長，射精後收縮將陰莖拉回形成 S 屈曲。', RT, { anchor: [-1.4, 1.2, 0.16] });
+      reg('參考構造', '直腸與肛門', 'Rectum & anus', '定位參考；陰莖後拉肌行經提肛肌與直腸間。',
+        [tube([[1.6, 2.55, 0], [0.5, 2.5, 0], [-0.7, 2.2, 0], [-1.5, 1.72, 0]], 0.12, 0x9c7a5b, 0.3), ring(V(-1.55, 1.68, 0), V(0.6, 0.5, 0), 0.1, 0.03, 0x7a5a3b)], { anchor: [0.2, 2.5, 0] });
+
+      const T = [], EH = [], EB = [], ET = [], VAS = [], CORD = [], ART = [], PAM = [], VEIN = [], CREM = [];
+      SIDES.forEach(s => {
+        const c = [-1.7, -0.85, s * 0.3];
+        T.push(ell(c, [0.27, 0.5, 0.24], 0xf4e4c1));
+        EH.push(ell([c[0] + 0.02, c[1] + 0.5, c[2]], [0.11, 0.1, 0.1], 0xd8a47f));
+        EB.push(tube([[c[0] - 0.03, c[1] + 0.45, c[2]], [c[0] - 0.2, c[1] + 0.3, c[2]], [c[0] - 0.28, c[1], c[2]], [c[0] - 0.24, c[1] - 0.35, c[2]], [c[0] - 0.1, c[1] - 0.5, c[2]]], 0.05, 0xd8a47f));
+        ET.push(ell([c[0] - 0.05, c[1] - 0.55, c[2]], [0.1, 0.09, 0.1], 0xc98d68));
+        const R = [-0.95, 0.2, s * 0.3], T0 = [c[0] - 0.1, c[1] + 0.62, c[2]];
+        const axis = new THREE.LineCurve3(V(...T0), V(...R)), ax = t => axis.getPoint(t).toArray();
+        VAS.push(tube([[c[0] - 0.05, c[1] - 0.55, c[2]], [c[0] - 0.33, c[1] - 0.38, c[2]], [c[0] - 0.38, c[1] + 0.05, c[2]], [c[0] - 0.28, c[1] + 0.5, c[2]], ax(0.04), ax(0.5), ax(1), [-0.75, 0.75, s * 0.28], [-0.35, 1.15, s * 0.22], [0.3, 1.3, s * 0.15]], 0.022, 0xffffff));
+        CORD.push(tube([T0, R], 0.1, 0xf0e6d8, 0.3));
+        CREM.push(tube([ax(0.02), ax(0.95)], 0.125, 0xc0504d, 0.22));
+        ART.push(tube(helixAlong(axis, 0.03, 9, 0, 160), 0.012, 0xe02020), tube([R, [-1.0, 0.9, s * 0.38], [-0.6, 1.7, s * 0.38], [-0.2, 2.15, s * 0.38]], 0.014, 0xe02020));
+        PAM.push(tube(helixAlong(axis, 0.065, 7, 1.0, 160), 0.014, 0x3b6fe0), tube(helixAlong(axis, 0.065, 7, 4.1, 160), 0.014, 0x3b6fe0));
+        VEIN.push(tube([R, [-1.1, 0.9, s * 0.45], [-0.7, 1.7, s * 0.45], [-0.3, 2.15, s * 0.45]], 0.02, 0x3b6fe0));
+      });
+      reg('睪丸與附睪', '睪丸', 'Testis', '位於陰囊中，生精需較體溫低環境；未下降者稱隱睪症。', T, { anchor: [-1.7, -0.7, 0.3] });
+      reg('睪丸與附睪', '附睪頭', 'Caput epididymidis', '輸出小管約占頭部 1/3 體積。', EH, { anchor: [-1.68, -0.28, 0.3] });
+      reg('睪丸與附睪', '附睪體', 'Corpus epididymidis', '極度迂曲單管，負責精子成熟與運輸。', EB, { anchor: [-1.98, -0.85, 0.3] });
+      reg('睪丸與附睪', '附睪尾', 'Cauda epididymidis', '精子貯存主要處所，延續為輸精管。', ET, { anchor: [-1.75, -1.4, 0.3] });
+      reg('睪丸與附睪', '輸精管', 'Vas (ductus) deferens', '肌層厚實，蠕動輸送精子入骨盆並膨大為輸精管壺。', VAS, { anchor: [-0.55, 0.98, 0.3] });
+      reg('精索與血管', '精索', 'Spermatic cord', '含輸精管、血管、神經、淋巴與筋膜。', CORD, { anchor: [-1.4, -0.05, 0.3] });
+      reg('精索與血管', '提睪肌', 'Cremaster muscle', '衍生自內腹斜肌之橫紋肌，協助調節溫度與促進蔓狀叢血流。', CREM, { anchor: [-1.55, -0.1, 0.4] });
+      reg('精索與血管', '睪丸動脈', 'Testicular artery', '極為迂曲被蔓狀靜脈叢包圍行逆流降溫。', ART, { anchor: [-1.25, 0.12, 0.3] });
+      reg('精索與血管', '蔓狀靜脈叢', 'Pampiniform venous plexus', '與睪丸動脈緊密纏繞之靜脈網。', PAM, { anchor: [-1.5, -0.1, 0.22] });
+      reg('精索與血管', '睪丸靜脈', 'Testicular vein', '右側入下腔靜脈、左側入左腎靜脈。', VEIN, { anchor: [-0.7, 1.7, 0.45] });
+      const scM = ell([-1.75, -0.8, 0], [0.62, 0.85, 0.72], 0xe8b9a0, 0.2);
+      const sepM = new THREE.Mesh(new THREE.CircleGeometry(1, 40), mat(0xc0504d, 0.35)); sepM.position.set(-1.75, -0.8, 0); sepM.scale.set(0.6, 0.83, 1);
+      reg('陰囊', '陰囊', 'Scrotum', '保護睪丸並提供較低溫環境以利生精（詳見 Ch.3 ⑤陰囊與被膜層次）。', scM, { anchor: [-2.3, -1.0, 0.5] });
+      reg('陰囊', '陰囊中隔', 'Scrotal septum', '由肉膜正中形成，分隔左右兩室。', sepM, { anchor: [-1.75, -1.55, 0] });
+    }
+  });
+
+  /* ===== 場景⑤：雄禽生殖系統比較解剖（鳥類背面觀，整合比較大體解剖） ===== */
+  SCENES.push({
+    name: '⑤ 雄禽生殖解剖（鳥類）',
+    title: '雄禽生殖系統比較解剖（背面觀示意，左為尾側）',
+    camera: { pos: [-0.3, 6.0, 4.8], target: [-0.3, -0.05, 0], fit: [2.6, 2.0] },
+    controls: [
+      { label: '🔄 切換睪丸：性活動期／非活動期', fn() { window._active = !window._active; window._applyTestis && window._applyTestis(); } },
+      { label: '🔍 背面全覽', fn() { flyHome(); } }
+    ],
+    desc: `
+<p>雄禽成對<b>睪丸、附睪、輸精管</b>與一個<b>交接器</b>全部位於<b>腹腔內</b>。<b>無輔性腺</b>（無囊腺、攝護腺、尿道球腺），故精液體積小，主要由泄殖腔旁血管體與背肛室腺貢獻精漿。</p>
+<p>睪丸位於<b>腎臟前葉腹前端</b>（無陰囊下降，無縱隔與小葉），左略大於右；性活動期變為飽滿<b>乳白色</b>。交接器官三型比較詳見 <a href="ch10.html#4">Ch.10「⑤ 雄禽交接器官三型」</a>。</p>
+<p class="src">雷弟生物學 3D 比較解剖整合（對比哺乳類雄性附屬腺與體溫調節）</p>`,
+    build() {
+      const S = [1, -1];
+      window._active = false;
+      const act = () => window._active ? 0xfaf6ea : 0xd2a86a;
+      const KID = [];
+      S.forEach(s => [[0.75, 0.45, 0.22], [-0.05, 0.4, 0.2], [-0.85, 0.45, 0.2]].forEach(k => KID.push(ell([k[0], -0.04, s * 0.5], [k[1], 0.13, k[2]], 0x9a4a3a, 0.85))));
+      reg('參考構造', '腎臟（前、中、後葉）', 'Kidney', '睪丸位於腎臟前葉腹前端；輸精管沿輸尿管行進至泄殖腔。', KID, { anchor: [-0.05, 0.1, 0.5] });
+      reg('參考構造', '主動脈', 'Aorta', '睪丸內側緊鄰主動脈與後腔靜脈。', tube([[1.6, 0.14, 0], [-1.7, 0.14, 0]], 0.04, 0xe03030), { anchor: [0.2, 0.18, 0] });
+      reg('參考構造', '後腔靜脈', 'Caudal vena cava', '與主動脈並行，緊鄰睪丸內側。', tube([[1.6, 0.04, 0], [-1.7, 0.04, 0]], 0.055, 0x3b6fe0), { anchor: [-0.7, 0.04, 0] });
+      reg('參考構造', '直腸／結腸', 'Rectum / colon', '消化道末端開口於泄殖腔糞道。', tube([[1.2, -0.3, 0], [0.2, -0.28, 0], [-0.9, -0.25, 0], [-1.5, -0.12, 0]], 0.055, 0x9c7a5b, 0.55), { anchor: [-0.4, -0.27, 0] });
+      const TE = [], EP = [], DD = [], UR = [], RC = [], PA = [], PV = [];
+      S.forEach(s => {
+        TE.push(ell([1.08, -0.15, s * 0.34], s > 0 ? [0.36, 0.18, 0.18] : [0.3, 0.15, 0.15], act()));
+        EP.push(ell([0.98, -0.06, s * 0.21], [0.11, 0.05, 0.05], 0xc98d68));
+        const pts = [], n = 28;
+        for (let i = 0; i <= n; i++) { const u = i / n, x = 0.92 - u * 2.62, sg = i % 2 ? 1 : -1; pts.push([x, -0.06 + sg * 0.018, s * (0.21 - 0.09 * u + sg * 0.03)]); }
+        DD.push(tube(pts, 0.014, 0xffffff, 1, 6));
+        UR.push(tube([[0.6, -0.1, s * 0.4], [-0.5, -0.1, s * 0.31], [-1.3, -0.09, s * 0.2], [-1.78, -0.05, s * 0.09]], 0.022, 0xe6d88a, 0.8));
+        RC.push(ell([-1.68, -0.03, s * 0.115], [0.1, 0.04, 0.04], 0xb7d9a8));
+        PA.push(cone([-1.74, -0.02, s * 0.1], [-1.8, 0.0, s * 0.055], 0.025, 0xb7d9a8));
+        PV.push(ell([-1.66, -0.1, s * 0.24], [0.1, 0.06, 0.06], 0xe06a8a));
+      });
+      const teP = reg('睪丸與管道', '睪丸', 'Testis', '成對（左略大於右）豆狀，無縱隔與小葉，全部位於腹腔體內高溫環境仍可生精。', TE, { anchor: [1.2, -0.15, 0.4] });
+      window._applyTestis = () => {
+        TE.forEach(m => {
+          m.material.color.setHex(act());
+          if (m.material.color.convertSRGBToLinear) m.material.color.convertSRGBToLinear();
+        });
+        select(teP);
+        $('info').insertAdjacentHTML('afterbegin', `<div class="g" style="background:#7a5a10">目前狀態：${window._active ? '性活動期（乳白色、充實膨大）' : '性休止期（淡棕／黃色）'}</div>`);
+      };
+      reg('睪丸與管道', '附睪', 'Epididymis', '鳥類附睪甚小位於睪丸背內側（輸出小管分近端皺褶與遠端平直區）。', EP, { anchor: [0.98, -0.02, 0.25] });
+      reg('睪丸與管道', '輸精管', 'Ductus deferens', '極迂曲呈鋸齒狀，為鳥類精子主要成熟處所（無蔓狀靜脈叢）。', DD, { anchor: [-0.3, -0.02, 0.18] });
+      reg('參考構造', '輸尿管', 'Ureter', '沿腎臟行進與輸精管共同開口入尿殖室。', UR, { anchor: [-0.6, -0.1, 0.33] });
+      reg('睪丸與管道', '貯精器', 'Receptaculum ductus deferentis', '進入泄殖腔前變寬形成貯精器。', RC, { anchor: [-1.68, 0.02, 0.15] });
+      reg('睪丸與管道', '輸精管乳頭', 'Papilla of ductus deferens', '貯精器末端突入尿殖室背壁之射精乳頭。', PA, { anchor: [-1.78, 0.02, 0.07] });
+      reg('泄殖腔與輔助生殖器', '糞道', 'Coprodeum', '泄殖腔最前腔室，接收直腸糞便。', ell([-1.55, 0, 0], [0.22, 0.17, 0.17], 0xd9a08a, 0.55), { anchor: [-1.5, 0.15, 0] });
+      reg('泄殖腔與輔助生殖器', '尿殖室', 'Urodeum', '泄殖腔中腔，輸精管與輸尿管開口於背壁。', ell([-1.82, 0, 0], [0.2, 0.17, 0.17], 0xe3b09a, 0.55), { anchor: [-1.82, 0.16, 0] });
+      reg('泄殖腔與輔助生殖器', '肛室', 'Proctodeum', '泄殖腔末端腔室通往泄殖腔口。', [ell([-2.07, 0, 0], [0.18, 0.15, 0.15], 0xeab9a4, 0.55), ring(V(-2.26, 0, 0), V(1, 0, 0), 0.12, 0.03, 0xd0707a)], { anchor: [-2.15, 0.15, 0] });
+      reg('泄殖腔與輔助生殖器', '泄殖腔旁血管體', 'Paracloacal vascular body', '性興奮時將動脈血超過濾成淋巴液腫脹推動交接器（鳥類靠淋巴液而非血液勃起！）。', PV, { anchor: [-1.66, -0.12, 0.28] });
+      const LF = []; S.forEach(s => LF.push(ell([-2.07, -0.13, s * 0.07], [0.13, 0.04, 0.05], 0xbfd8f0, 0.9)));
+      reg('泄殖腔與輔助生殖器', '淋巴皺褶', 'Lymphatic fold', '肛室腹側接受淋巴液充脹推動陰莖外翻／勃起。', LF, { anchor: [-2.07, -0.17, 0.12] });
+      reg('泄殖腔與輔助生殖器', '背肛室腺', 'Dorsal proctodeal gland', '分泌精漿成分補償無輔性腺的鳥類生殖道。', ell([-2.07, 0.16, 0], [0.12, 0.05, 0.1], 0x8fbf6a), { anchor: [-2.07, 0.22, 0] });
+    }
+  });
 })();

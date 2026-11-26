@@ -262,4 +262,292 @@
       checkbox(box, '播放 PGF₂α 逆流轉移動畫', true, v => S4.play = v);
     }
   });
+
+  /* ===== 場景⑤：卵巢縱切①→⑩發育、格蕾斐濾泡放大與物種卵巢外形（整合比較大體解剖） ===== */
+  (function () {
+    const { TEX, mat, ell, blob, tube, ribbon, annulus, disc, shell } = ANAT;
+    SCENES.push({
+      name: '⑤ 卵巢全剖面與外形',
+      title: '卵巢切面：濾泡發育 ①→⑩、格蕾斐濾泡放大與物種卵巢外形',
+      camera: { pos: [1.0, -0.2, 12.5], target: [1.0, -0.4, 0], fit: [6.4, 3.6] },
+      controls: [
+        { label: '🔍 卵巢全覽', fn() { flyHome(); } },
+        { label: '🔍 卵巢縱切面', fn() { flyTo([-1.2, 0.3, 7.5], [-1.2, 0.3, 0]); } },
+        { label: '🔍 格蕾斐濾泡放大', fn() { flyTo([4.3, 0.3, 6], [4.3, 0.3, 0]); } },
+        { label: '🔍 物種卵巢外形', fn() { flyTo([-0.6, -1.0, 6.5], [-0.6, -2.7, 0]); } }
+      ],
+      desc: `
+<p>左：卵巢縱切面（依 <b>①→⑩</b> 呈馬蹄循環排列）；右：成熟格蕾斐濾泡放大剖面；下方：<b>牛羊杏仁形、馬豆形（具排卵窩）與豬葡萄串狀</b>卵巢比較。</p>
+<table>
+  <tr><th>階段</th><th>重點（對照本頁 ①–③ 分子機轉）</th></tr>
+  <tr><td>①原始→②初級</td><td>扁平→單層方形濾泡細胞，出現透明帶與 FSH-R（不依賴性腺素）</td></tr>
+  <tr><td>③次級→④三級</td><td>多層顆粒細胞＋內外濾泡膜；形成濾泡腔與內膜 LH-R（FSH 依賴）</td></tr>
+  <tr><td>⑤格蕾斐→⑦血體→⑧黃體→⑨白體</td><td>LH 峰排卵後血體→大小黃體細胞→退化白體；馬黃體埋於基質</td></tr>
+  <tr><td>⑩閉鎖濾泡</td><td>可於各期發生，家畜以三級濾泡最常見（基膜增厚成玻璃狀膜）</td></tr>
+</table>
+<p class="src">雷弟生物學 3D 比較解剖整合（搭配溼潤組織紋理，牛 12–19 mm／馬 25–70 mm／豬 8–12 mm）</p>`,
+      build() {
+        const CX = -1.2, CY = 0.3, SX = 2.3, SY = 1.5, SZ = 1.15;
+        const E = (deg, f) => { const a = deg * Math.PI / 180; return [CX + SX * f * Math.cos(a), CY + SY * f * Math.sin(a), 0]; };
+        const flat = (m, sx, sy) => { m.scale.set(sx, sy, 1); m.position.set(CX, CY, -0.015); return m; };
+        const back = (r, col, o, c) => { const m = shell(r, [1, 1, 1], col, o, Math.PI, Math.PI); m.position.set(...c); return m; };
+        const G1 = '卵巢一般構造', G2 = '濾泡發育', G3 = '排卵後的變化', G4 = '格蕾斐濾泡放大', G5 = '物種卵巢外形';
+        const OOC = 0xfbefb0, ZP = 0xffffff, FC = 0xf0a070, GR = 0xf2c36b, TI = 0xe0956a, TE = 0xc77a6a, ANT = 0x9fd6ff;
+
+        const ovShell = shell(1, [SX, SY, SZ], 0xf2e2c8, 0.35, Math.PI, Math.PI); ovShell.position.set(CX, CY, 0);
+        reg(G1, '生殖上皮', 'Germinal epithelium', '覆蓋白膜外的單層鱗狀中皮（位於卵巢表面，有別於睪丸曲細精管內）。',
+          [ovShell, flat(annulus(1, 0.985, 0.03, 0xfff4dc), SX, SY)], { anchor: E(140, 1.0) });
+        reg(G1, '白膜', 'Tunica albuginea', '卵巢表面緻密結締組織被膜。', flat(annulus(0.985, 0.94, 0.025, 0xfafafa), SX, SY), { anchor: E(165, 0.96) });
+        reg(G1, '皮質', 'Cortex', '含各發育階段濾泡與黃體（馬為少見例外：皮質在內、髓質在外！）。',
+          flat(annulus(0.94, 0.55, 0.02, 0xdcb79c), SX, SY), { anchor: E(-170, 0.7) });
+        reg(G1, '髓質', 'Medulla', '含彈性結締組織、神經與迂曲血管。', flat(disc(0.55, 0.02, 0xc7837a), SX, SY), { anchor: [CX - 0.4, CY + 0.1, 0] });
+        const VS = [];
+        [[-0.5, 0xd03030], [-0.2, 0x4a6fd8], [0.15, 0xd03030], [0.45, 0x4a6fd8]].forEach(([dx, c], k) => {
+          const base = new THREE.CatmullRomCurve3(PV([[CX + dx * 0.4, CY - SY - 0.5, 0.06], [CX + dx * 0.5, CY - SY + 0.3, 0.06], [CX + dx * 1.6, CY - 0.1, 0.06], [CX + dx * 2.6, CY + 0.35, 0.05]]));
+          VS.push(tube(helixAlong(base, 0.05, 6, k, 160), 0.022, c, 1, 2));
+        });
+        reg(G1, '髓質血管', 'Medullary vessels', '經卵巢門進入的高度迂曲動靜脈。', VS, { anchor: [CX + 0.6, CY - 0.4, 0.06] });
+        reg(G1, '卵巢門', 'Hilus ovarii', '卵巢附著於卵巢系膜之血管神經門戶。',
+          [ell([CX, CY - SY + 0.02, 0], [0.35, 0.12, 0.2], 0xc9a0a0, 0.8), ribbon([[CX - 0.35, CY - SY, 0], [CX + 0.35, CY - SY, 0]], [[CX - 0.5, CY - SY - 0.6, -0.05], [CX + 0.5, CY - SY - 0.6, -0.05]], 0x9be0b0, 0.35)],
+          { anchor: [CX, CY - SY - 0.05, 0.1] });
+
+        const PR = [];
+        [[178, 0.9], [188, 0.89], [198, 0.88], [170, 0.87], [207, 0.87], [183, 0.84]].forEach(([d, f]) => {
+          const c = E(d, f); PR.push(ell(c, [0.05, 0.05, 0.05], OOC), back(0.075, FC, 0.8, c));
+        });
+        reg(G2, '① 原始濾泡', 'Primordial follicle', '出生即存在，停於第一次減數分裂前期之初級卵母細胞外包單層扁平濾泡細胞。', PR, { anchor: E(188, 0.88) });
+        let c = E(152, 0.8);
+        reg(G2, '② 初級濾泡', 'Primary follicle', '單層方形濾泡細胞；開始分泌透明帶並表現 FSH 受體。', [ell(c, [0.075, 0.075, 0.075], OOC), back(0.09, ZP, 0.6, c), back(0.13, FC, 0.85, c)], { anchor: c });
+        c = E(124, 0.74);
+        reg(G2, '③ 次級濾泡', 'Secondary follicle', '多層顆粒細胞＋內外濾泡膜分化。', [ell(c, [0.09, 0.09, 0.09], OOC), back(0.11, ZP, 0.6, c), back(0.21, GR, 0.9, c), back(0.25, TI, 0.7, c)], { anchor: c });
+        c = E(93, 0.66);
+        const TA = [ell(c, [0.09, 0.09, 0.09], OOC), back(0.11, ZP, 0.6, c), back(0.3, GR, 0.9, c), back(0.35, TI, 0.7, c)];
+        [[0.15, 0.08], [-0.13, 0.12], [0.05, -0.17], [-0.16, -0.08]].forEach(([dx, dy]) => TA.push(ell([c[0] + dx, c[1] + dy, 0.02], [0.06, 0.05, 0.03], ANT, 0.7)));
+        reg(G2, '④ 三級濾泡', 'Tertiary (antral) follicle', '形成含玻尿酸與蛋白醣之濾泡腔，內膜表現 LH-R，依賴 FSH 發育。', TA, { anchor: c });
+        c = E(52, 0.86);
+        reg(G2, '⑤ 格蕾斐濾泡', 'Graafian (mature) follicle', '凸出於卵巢表面的成熟水泡狀濾泡（右側為放大剖面）。',
+          [back(0.5, TE, 0.6, c), back(0.46, TI, 0.75, c), back(0.42, GR, 0.95, c), ell(c, [0.36, 0.36, 0.2], ANT, 0.3), ell([c[0] - 0.18, c[1] - 0.2, 0], [0.16, 0.12, 0.12], GR), ell([c[0] - 0.12, c[1] - 0.12, 0.07], [0.07, 0.07, 0.07], OOC)], { anchor: [c[0] + 0.3, c[1] + 0.35, 0] });
+
+        c = E(12, 0.93);
+        const ovum = [c[0] + 0.62, c[1] + 0.25, 0.25];
+        const zpOv = shell(0.1, [1, 1, 1], ZP, 0.5, 0, Math.PI * 2); zpOv.position.set(...ovum);
+        const OVL = [back(0.38, TE, 0.6, c), back(0.34, GR, 0.9, c), ell(ovum, [0.08, 0.08, 0.08], OOC), zpOv];
+        for (let k = 0; k < 12; k++) { const a = k / 12 * Math.PI * 2; OVL.push(ell([ovum[0] + Math.cos(a) * 0.14, ovum[1] + Math.sin(a) * 0.14, ovum[2]], [0.03, 0.03, 0.03], GR)); }
+        reg(G3, '⑥ 排卵（濾泡破裂）', 'Ovulation', 'LH 高峰後破裂釋出含透明帶與放射冠之卵團。', OVL, { anchor: ovum });
+        c = E(-22, 0.8);
+        reg(G3, '⑦ 血體', 'Corpus hemorrhagicum', '排卵後充滿血液凝塊之早期腔室（豬之血體顯著較牛羊大）。', [back(0.3, GR, 0.9, c), ell(c, [0.24, 0.24, 0.12], 0x8a1020)], { anchor: c });
+        c = E(-52, 0.82);
+        const CL = [ell(c, [0.42, 0.42, 0.25], 0xf2a51a)];
+        for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2; CL.push(tube([[c[0], c[1], 0.26], [c[0] + Math.cos(a) * 0.38, c[1] + Math.sin(a) * 0.38, 0.1]], 0.012, 0xc0503a)); }
+        reg(G3, '⑧ 黃體', 'Corpus luteum', '大黃體細胞源自粒性細胞、小黃體細胞源自膜細胞，分泌 P₄（牛馬含葉黃素呈黃色；豬綿羊呈肉色）。', CL, { anchor: [c[0] + 0.3, c[1] - 0.25, 0.2] });
+        c = E(-122, 0.78);
+        const caG = new THREE.SphereGeometry(0.2, 24, 16), pa = caG.attributes.position, rq = rnd(3);
+        for (let i = 0; i < pa.count; i++) { const k = 0.8 + rq() * 0.35; pa.setXYZ(i, pa.getX(i) * k, pa.getY(i) * k, pa.getZ(i) * k * 0.6); }
+        caG.computeVertexNormals(); const ca = new THREE.Mesh(caG, mat(0xf2f0ea)); ca.position.set(...c);
+        reg(G3, '⑨ 白體', 'Corpus albicans', '溶黃體後纖維母細胞與巨噬細胞侵入形成白色緻密瘢痕結節。', ca, { anchor: c });
+        c = E(-152, 0.72);
+        const atG = new THREE.SphereGeometry(0.2, 32, 20), pb = atG.attributes.position;
+        for (let i = 0; i < pb.count; i++) { const x = pb.getX(i), y = pb.getY(i), z = pb.getZ(i), k = 1 + 0.15 * Math.sin(x * 40) * Math.cos(y * 40); pb.setXYZ(i, x * k, y * k, z * k); }
+        atG.computeVertexNormals(); const at = new THREE.Mesh(atG, mat(0xe8e0b8, 0.6)); at.position.set(...c);
+        reg(G2, '⑩ 閉鎖濾泡', 'Atretic follicle', '卵母細胞自溶、透明帶皺褶、顆粒細胞凋亡，基膜增厚成玻璃狀膜。', [at, ell(c, [0.07, 0.06, 0.06], 0xb8a060)], { anchor: c });
+        reg(G2, '無卵濾泡／黃體化濾泡', 'Anovular / luteinizing follicle', '鳥類無濾泡腔亦不形成黃體；哺乳類未破裂先黃體化亦見於少數情況。',
+          [back(0.14, GR, 0.9, E(-178, 0.76)), ell(E(-178, 0.76), [0.1, 0.1, 0.05], 0xf5c060, 0.8)], { anchor: E(-178, 0.76) });
+
+        const D = [4.3, 0.3, 0], dz = (x, y, z) => [D[0] + x, D[1] + y, D[2] + z];
+        const flatR = (ro, ri, col) => { const m = annulus(ro, ri, 0.02, col); m.position.set(D[0], D[1], -0.01); return m; };
+        reg(G4, '濾泡外膜', 'Theca externa', '最外層結締組織支持層。', [back(1.6, TE, 0.55, D), flatR(1.6, 1.46, TE)], { anchor: dz(-1.25, 1.0, 0) });
+        const CAP = [], rc = rnd(11);
+        for (let k = 0; k < 9; k++) {
+          const th = 0.4 + rc() * 2.3, ph0 = Math.PI + rc() * 0.3, pts = [];
+          for (let i = 0; i <= 20; i++) { const ph = ph0 + i / 20 * (Math.PI - 0.6); pts.push(dz(1.47 * Math.sin(th) * Math.cos(ph), 1.47 * Math.cos(th), 1.47 * Math.sin(th) * Math.sin(ph))); }
+          CAP.push(tube(pts, 0.012, 0xd02828));
+        }
+        reg(G4, '微血管網', 'Capillary network', '位於濾泡內、外膜間（次級濾泡起出現，供應營養與運送類固醇）。', CAP, { anchor: dz(0.9, 1.15, -0.4) });
+        reg(G4, '濾泡內膜', 'Theca interna', '表現 LH 受體製造雄性素前驅物；排卵後形成小型黃體細胞。', [back(1.46, TI, 0.75, D), flatR(1.46, 1.37, TI)], { anchor: dz(1.3, 0.6, 0) });
+        reg(G4, '基底膜', 'Basement membrane', '阻隔血管進入顆粒層。', [back(1.37, 0xffffff, 0.5, D), flatR(1.37, 1.34, 0xffffff)], { anchor: dz(1.25, -0.55, 0) });
+        reg(G4, '粒性細胞層', 'Membrana granulosa', '無血管；具 FSH-R 轉雄性素為 E₂（排卵後形成大型黃體細胞）。', [back(1.34, GR, 0.95, D), flatR(1.34, 1.12, GR)], { anchor: dz(-1.1, -0.65, 0) });
+        reg(G4, '濾泡腔（濾泡液）', 'Antrum (liquor folliculi)', '富含玻尿酸與 E₂ 之清澈腔液。', ell(D, [1.1, 1.1, 0.6], ANT, 0.18), { anchor: dz(0.35, 0.45, 0) });
+        reg(G4, '卵丘', 'Cumulus oophorus', '包圍卵母細胞向腔突出的顆粒細胞群。', ell(dz(-0.6, -0.65, -0.2), [0.6, 0.45, 0.4], 0xf5cd7a), { anchor: dz(-0.75, -0.8, 0.1) });
+        const COR = [];
+        for (let k = 0; k < 22; k++) { const a = k / 22 * Math.PI * 2; COR.push(ell(dz(-0.45 + Math.cos(a) * 0.34, -0.38 + Math.sin(a) * 0.34, 0.12), [0.06, 0.05, 0.05], 0xf7b84a)); }
+        reg(G4, '放射冠', 'Corona radiata', '貼附透明帶呈放射排列隨卵排出的顆粒細胞層。', COR, { anchor: dz(-0.45, -0.02, 0.12) });
+        reg(G4, '透明帶', 'Zona pellucida', '初級濾泡起形成之醣蛋白被殼。', ell(dz(-0.45, -0.38, 0.12), [0.27, 0.27, 0.27], ZP, 0.45), { anchor: dz(-0.2, -0.38, 0.3) });
+        reg(G4, '卵母細胞', 'Oocyte', '濾泡腔形成時已達成熟終體積。', ell(dz(-0.45, -0.38, 0.12), [0.2, 0.2, 0.2], OOC), { anchor: dz(-0.45, -0.38, 0.32) });
+        textSprite('格蕾斐濾泡（剖面放大）', dz(0, 2.0, 0), 0.38);
+
+        const Y = -2.75;
+        reg(G5, '牛、綿羊：杏仁形', 'Cow / ewe: almond-shaped', '牛羊卵巢呈杏仁形，黃體常以冠（crown）狀突向表面。',
+          [blob([-2.9, Y, 0], [0.55, 0.32, 0.3], 0xeee0d2, 1, { amp: 0.06, freq: 3, seed: 3 }), blob([-2.6, Y + 0.25, 0.08], [0.2, 0.2, 0.18], 0xe8901c, 1, { amp: 0.1, freq: 4 }), ell([-3.15, Y + 0.12, 0.18], [0.14, 0.14, 0.14], 0xd2e4ec, 0.6)], { anchor: [-2.9, Y - 0.3, 0.2] });
+        reg(G5, '馬：豆形（排卵窩）', 'Mare: bean-shaped (ovulation fossa)', '馬卵巢腹緣具排卵窩，所有排卵僅能由此凹痕發生，皮質內陷且黃體埋置內部。',
+          [blob([-0.6, Y, 0], [0.75, 0.45, 0.38], 0xeadbd0, 1, { amp: 0.05, freq: 2.5, seed: 8 }), ell([-0.6, Y - 0.38, 0.05], [0.22, 0.12, 0.25], 0x6a4040)], { anchor: [-0.6, Y - 0.45, 0.2] });
+        const SOW = [], rs = rnd(21);
+        for (let k = 0; k < 16; k++) SOW.push(k % 3 === 0 ? blob([1.8 + (rs() - 0.5) * 0.9, Y + (rs() - 0.5) * 0.6, (rs() - 0.5) * 0.5], [0.15, 0.15, 0.15], 0xd77a6a, 1, { amp: 0.1, seed: k }) : ell([1.8 + (rs() - 0.5) * 0.9, Y + (rs() - 0.5) * 0.6, (rs() - 0.5) * 0.5], [0.15, 0.15, 0.15], 0xcfe2ec, 0.7));
+        SOW.forEach(m => { if (m.material.opacity < 1) m.material.map = TEX.vnet; });
+        reg(G5, '豬：葡萄串狀', 'Sow: cluster of grapes', '每次 10–25 顆多排卵使豬卵巢布滿凸起濾泡與大型血體/黃體如葡萄串。', SOW, { anchor: [1.8, Y - 0.35, 0.2] });
+      }
+    });
+  })();
+
+  /* ===== 場景⑥：鳥類（母雞）生殖系統與 24h 蛋形成動畫（整合比較大體解剖） ===== */
+  (function () {
+    const { TEX, ell, blob, tube, ttube, ribbon, lathe, surfVessels, cyl, shell, ring, fbm3 } = ANAT;
+    SCENES.push({
+      name: '⑥ 雌禽(母雞)與造蛋',
+      title: '鳥類雌性生殖系統（產蛋母雞左側觀、排卵階層 F1–F6 與 24h 造蛋）',
+      camera: { pos: [-0.6, 1.2, 9.5], target: [-0.6, 0.0, 0], fit: [3.6, 2.3] },
+      controls: [
+        { label: '▶ 蛋的形成動畫（排卵→產蛋）', fn() { window._eggPlay && window._eggPlay(); } },
+        { label: '🦅 切換：奇異鳥／鷹類（兩側卵巢有功能）', fn() { window._bothOv && window._bothOv(); } },
+        { label: '🔍 全貌復位', fn() { flyHome(); } },
+        { label: '🔍 卵巢濾泡階層', fn() { flyTo([1.8, 0.5, 4.2], [1.8, 0.3, 0.3]); } },
+        { label: '🔍 殼腺～泄殖腔', fn() { flyTo([-2.8, 0.2, 4], [-2.8, -0.1, 0.2]); } },
+        { label: '🔍 背側觀（右側退化）', fn() { flyTo([-0.6, 8.5, 1.5], [-0.6, 0, 0]); } }
+      ],
+      desc: `
+<p><b>大部分鳥類僅發育左側卵巢與左側輸卵管</b>，右側胚胎期退化（少數如奇異鳥 kiwi 與鷹類具兩側卵巢但常僅左管有效）。鳥類濾泡<b>無濾泡腔、不形成黃體</b>！</p>
+<table>
+  <tr><th>輸卵管分區</th><th>長度／時間</th><th>核心功能</th></tr>
+  <tr><td>漏斗部 Infundibulum</td><td>15–30 分</td><td><b>受精處所</b>＋繫帶濃蛋白</td></tr>
+  <tr><td>蛋白分泌部 Magnum</td><td>32–34 cm / ~3h</td><td>分泌 <b>80% 以上卵白</b></td></tr>
+  <tr><td>峽部 Isthmus</td><td>~10 cm / ~1.5h</td><td>分泌內外蛋殼膜</td></tr>
+  <tr><td>殼腺 Shell gland</td><td>~11 cm / ~20h</td><td>膨脹加水(15 g)＋<b>鈣化蛋殼</b>＋色素</td></tr>
+  <tr><td>子宮陰道精子儲存細管</td><td>25,000 條</td><td>配種一次可受精產蛋達 <b>2–4 週</b></td></tr>
+</table>
+<p class="src">雷弟生物學 3D 比較解剖整合（勾選右側「透視模式」可直接透視殼腺內正在鈣化中的蛋）</p>`,
+      build() {
+        const G1 = '卵巢（左側）', G2 = '輸卵管（左側）', G3 = '退化的右側', G4 = '泄殖腔與鄰近器官';
+        const YK = 0xf5c400, OV = [1.7, 0.6, 0.15], OVa = V(...OV);
+
+        reg(G1, '卵巢基質', 'Ovarian stroma', '藉卵巢系膜附著體壁，嵌入無濾泡腔之黃色卵黃濾泡階層。',
+          [ell(OV, [0.38, 0.26, 0.24], 0xf0dcc0), ribbon([[OV[0] - 0.3, OV[1] + 0.2, OV[2] - 0.1], [OV[0] + 0.3, OV[1] + 0.2, OV[2] - 0.1]], [[OV[0] - 0.4, OV[1] + 0.55, -0.05], [OV[0] + 0.4, OV[1] + 0.55, -0.05]], 0x9be0b0, 0.35)],
+          { anchor: [OV[0], OV[1] + 0.3, OV[2] + 0.1] });
+        const HF = [['F1', 0.36, [0.45, -1, 0.65]], ['F2', 0.31, [-0.7, -1, 0.55]], ['F3', 0.27, [1, 0.15, 0.8]], ['F4', 0.23, [-1, 0.35, 0.75]], ['F5', 0.19, [0.25, 0.9, 0.9]], ['F6', 0.16, [-0.25, -0.2, 1]]];
+        const FP = {};
+        HF.forEach(([n, r, d]) => {
+          const dir = V(...d).normalize(), c = OVa.clone().addScaledVector(dir, 0.22 + r + 0.06);
+          FP[n] = { c, r };
+          const ms = [ell(c.toArray(), [r, r, r], YK), cyl(OVa.clone().addScaledVector(dir, 0.2).toArray(), c.clone().addScaledVector(dir, -r * 0.9).toArray(), 0.035, 0xf0c8a0)];
+          const rr = rnd(n.charCodeAt(1));
+          for (let k = 0; k < 4; k++) {
+            const pts = [], ax = V(rr() - 0.5, rr() - 0.5, rr() - 0.5).normalize(), b = V(0, 1, 0).cross(ax).normalize();
+            for (let i = 0; i <= 14; i++) { const a = i / 14 * 2.2 + k; pts.push(c.clone().addScaledVector(ax, Math.cos(a) * r * 1.01).addScaledVector(b, Math.sin(a) * r * 1.01)); }
+            ms.push(tube(pts, 0.006, 0xc03020));
+          }
+          ms[0].material.map = TEX.vnet;
+          const info = n === 'F1' ? '最大、下一個將破裂排卵的優勢黃卵黃濾泡。' : '黃卵黃濾泡階層之一（肝臟合成卵黃前驅物運入，無濾泡腔）。';
+          reg(G1, '高階濾泡 ' + n, 'Hierarchical yellow follicle ' + n, info, ms, { anchor: c.clone().addScaledVector(dir, r * 0.5).toArray() });
+        });
+        const f1 = FP.F1, sg = new THREE.TorusGeometry(f1.r * 1.01, 0.022, 8, 24, 1.6); sg.rotateZ(-0.8);
+        const stig = new THREE.Mesh(sg, ANAT.mat(0xfff6c8)); stig.position.copy(f1.c); stig.rotation.y = -Math.PI / 2 + 0.5;
+        reg(G1, '泡裂徑', 'Stigma', '大濾泡壁缺乏血管之淺色無血裂帶（對應人類 Ch.8 排卵口 stigma）。', stig, { anchor: f1.c.clone().add(V(0.2, 0.2, f1.r)).toArray() });
+        const SY = [], LW = [], SW = [], rs = rnd(91);
+        const onOv = r => { const d = V(rs() - 0.5, rs() - 0.5, rs() * 0.8 + 0.1).normalize(); return OVa.clone().add(V(d.x * 0.38, d.y * 0.26, d.z * 0.24)).addScaledVector(d, r * 0.5).toArray(); };
+        for (let k = 0; k < 7; k++) SY.push(ell(onOv(0.07), [0.07, 0.07, 0.07], 0xf7d84a));
+        for (let k = 0; k < 12; k++) LW.push(ell(onOv(0.035), [0.035, 0.035, 0.035], 0xf8f4ea));
+        for (let k = 0; k < 26; k++) SW.push(ell(onOv(0.015), [0.016, 0.016, 0.016], 0xffffff));
+        reg(G1, '小黃濾泡（5–10 mm）', 'Small yellow follicles', '依序補充進入 F1–F6 階層庫。', SY, { anchor: SY[0].position.toArray() });
+        reg(G1, '大白濾泡（2–4 mm）', 'Large white follicles', '含白色卵黃之中小型濾泡。', LW, { anchor: LW[0].position.toArray() });
+        reg(G1, '小白濾泡（<1 mm）', 'Small white follicles', '濾泡閉鎖主要發生於此類數千顆小濾泡。', SW, { anchor: SW[0].position.toArray() });
+        const pof = new THREE.Mesh(new THREE.SphereGeometry(0.15, 24, 16, 0, Math.PI * 2, 0.9, Math.PI - 0.9), ANAT.mat(0xe8a0a0, 0.9));
+        pof.position.set(OV[0] - 0.3, OV[1] + 0.35, OV[2] + 0.35); pof.rotation.x = -0.6;
+        reg(G1, '排卵後濾泡', 'Postovulatory follicle', '排卵後 5 日內凋亡吸收——鳥類不形成黃體！', pof, { anchor: [OV[0] - 0.3, OV[1] + 0.45, OV[2] + 0.4] });
+        const atG = new THREE.SphereGeometry(0.08, 20, 14), pa = atG.attributes.position;
+        for (let i = 0; i < pa.count; i++) { const k = 1 + 0.2 * Math.sin(pa.getX(i) * 90) * Math.cos(pa.getY(i) * 90); pa.setXYZ(i, pa.getX(i) * k, pa.getY(i) * k, pa.getZ(i) * k); }
+        atG.computeVertexNormals(); const atr = new THREE.Mesh(atG, ANAT.mat(0xd8c890)); atr.position.set(OV[0] + 0.35, OV[1] + 0.3, OV[2] + 0.25);
+        reg(G1, '閉鎖濾泡', 'Atretic follicle', '多見於小濾泡；遇逆境突然停產時高階濾泡亦會退化閉鎖。', atr);
+        reg(G1, '濾泡壁層次（說明）', 'Follicle wall layers', '內而外：卵黃周層 → 顆粒細胞 → 基底膜 → 濾泡內膜 → 濾泡外膜（具血管）。',
+          (() => { const g = []; const c = FP.F2.c, r = FP.F2.r; [[1.0, 0xfff3b0], [1.04, 0xf2c36b], [1.08, 0xe0956a], [1.12, 0xc77a6a]].forEach(([k, col]) => { const m = shell(r * k, [1, 1, 1], col, 0.9, Math.PI * 0.35, Math.PI * 0.3, 0.6, 0.9); m.position.copy(c); g.push(m); }); return g; })(),
+          { anchor: FP.F2.c.clone().add(V(0, -0.2, FP.F2.r)).toArray() });
+
+        const inf = V(1.25, -0.55, 0.55), infDir = f1.c.clone().sub(inf).normalize();
+        const FIM = [], q = new THREE.Quaternion().setFromUnitVectors(V(0, 1, 0), infDir);
+        for (let k = 0; k < 12; k++) {
+          const a = k / 12 * Math.PI * 2, rim = V(Math.cos(a) * 0.3, 0.3, Math.sin(a) * 0.3).applyQuaternion(q).add(inf);
+          const tip = V(Math.cos(a) * 0.4, 0.42, Math.sin(a) * 0.4).applyQuaternion(q).add(inf);
+          FIM.push(ttube([rim, rim.clone().lerp(tip, 0.5).add(V(0, 0.03 * Math.sin(k * 2.3), 0.03 * Math.cos(k * 1.7))), tip], [0.028, 0.01], 0xf2b4a6, 1, { wob: 0.2, seed: k }));
+        }
+        reg(G2, '漏斗部：繖部', 'Infundibulum – fimbriated part', '吞噬卵黃並為鳥類受精場所。',
+          [lathe([[0.07, 0], [0.12, 0.1], [0.22, 0.22], [0.3, 0.3]], 0xf7c8b0, 0.6, inf.toArray(), infDir.toArray()), ...FIM],
+          { anchor: inf.clone().addScaledVector(infDir, 0.3).add(V(0, 0, 0.3)).toArray() });
+        const neck = [inf.toArray(), [1.15, -0.8, 0.55], [1.0, -0.9, 0.55]];
+        reg(G2, '漏斗部：管狀部', 'Infundibulum – tubular part', '分泌圍繞卵黃之濃稠蛋白繫帶層。', tube(neck, 0.09, 0xf5d8c0), { anchor: [1.12, -0.85, 0.65] });
+        const mBase = new THREE.CatmullRomCurve3(PV([[1.0, -0.9, 0.55], [0.3, -1.0, 0.6], [-0.4, -0.95, 0.6], [-0.95, -0.7, 0.55]]));
+        const mFr = mBase.computeFrenetFrames(360, false), magPts = [];
+        for (let i = 0; i <= 360; i++) {
+          const t = i / 360, e = Math.sin(Math.PI * t);
+          const dy = e * (0.24 * Math.sin(t * 29) + 0.12 * fbm3(t * 7, 1, 2)), dz = e * (0.26 * Math.cos(t * 17 + 0.7) + 0.12 * fbm3(t * 7, 5, 1));
+          magPts.push(mBase.getPointAt(t).addScaledVector(mFr.normals[i], dy).addScaledVector(mFr.binormals[i], dz));
+        }
+        magPts[0] = V(1.0, -0.9, 0.55); magPts[magPts.length - 1] = V(-0.95, -0.7, 0.55);
+        reg(G2, '蛋白分泌部', 'Magnum (32–34 cm)', '高度盤曲厚壁管狀腺分泌 80% 以上卵白。', (() => { const m = ttube(magPts, 0.13, 0xf3ece4, 1, { wob: 0.06, seg: 700, radial: 18 }); return [m, ...surfVessels(m, { side: V(0, 1, 0), count: 26, spread: 1.6, vr: 0.006, seed: 5 })]; })(), { anchor: [0.1, -1.15, 0.9] });
+        reg(G2, '峽部透明區', 'Translucent zone', '不含管狀腺之分隔透明環。', ring(V(-0.97, -0.69, 0.55), V(-1, 0.35, 0), 0.13, 0.04, 0xd8f0ff, 0.8), { anchor: [-0.97, -0.55, 0.65] });
+        const isth = [[-0.98, -0.68, 0.55], [-1.3, -0.5, 0.5], [-1.62, -0.38, 0.45]];
+        reg(G2, '峽部', 'Isthmus (~10 cm)', '分泌形成內外蛋殼膜，遠端啟動鈣化核成核。', ttube(isth, 0.11, 0xe8c8a8), { anchor: [-1.3, -0.35, 0.55] });
+        const SGc = [-2.15, -0.38, 0.42];
+        reg(G2, '殼腺（子宮）', 'Shell gland (uterus)', '停留 ~20h：膨脹加水約 15 g 並沉積碳酸鈣蛋殼與色素（勾選「透視模式」可透視內部蛋）。', blob(SGc, [0.58, 0.44, 0.42], 0xd48c8c, 0.4, { amp: 0.05 }), { anchor: [-2.15, 0.08, 0.42], wall: true, wallO: 0.72 });
+        const eggP = reg(G2, '蛋（殼腺內）', 'Egg in shell gland', '殼腺中完成鈣化之雞蛋。', [ell(SGc, [0.4, 0.29, 0.29], 0xd9a066)], { anchor: [SGc[0] - 0.2, SGc[1] - 0.15, SGc[2] + 0.3], inner: true });
+        const UVJ = V(-2.74, -0.28, 0.38);
+        const SST = [ring(UVJ, V(1, 0.1, 0), 0.11, 0.045, 0xb04060)];
+        for (let k = 0; k < 14; k++) { const a = k / 14 * Math.PI * 2; SST.push(tube([UVJ.clone().add(V(0, Math.cos(a) * 0.08, Math.sin(a) * 0.08)), UVJ.clone().add(V(-0.02, Math.cos(a) * 0.17, Math.sin(a) * 0.17))], 0.012, 0x70b8ff)); }
+        reg(G2, '子宮陰道括約肌', 'Uterovaginal sphincter', '分隔殼腺與陰道之括約肌。', SST[0], { anchor: [UVJ.x, UVJ.y - 0.18, UVJ.z + 0.1] });
+        reg(G2, '精子儲存細管', 'Sperm storage tubules', '約 25,000 個管狀腺，庇護精子使單次受精可持續 2–4 週。', SST.slice(1), { anchor: [UVJ.x, UVJ.y + 0.2, UVJ.z + 0.1] });
+        const vagP = [UVJ.toArray(), [-2.92, -0.05, 0.33], [-3.1, -0.28, 0.25], [-3.28, -0.02, 0.15], [-3.45, 0.02, 0.06]];
+        reg(G2, '陰道', 'Vagina (~10 cm)', 'S 形肌壁收縮經外翻陰道排出蛋（不接觸糞便）。', tube(vagP, 0.08, 0xe0a0b0), { anchor: [-3.1, -0.4, 0.3] });
+
+        const rOv = reg(G3, '右卵巢（退化）', 'Right ovary (regressed)', '多數鳥類右卵巢於胚胎期退化。', ell([1.7, 0.6, -0.32], [0.16, 0.05, 0.06], 0xbdb5a8), { anchor: [1.7, 0.66, -0.35] });
+        reg(G3, '右輸卵管殘跡', 'Vestigial right oviduct', '右側僅餘泄殖腔旁囊狀殘跡。',
+          [tube([[-3.45, 0.05, -0.15], [-3.15, 0.1, -0.3], [-2.9, 0.12, -0.35]], 0.04, 0xc8a8b0), ell([-2.85, 0.12, -0.36], [0.08, 0.06, 0.06], 0xc8a8b0, 0.8)], { anchor: [-3.0, 0.15, -0.35] });
+        const ROF = [];
+        [[0.24, [0.3, -1, -0.6]], [0.2, [-0.6, -0.6, -0.8]], [0.15, [0.6, 0.4, -0.9]], [0.11, [-0.4, 0.5, -1]]].forEach(([r, d]) => {
+          const dir = V(...d).normalize(), c = V(1.7, 0.6, -0.4).addScaledVector(dir, 0.2 + r); ROF.push(ell(c.toArray(), [r, r, r], YK));
+        });
+        ROF.push(ell([1.7, 0.6, -0.4], [0.3, 0.2, 0.18], 0xf0dcc0));
+        const rFun = reg(G3, '右卵巢（具功能：奇異鳥、鷹類）', 'Functional right ovary', '少數物種雙側卵巢皆有功能，但多半仍僅左側輸卵管暢通。', ROF, { anchor: [1.7, 0.2, -0.8], hidden: true });
+        const dropEgg = ell([1.7, -0.1, -0.7], [0.12, 0.12, 0.12], YK, 0.9);
+        const rDrop = reg(G3, '右側排出的卵（落入腹腔）', 'Ovum from right ovary', '右卵落入腹腔再行吸收。', dropEgg, { anchor: [1.7, -0.3, -0.7], hidden: true });
+
+        reg(G4, '泄殖腔', 'Cloaca', '尿道、消化道與生殖道共同腔室。', ell([-3.62, 0.05, 0], [0.36, 0.3, 0.3], 0xb98aa8, 0.4), { anchor: [-3.62, 0.38, 0.1] });
+        reg(G4, '泄殖腔口', 'Vent', '產蛋時陰道外翻清潔產出。', ring(V(-3.98, 0.02, 0), V(1, 0, 0), 0.1, 0.035, 0x6a3a50));
+        reg(G4, '結腸／直腸', 'Colon / rectum', '開口入糞道。', ttube([[1.2, 0.05, -0.15], [0, 0.15, -0.15], [-2.0, 0.25, -0.1], [-3.4, 0.12, -0.02]], 0.12, 0x7a8a5a, 0.35), { anchor: [-1.0, 0.3, -0.1] });
+        reg(G4, '腎臟', 'Kidneys', '背側三葉腎臟。', [1, -1].flatMap(s => [[0.95, 0.42], [0.25, 0.32], [-0.45, 0.4]].map(([x, l], k) => blob([x, 0.95, s * 0.28], [l, 0.17, 0.17], 0x7a3a30, 1, { amp: 0.12, freq: 4, seed: k + s * 5 }))), { anchor: [0.2, 1.1, 0.28] });
+        reg(G4, '輸尿管', 'Ureters', '腎臟至尿殖室。', [1, -1].map(s => tube([[-0.9, 0.9, s * 0.28], [-2.5, 0.6, s * 0.2], [-3.45, 0.15, s * 0.05]], 0.016, 0xf3e6a0)), { anchor: [-2.3, 0.62, 0.22] });
+
+        let both = false, dropT = 0;
+        window._bothOv = () => { both = !both; rOv.visible = !both; rFun.visible = both; rDrop.visible = both; dropT = 0; rebuildList(); refresh(); select(both ? rFun : rOv); };
+
+        const eggG = new THREE.Group(); CUR.root.add(eggG); eggG.visible = false;
+        const yolk = ell([0, 0, 0], [0.14, 0.14, 0.14], YK), alb = ell([0, 0, 0], [1, 1, 1], 0xffffff, 0.35), memb = ell([0, 0, 0], [1, 1, 1], 0xf5f0e0, 0.55), shl = ell([0, 0, 0], [1, 1, 1], 0xd9a066, 1);
+        eggG.add(yolk, alb, memb, shl);
+        const segs = [
+          { n: '排卵', c: new THREE.CatmullRomCurve3([f1.c.clone(), f1.c.clone().lerp(inf, 0.5), inf.clone()]), w: 0.06, t: 'F1 沿<b>泡裂徑</b>破裂被繖部吞入。' },
+          { n: '漏斗部', c: new THREE.CatmullRomCurve3(PV(neck)), w: 0.07, t: '漏斗部（15–30 分）：受精＋分泌濃稠繫帶蛋白。' },
+          { n: '蛋白分泌部', c: new THREE.CatmullRomCurve3(magPts), w: 0.3, t: '蛋白分泌部（~3h）：分泌 80% 以上卵白。' },
+          { n: '峽部', c: new THREE.CatmullRomCurve3(PV(isth)), w: 0.12, t: '峽部（~1.5h）：沉積內外蛋殼膜。' },
+          { n: '殼腺', c: new THREE.CatmullRomCurve3([V(...isth[2]), V(...SGc), V(...SGc).add(V(-0.25, 0.02, 0)), UVJ.clone()]), w: 0.35, t: '殼腺（~20h）：加水膨脹並鈣化蛋殼與沉積色素。' },
+          { n: '陰道', c: new THREE.CatmullRomCurve3(PV([...vagP, [-3.95, 0.02, 0.0], [-4.4, -0.1, 0.0]])), w: 0.1, t: '陰道（數分）：外翻產出乾淨蛋殼！' }
+        ];
+        let playing = false, t0 = 0, lastSeg = -1; const DUR = 22000;
+        window._eggPlay = () => { playing = true; t0 = performance.now(); lastSeg = -1; eggG.visible = true; eggP.visible = false; rebuildList(); refresh(); };
+        CUR.tick = dtS => {
+          if (both && rDrop.visible) {
+            dropT = (dropT + (dtS || 0.016) * 0.36) % 1;
+            dropEgg.position.y = -0.1 - dropT * 1.3;
+            dropEgg.material.opacity = 0.9 * (1 - dropT);
+            dropEgg.scale.setScalar(0.12 * (1 - dropT * 0.6));
+          }
+          if (!playing) return;
+          const u = (performance.now() - t0) / DUR;
+          if (u >= 1) { playing = false; eggG.visible = false; eggP.visible = true; rebuildList(); refresh(); $('info').insertAdjacentHTML('afterbegin', '<div class="g" style="background:#2f7f3f">✅ 產蛋完成（全程約 24–26 小時）</div>'); return; }
+          let acc = 0, i = 0; while (i < segs.length - 1 && u > acc + segs[i].w) { acc += segs[i].w; i++; }
+          const k = Math.min(1, (u - acc) / segs[i].w), S = segs[i];
+          eggG.position.copy(S.c.getPointAt(k));
+          const albK = i < 2 ? 0 : i === 2 ? k : 1, memK = i < 3 ? 0 : i === 3 ? k : 1, shK = i < 4 ? 0 : i === 4 ? Math.max(0, (k - 0.3) / 0.6) : 1;
+          alb.visible = albK > 0; alb.scale.set(0.14 + 0.24 * albK, 0.14 + 0.15 * albK, 0.14 + 0.15 * albK);
+          memb.visible = memK > 0; memb.scale.set(0.39, 0.3, 0.3); memb.material.opacity = 0.55 * memK;
+          shl.visible = shK > 0; shl.scale.set(0.41, 0.31, 0.31); shl.material.opacity = Math.min(1, shK); shl.material.transparent = shK < 1;
+          if (i !== lastSeg) { lastSeg = i; $('info').innerHTML = `<h3>🥚 ${S.n}</h3><div class="en">Egg formation ${i + 1}/${segs.length}</div><div class="t">${S.t}</div>`; }
+        };
+      }
+    });
+  })();
 })();

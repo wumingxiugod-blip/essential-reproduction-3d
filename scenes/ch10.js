@@ -298,4 +298,289 @@
       checkbox(box, '播放粒子運輸流', true, v => S3.play = v);
     }
   });
+
+  /* ===== 場景④：陰莖橫切面逐層剝開解剖（整合比較大體解剖） ===== */
+  SCENES.push({
+    name: '④ 陰莖橫切（逐層剝開）',
+    title: '陰莖橫切面層次構造（由外而內逐層剝開）',
+    camera: { pos: [2.6, 2.2, 4.2], target: [0, 0, 0], fit: [1.8, 1.5] },
+    controls: [{ label: '🔍 橫切剖面復位', fn() { flyHome(); } }],
+    desc: `
+<p>自外而內逐層剝開：<b>皮膚 → 淺陰莖筋膜（Colles 筋膜）→ 疏鬆結締組織 → 深陰莖筋膜（Buck 筋膜）→ 白膜（Tunica albuginea）</b>，內部並列三條勃起柱：背側成對<b>陰莖海綿體</b>與腹側圍繞尿道之<b>尿道海綿體</b>（銜接本頁 ②勃起血液動力模型）。</p>
+<p class="src">雷弟生物學 3D 比較解剖整合（對應 Essential Reproduction Ch.10 Box 10.1）</p>`,
+    build() {
+      const layers = [
+        ['皮膚', 'Skin', 1.0, 0.94, 0xe3b79a, 0.0, '最外層皮膚（游離部另覆包皮）。'],
+        ['淺陰莖筋膜（Colles 筋膜）', "Superficial fascia (Colles' fascia)", 0.93, 0.87, 0xd9a0a0, 0.25, '皮下第一層筋膜。'],
+        ['疏鬆結締組織', 'Loose connective tissue', 0.86, 0.80, 0xf1e6c8, 0.5, '使淺深層筋膜間可滑動。'],
+        ['深陰莖筋膜（Buck 筋膜）', "Deep fascia (Buck's fascia)", 0.79, 0.73, 0xc9d6e8, 0.75, '緊貼白膜包被勃起柱之堅韌筋膜。'],
+        ['白膜', 'Tunica albuginea', 0.72, 0.67, 0xfafafa, 1.0, '緻密纖維膜限制海綿體充血過度擴張，維持勃起高壓硬度並壓閉白膜下靜脈叢。']
+      ];
+      layers.forEach(l => {
+        reg('包被層次（由外而內）', l[0], l[1], l[6], annulus(l[2], l[3], 1.6 - 1.2 + l[5], l[4], 1, -1.0), { anchor: [l[2] * 0.7, l[2] * 0.7, l[5] - 0.7] });
+      });
+      reg('勃起組織', '中隔／海綿體間結締組織', 'Septum / trabecular tissue', '白膜向內形成中隔並伸出含平滑肌之小樑支架。', disc(0.67, 2.2, 0xe8d3c5, 1, 0, 0, -1.0), { anchor: [0, 0.05, 1.1] });
+      const Z0 = -1.0, LEN = 2.3, cc = [-1, 1].map(s => disc(0.31, LEN, 0xc8404a, 1, s * 0.32, 0.2, Z0));
+      reg('勃起組織', '陰莖海綿體（左右各一）', 'Corpus cavernosum penis', '背側成對高壓勃起組織（肉食類遠端特化成陰莖骨 os penis）。', cc, { anchor: [-0.32, 0.2, 1.3] });
+      const rr = rnd(11), dg = new THREE.CircleGeometry(1, 12), instM = new THREE.InstancedMesh(dg, mat(0x7a1520, 1), 80), mtx = new THREE.Matrix4();
+      for (let i = 0; i < 80; i++) {
+        const s = i < 40 ? -1 : 1, a = rr() * 6.28, rd = Math.sqrt(rr()) * 0.26, r = 0.03 + rr() * 0.03;
+        mtx.compose(V(s * 0.32 + Math.cos(a) * rd, 0.2 + Math.sin(a) * rd, Z0 + LEN + 0.002), new THREE.Quaternion(), V(r, r, 1));
+        instM.setMatrixAt(i, mtx);
+      }
+      instM.instanceMatrix.needsUpdate = true; instM.frustumCulled = false;
+      reg('勃起組織', '海綿窩（血液空間）', 'Cavernous sinusoids', '肌肉海綿型血液竇寬大；彈性纖維型結締組織較厚實。', instM, { anchor: [0.32, 0.2, Z0 + LEN + 0.02] });
+      reg('勃起組織', '尿道海綿體', 'Corpus spongiosum', '腹側圍繞尿道（勃起壓力較低以免壓扁尿道影響射精）。', disc(0.27, LEN, 0x8e5a9e, 1, 0, -0.42, Z0), { anchor: [0, -0.5, 1.3] });
+      const urMesh = annulus(0.1, 0.055, LEN + 0.05, 0xffd35c, 1, Z0); urMesh.position.y = -0.42;
+      reg('勃起組織', '尿道', 'Urethra', '尿液與精液最後共同通道，分布尿道腺。', urMesh, { anchor: [0.1, -0.42, 1.4] });
+      reg('勃起組織', '尿道腔', 'Urethral lumen', '管腔中央通道。', disc(0.055, LEN + 0.02, 0x3a2a10, 1, 0, -0.42, Z0), { anchor: [0, -0.42, Z0 + LEN + 0.05], nolabel: true });
+    }
+  });
+
+  /* ===== 場景⑤：雄禽交接器官的三種類型（比較生殖生理與交配機制） ===== */
+  SCENES.push({
+    name: '⑤ 雄禽交接器官三型',
+    title: '雄禽交接器官比較（97% 無插入型 vs 非插入型 vs 鴨鵝螺旋插入型）',
+    camera: { pos: [0, 3.0, 11.0], target: [0.0, 0.3, 0.5], fit: [4.5, 2.6] },
+    controls: [{ label: '🔍 三型並列比較', fn() { flyHome(); } }],
+    desc: `
+<p>不同於哺乳動物陰莖（兼負排尿並以血液充血勃起），禽類交接器<b>不兼排尿</b>且由泄殖腔旁血管體產生<b>淋巴液</b>推動勃起！97% 鳥類沒有插入型陰莖，僅 3%（如雁鴨、平胸鳥類）具螺旋插入型陰莖。</p>
+<p class="src">雷弟生物學 3D 比較解剖整合（搭配 Ch.07 ⑤雄禽整體構造閱讀）</p>`,
+    build() {
+      const XA = -2.9, XB = 0, XC = 2.9;
+      const vent = x => ring(V(x, 0, 0), V(0, 0, 1), 0.5, 0.09, 0xd4707a);
+      const G1 = '(一) 缺乏陰莖：泄殖腔接吻';
+      reg(G1, '外翻泄殖腔（泄殖腔口）', 'Everted cloaca (cloacal kiss)', '鸚鵡、燕雀、鴿與猛禽藉外翻泄殖腔緊貼雌禽傳遞精液。', [vent(XA), ell([XA, 0, 0.12], [0.4, 0.4, 0.22], 0xe88a92, 0.8)], { anchor: [XA + 0.4, 0.35, 0.2] });
+      reg(G1, '輸精管乳頭（開口）', 'Papillae of ductus deferens', '精液直接排出。', [cone([XA - 0.15, 0.02, 0.2], [XA - 0.15, 0.02, 0.45], 0.06, 0xf2f0d0), cone([XA + 0.15, 0.02, 0.2], [XA + 0.15, 0.02, 0.45], 0.06, 0xf2f0d0)], { anchor: [XA, 0.02, 0.45] });
+      const G2 = '(二) 非插入型陰莖：雞／火雞／鵪鶉';
+      reg(G2, '泄殖腔口', 'Vent', '腹唇具短小非插入型突起（剛孵出時大小亦作為雛雞雌雄鑑別依據）。', [vent(XB), ell([XB, 0.05, 0.1], [0.38, 0.36, 0.2], 0xe88a92, 0.7)], { anchor: [XB + 0.45, 0.3, 0.1] });
+      reg(G2, '輸精管乳頭', 'Papillae of ductus deferens', '射精沿正中溝流入雌鳥輸卵管。', [cone([XB - 0.15, 0.1, 0.2], [XB - 0.15, 0.1, 0.4], 0.05, 0xf2f0d0), cone([XB + 0.15, 0.1, 0.2], [XB + 0.15, 0.1, 0.4], 0.05, 0xf2f0d0)], { anchor: [XB + 0.15, 0.2, 0.4] });
+      reg(G2, '側陰莖體', 'Lateral phallic bodies', '由淋巴液充脹變腫脹但不能伸出插入。', [ell([XB - 0.14, -0.44, 0.2], [0.1, 0.1, 0.14], 0xf8f0e0), ell([XB + 0.14, -0.44, 0.2], [0.1, 0.1, 0.14], 0xf8f0e0)], { anchor: [XB + 0.3, -0.5, 0.25] });
+      reg(G2, '陰莖正中溝', 'Median groove', '引導精液向下流經之溝槽。', cyl([XB, -0.4, 0.14], [XB, -0.45, 0.32], 0.02, 0x4a2a2a), { anchor: [XB, -0.62, 0.3] });
+      reg(G2, '腫脹的淋巴皺褶', 'Lymphatic fold', '灌注淋巴液推動腹唇突起。', ell([XB, -0.3, 0.05], [0.28, 0.13, 0.12], 0xbfd8f0, 0.45), { anchor: [XB - 0.45, -0.3, 0.05] });
+      const G3 = '(三) 插入型陰莖：鵝／鴨／平胸鳥類';
+      const base = [XC, -0.2, 0.15], apex = [XC, 1.5, 1.5], axis = lineCurve(base, apex), turns = 2.5, R = 0.3;
+      reg(G3, '泄殖腔口', 'Vent', '陰莖勃起伸出泄殖腔腹側。', vent(XC), { anchor: [XC + 0.55, -0.1, 0] });
+      reg(G3, '皮下囊（粗囊）', 'Cutaneous sac', '鵝陰莖逆時針盤旋約 2.5 圈成雙 U 形結構。', tube(helixAlong(axis, R, turns, 0, 260), 0.105, 0xe8b88a, 1, 2), { anchor: [XC + 0.45, 0.7, 0.9] });
+      reg(G3, '腺體囊（細囊）', 'Glandular sac', '尖端具開口排出類精漿分泌物。', tube(helixAlong(axis, R, turns, Math.PI, 260), 0.06, 0x6fa0d8, 1, 2), { anchor: [XC - 0.4, 0.9, 1.1] });
+      reg(G3, '螺旋溝／陰莖摺縫', 'Phallic flexure', '射精時精液沿螺旋溝直入雌鳥泄殖腔。', tube(helixAlong(axis, R, turns, Math.PI / 2, 260), 0.03, 0x3a2418, 1, 2), { anchor: [XC, 0.5, 0.75] });
+      reg(G3, '軟骨體', 'Cartilaginous body', '基部支持構造（全長勃起可達 8–10 cm）。', ell([XC, -0.22, 0.12], [0.28, 0.18, 0.2], 0xf5f5f0), { anchor: [XC - 0.3, -0.3, 0.1] });
+      reg(G3, '陰莖懸韌帶', 'Suspensorium phalli', '固定於泄殖腔壁之韌帶。', [cyl([XC - 0.2, -0.3, 0.05], [XC - 0.65, -0.1, -0.1], 0.03, 0xe0d3b0), cyl([XC + 0.2, -0.3, 0.05], [XC + 0.65, -0.1, -0.1], 0.03, 0xe0d3b0)], { anchor: [XC - 0.65, -0.15, -0.1] });
+      const pouch = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 1.0, 24, 1, true), mat(0x9fc5e8, 0.14));
+      pouch.position.set(XC, 0.15, 0.4); pouch.quaternion.setFromUnitVectors(V(0, 1, 0), V(0, 0.6, 0.8));
+      reg(G3, '陰莖袋', 'Phallic pouch', '未勃起時將陰莖反轉收藏於腹膜袋內。', pouch, { anchor: [XC + 0.55, 0, 0.5] });
+      const RD = [];
+      for (let i = 1; i < 14; i++) {
+        const t = i / 14, p = axis.getPointAt(t), a = Math.PI * 2 * t * turns, fr = axis.computeFrenetFrames(2, false);
+        const rad = fr.normals[0].clone().multiplyScalar(Math.cos(a)).addScaledVector(fr.binormals[0], Math.sin(a));
+        const pt = p.clone().addScaledVector(rad, R + 0.1), Tt = axis.getTangentAt(t);
+        const rCone = cone(pt.toArray(), pt.clone().addScaledVector(Tt, -0.14).addScaledVector(rad, 0.03).toArray(), 0.03, 0xf2ead8);
+        rCone.quaternion.setFromUnitVectors(V(0, 1, 0), Tt.clone().multiplyScalar(-1).addScaledVector(rad, 0.2).normalize());
+        RD.push(rCone);
+      }
+      reg(G3, '陰莖脊', 'Phallic ridges', '朝向基部之倒棘幫助交配固定。', RD, { anchor: [XC + 0.45, 0.2, 0.55] });
+      reg(G3, '尖端（腺囊開口）', 'Apex', '末端腺囊開口釋放分泌物。', [ell(apex, [0.1, 0.1, 0.1], 0xe0a0a0), ring(V(...apex), V(0, 0.6, 0.8), 0.06, 0.02, 0x4a2a2a)], { anchor: [XC + 0.15, 1.6, 1.55] });
+    }
+  });
+
+  /* ===== 場景⑥：輸卵管分段、組織切面、上皮細胞與四種物種卵巢囊比較（整合比較大體解剖） ===== */
+  (function () {
+    const { mat, ell, tube, ttube, lathe, box, shell, ring, annulus } = ANAT;
+    SCENES.push({
+      name: '⑥ 輸卵管與卵巢囊',
+      title: '輸卵管解剖：漏斗→壺部→峽部→UTJ、切面上皮與四型卵巢囊',
+      camera: { pos: [-0.2, -0.3, 13], target: [-0.2, -0.4, 0], fit: [7.8, 3.8] },
+      controls: [
+        { label: '🔍 全圖總覽', fn() { flyHome(); } },
+        { label: '🔍 分段＋橫切面', fn() { flyTo([-2.4, 0.5, 7], [-2.4, 0.5, 0]); } },
+        { label: '🔍 上皮細胞', fn() { flyTo([-3.0, -2.4, 4.2], [-3.0, -2.6, 0]); } },
+        { label: '🔍 卵巢囊物種型式', fn() { flyTo([3.4, 0.4, 6], [3.4, 0.3, 0]); } }
+      ],
+      desc: `
+<p>補足本頁 ③雌道雙向運輸的微細組織學對比：上左比較<b>漏斗 → 壺部（受精、黏膜最發達分枝）→ 峽部（貯精、肌層最厚）→ 宮管接合（UTJ）</b>；下方比對濾泡期（纖毛細胞多）vs 黃體期（分泌細胞多）上皮與四類物種卵巢囊。</p>
+<p class="src">雷弟生物學 3D 比較解剖整合（對應 Essential Reproduction Ch.10 p.185 輸卵管運輸）</p>`,
+      build() {
+        const Y = 1.4, TB = 0xf0cdbd, MU = 0xc97a5c, MC = 0xb0563f, ML = 0xc9765c, SE = 0xf6eedc, EP = 0xfff2a8;
+        const G1 = '輸卵管分段', G2 = '管壁橫切面', G3 = '上皮細胞', G4 = '卵巢囊型式';
+        const foldRod = (x0, x1, rIn, n, depth, branch, col) => {
+          const s = new THREE.Shape(), N = 240;
+          for (let i = 0; i <= N; i++) {
+            const t = i / N * Math.PI * 2;
+            const f = Math.pow(Math.max(0, Math.cos(n * t)), 2) + branch * Math.pow(Math.max(0, Math.cos(n * 3 * t + 0.6)), 4);
+            const r = rIn * (1 - depth) + rIn * depth * Math.min(1, f);
+            const p = [Math.cos(t) * r, Math.sin(t) * r];
+            i ? s.lineTo(...p) : s.moveTo(...p);
+          }
+          const g = new THREE.ExtrudeGeometry(s, { depth: x1 - x0, bevelEnabled: false, curveSegments: 4 });
+          const m = new THREE.Mesh(g, mat(col, 0.95)); m.rotation.y = Math.PI / 2; m.position.set(x0, Y, 0); return m;
+        };
+
+        const fc = V(-4.65, Y, 0), dir = V(-1, 0, 0), FIM = [], q = new THREE.Quaternion().setFromUnitVectors(V(0, 1, 0), dir);
+        for (let k = 0; k < 16; k++) {
+          const a = k / 16 * Math.PI * 2, rim = V(Math.cos(a) * 0.55, 0.45, Math.sin(a) * 0.55).applyQuaternion(q).add(fc);
+          const tip = V(Math.cos(a + 0.15) * 0.78, 0.7, Math.sin(a + 0.15) * 0.78).applyQuaternion(q).add(fc);
+          FIM.push(tube([rim, rim.clone().lerp(tip, 0.5).add(V(0, 0.03 * Math.sin(k * 3), 0)), tip], 0.035, 0xf4a87c));
+        }
+        reg(G1, '漏斗（輸卵管漏斗）', 'Infundibulum', '近端漏斗拾取卵（包含對側腹腔排出的卵）。', lathe([[0.13, 0], [0.2, 0.12], [0.38, 0.32], [0.55, 0.45]], 0xf7c890, 0.6, fc.toArray(), dir.toArray()), { anchor: [-4.8, Y + 0.45, 0] });
+        reg(G1, '輸卵管繖', 'Fimbriae', '邊緣不規則指狀皺褶。', FIM, { anchor: [-5.3, Y - 0.6, 0] });
+        reg(G1, '輸卵管腹口', 'Ostium abdominale', '通入輸卵管管腔。', ring(V(-4.66, Y, 0), dir, 0.13, 0.025, 0x6a3a2a), { anchor: [-4.66, Y, 0.15] });
+        reg(G1, '輸卵管壺部', 'Ampulla', '約占半長，受精發生處，黏膜皺褶分枝最多。', [ttube([[-4.6, Y, 0], [-3.4, Y + 0.04, 0], [-2.2, Y, 0]], 0.3, TB, 0.3), foldRod(-4.55, -2.25, 0.25, 6, 0.75, 0.8, 0xf2a8a0)], { anchor: [-3.4, Y + 0.32, 0] });
+        reg(G1, '輸卵管峽部', 'Isthmus', '較短、管壁肌層最厚、精子貯存調控區。', [ttube([[-2.2, Y, 0], [-1.4, Y, 0], [-0.62, Y, 0]], t => 0.3 - 0.12 * Math.min(1, t * 4), 0xe9b860, 0.55), foldRod(-2.15, -0.65, 0.1, 4, 0.6, 0, 0xf2a8a0)], { anchor: [-1.4, Y + 0.22, 0] });
+        reg(G1, '宮管接合', 'Uterotubal junction (UTJ)', '豬具指狀瓣防多精入卵，牛羊呈扭結調節早期胚入宮。', ring(V(-0.5, Y, 0), V(1, 0, 0), 0.17, 0.06, 0xd4708a), { anchor: [-0.5, Y + 0.25, 0] });
+        reg(G1, '子宮角（尖端）', 'Uterine horn (tip)', '連接峽部進入子宮。', ttube([[-0.42, Y, 0], [0.2, Y, 0], [0.75, Y, 0]], [0.18, 0.38], 0xcf7480, 0.5), { anchor: [0.3, Y + 0.35, 0] });
+        const zygZP = shell(0.13, [1, 1, 1], 0xffffff, 0.45, 0, Math.PI * 2); zygZP.position.set(-3.2, Y, 0);
+        reg(G1, '合子（受精卵）', 'Zygote', '進入子宮前駐留輸卵管約 1–2 天（兔卵外獲得多醣包膜）。', [ell([-3.2, Y, 0], [0.1, 0.1, 0.1], 0xfbefb0), zygZP], { anchor: [-3.2, Y - 0.1, 0.12] });
+        textSprite('卵巢端 →→→→→ 子宮端', [-2.3, Y + 0.85, 0], 0.26, '#8fd0ff');
+
+        const section = (cx, cy, R, mT, n, depth, branch, name) => {
+          const rm = R - 0.05 - mT, m = {}, at = mesh => { mesh.position.set(cx, cy, 0); return mesh; };
+          m.serosa = at(annulus(R, R - 0.05, 0.05, SE));
+          m.lon = at(annulus(R - 0.05, R - 0.05 - mT * 0.4, 0.06, ML));
+          m.cir = at(annulus(R - 0.05 - mT * 0.4, rm, 0.06, MC));
+          const s = new THREE.Shape(); s.absarc(0, 0, rm, 0, Math.PI * 2, false);
+          const pts = [], N = 300;
+          for (let i = 0; i < N; i++) {
+            const t = i / N * Math.PI * 2, f = Math.pow(Math.max(0, Math.cos(n * t)), 2) + branch * Math.pow(Math.max(0, Math.cos(n * 3 * t + 0.6)), 4);
+            const r = rm * (0.93 - depth * Math.min(1, f)); pts.push(new THREE.Vector2(Math.cos(t) * r, Math.sin(t) * r));
+          }
+          s.holes.push(new THREE.Path(pts));
+          m.muc = at(new THREE.Mesh(new THREE.ExtrudeGeometry(s, { depth: 0.07, bevelEnabled: false, curveSegments: 48 }), mat(0xf2a8a0)));
+          m.epi = ttube(pts.map(p => [cx + p.x, cy + p.y, 0.075]), 0.012, EP, 1, { closed: true, cap: false, radial: 6, seg: 400 });
+          textSprite(name, [cx, cy - R - 0.25, 0], 0.24);
+          return m;
+        };
+        const S1 = section(-4.6, -0.35, 0.55, 0.06, 5, 0.45, 0, '漏斗部切面');
+        const S2 = section(-3.2, -0.35, 0.75, 0.1, 7, 0.75, 1.0, '壺部切面');
+        const S3 = section(-1.5, -0.35, 0.55, 0.22, 5, 0.5, 0, '峽部切面');
+        const S = [S1, S2, S3];
+        reg(G2, '漿膜', 'Serosa', '最外層單層方形中皮＋薄結締組織。', S.map(s => s.serosa), { anchor: [-3.2, 0.4, 0.05] });
+        reg(G2, '縱行肌層（外）', 'Longitudinal muscle', '平滑肌外層。', S.map(s => s.lon), { anchor: [-1.0, -0.5, 0.06] });
+        reg(G2, '環行／螺旋肌層（內）', 'Circular muscle', '肌層厚度往峽部方向遞增助蠕動推進配子。', S.map(s => s.cir), { anchor: [-1.85, -0.1, 0.06] });
+        reg(G2, '黏膜皺褶（固有層）', 'Mucosal folds', '壺部皺褶最顯著分枝以擴大受精微環境。', S.map(s => s.muc), { anchor: [-2.9, -0.05, 0.07] });
+        reg(G2, '黏膜上皮', 'Epithelium', '單層柱狀（不含杯狀細胞）。', S.map(s => s.epi), { anchor: [-4.4, -0.35, 0.08] });
+
+        const Y0 = -2.75, cells = 'CSCPCCSCSPCSC', CIL = [], SEC = [], PEG = [], CIN = [], SGR = [];
+        let x = -4.9;
+        for (const t of cells) {
+          if (t === 'C') {
+            const w = 0.26, h = 0.78; CIL.push(box([x + w / 2, Y0 + h / 2, 0], [w * 0.96, h, 0.3], 0xbfe0f0));
+            CIN.push(ell([x + w / 2, Y0 + h * 0.5, 0.1], [0.08, 0.1, 0.08], 0xd8ccf0));
+            for (let k = 0; k < 6; k++) CIL.push(cyl([x + 0.03 + k * 0.04, Y0 + h, 0.05 - (k % 2) * 0.1], [x + 0.03 + k * 0.04 + 0.02 * Math.sin(k), Y0 + h + 0.22, 0.05 - (k % 2) * 0.1], 0.006, 0xffffff));
+            x += w;
+          } else if (t === 'S') {
+            const w = 0.17, h = 0.82; SEC.push(box([x + w / 2, Y0 + h / 2, 0], [w * 0.96, h, 0.3], 0xf0d0a0));
+            SEC.push(ell([x + w / 2, Y0 + h * 0.35, 0.1], [0.06, 0.09, 0.06], 0x7a4fa0));
+            for (let k = 0; k < 5; k++) SGR.push(ell([x + 0.04 + (k % 3) * 0.045, Y0 + h - 0.06 - Math.floor(k / 3) * 0.06, 0.12], [0.022, 0.022, 0.022], 0xc0508a));
+            x += w;
+          } else {
+            const w = 0.07, h = 0.76; PEG.push(box([x + w / 2, Y0 + h / 2, 0], [w * 0.96, h, 0.3], 0x8a6aa8));
+            PEG.push(ell([x + w / 2, Y0 + h * 0.45, 0.1], [0.03, 0.12, 0.05], 0x40285a));
+            x += w;
+          }
+        }
+        const xm = (-4.9 + x) / 2, ww = x + 4.9;
+        reg(G3, '纖毛細胞', 'Ciliated cell', '濾泡期豐富（將液體掃向子宮）；漏斗端比例最高。', [...CIL, ...CIN], { anchor: [-4.77, Y0 + 0.95, 0] });
+        reg(G3, '分泌性細胞', 'Secretory cell', '黃體期增多（壺部約占 50%），促精子獲能並營養受精卵。', [...SEC, ...SGR], { anchor: [-4.55, Y0 + 0.82, 0] });
+        reg(G3, '插入細胞', 'Peg (intercalary) cell', '分泌性細胞先驅／耗盡態。', PEG, { anchor: [-4.1, Y0 + 0.5, 0.16] });
+        reg(G3, '基底膜', 'Basement membrane', '上皮支持膜。', box([xm, Y0 - 0.02, 0], [ww, 0.04, 0.32], 0xffffff), { anchor: [xm + 1.0, Y0 - 0.02, 0.16] });
+        reg(G3, '固有層', 'Lamina propria', '結締組織基質（無其他腺體與杯狀細胞）。', box([xm, Y0 - 0.3, 0], [ww, 0.52, 0.32], 0xf2b8b0, 0.9), { anchor: [xm, Y0 - 0.35, 0.16] });
+        textSprite('↑ 管腔（纖毛掃向子宮）', [x + 1.5, Y0 + 0.9, 0], 0.22, '#8fd0ff');
+
+        const OVC = 0xf2e2c8, BU = 0x8fc7e0;
+        const mini = (cx, cy, name, en, info, bursa) => {
+          const ov = ell([cx, cy, 0], [0.32, 0.22, 0.22], OVC);
+          const tubeM = tube([[cx - 0.5, cy + 0.45, 0], [cx - 0.1, cy + 0.6, 0.1], [cx + 0.5, cy + 0.55, 0], [cx + 0.7, cy + 0.1, 0]], 0.05, TB);
+          reg(G4, name, en, info, [ov, tubeM, ...bursa], { anchor: [cx, cy - 0.45, 0] });
+          textSprite(name, [cx, cy - 0.85, 0], 0.22);
+        };
+        const bShell = (cx, cy, ts, tl, ps, pl, o = 0.35) => { const m = new THREE.Mesh(new THREE.SphereGeometry(0.48, 32, 20, ps, pl, ts, tl), mat(BU, o)); m.position.set(cx, cy, 0); m.scale.set(1, 0.85, 0.85); return m; };
+        mini(2.5, 1.2, '牛、兔、綿羊：不包圍', 'No ovarian bursa covering', '漏斗僅貼近卵巢而不覆蓋。', [lathe([[0.06, 0], [0.12, 0.08], [0.24, 0.18]], 0xf7c890, 0.8, [2.08, 1.5, 0], [0.4, -1, 0])]);
+        mini(4.4, 1.2, '豬：發達、開放', 'Sow: well-developed open bursa', '開放但寬大囊膜包覆大半卵巢。', [bShell(4.4, 1.2, 0.9, Math.PI - 0.9, 0, Math.PI * 2)]);
+        mini(2.5, -0.85, '犬、狐、水貂：有裂隙', 'Dog / fox / mink: slit', '具僅容許卵巢進出的裂縫。', [bShell(2.5, -0.85, 0, Math.PI, 0.35, Math.PI * 2 - 0.7)]);
+        mini(4.4, -0.85, '小鼠、鼠：幾乎封閉', 'Mouse / rat: closed bursa', '僅極小開孔以保存排卵後積液（馬則僅窄囊包圍排卵窩）。', [bShell(4.4, -0.85, 0.22, Math.PI - 0.22, 0, Math.PI * 2, 0.45)]);
+      }
+    });
+  })();
+
+  /* ===== 場景⑦：子宮頸與陰道縱切物種比較（整合比較大體解剖） ===== */
+  (function () {
+    const { tube, ttube, lathe, halfRing, halfCyl, ring } = ANAT;
+    SCENES.push({
+      name: '⑦ 子宮頸物種縱切',
+      title: '子宮頸與陰道縱切面比較（牛／豬／馬／犬／人精子屏障 vs 通道差異）',
+      camera: { pos: [0, 0.2, 15.5], target: [0, -0.3, 0], fit: [8.6, 4.2] },
+      controls: [
+        { label: '🟡 母牛：顯示／隱藏 子宮頸栓（懷孕）', fn() { const p = CUR.parts.find(p => p.zh === '子宮頸栓（懷孕）'); p.visible = !p.visible; rebuildList(); refresh(); if (p.visible) select(p); } },
+        { label: '🔍 五物種並列全覽', fn() { flyHome(); } },
+        { label: '🔍 牛（四嵌合圓環）', fn() { flyTo([-5, 0, 5.5], [-5, -0.3, 0]); } },
+        { label: '🔍 豬（螺旋配合公豬）', fn() { flyTo([-2.5, 0, 5.5], [-2.5, -0.3, 0]); } },
+        { label: '🔍 馬（縱褶花瓣突出）', fn() { flyTo([0, 0, 5.5], [0, -0.3, 0]); } },
+        { label: '🔍 狗（單一皺褶）', fn() { flyTo([2.5, 0, 5.5], [2.5, -0.3, 0]); } },
+        { label: '🔍 人（SCJ 移行區）', fn() { flyTo([5, 0, 5.5], [5, -0.3, 0]); } }
+      ],
+      desc: `
+<p>對照本頁 Table 10.3「射精部位差異」背後之解剖關鍵——比較<b>牛羊（4 嵌合圓環＝精子障礙）</b>、<b>豬（螺旋枕配合公豬螺旋陰莖＝無障礙）</b>、<b>馬（短管顯著縱褶＝無障礙）</b>、<b>犬（單皺褶＝黏連與障礙）</b>與<b>人（內外子宮頸鱗狀柱狀交接處 SCJ）</b>。</p>
+<p class="src">雷弟生物學 3D 比較解剖整合（下方按鈕可顯示母牛懷孕子宮頸栓與逐一近距觀察各物種）</p>`,
+      build() {
+        const CXC = 0xe2c0c2, MUC = 0xeab0bc, RG = 0xb05a72, VG = 0xe5a9ab, UT = 0xcf7480;
+        const vag = (x, y1 = -0.8) => [halfCyl([x, 0, 0], 0.62, 0.62, -2.2, y1, VG, 0.6)];
+        const uter = (x, y0) => [halfCyl([x, 0, 0], 0.5, 0.6, y0, y0 + 0.7, UT, 0.45)];
+        const title = (x, t, s) => textSprite(t, [x, -2.75, 0], 0.62, '#ffd479', s);
+
+        let X = -5, G = '牛（反芻獸）';
+        title(X, '母牛', '圓環4個・嵌合');
+        reg(G, '子宮頸壁（牛）', 'Cervical wall', '厚壁僵硬富含膠原彈性結締組織，含大量分泌杯狀細胞。', [halfCyl([X, 0, 0], 0.45, 0.45, -0.8, 0.8, CXC, 0.7), halfCyl([X, 0, 0], 0.32, 0.32, -0.8, 0.8, MUC, 0.9)], { anchor: [X + 0.45, 0.2, 0] });
+        reg(G, '圓環（4 個，互相嵌合）', 'Annular rings ×4', '互相嵌合緊鎖管腔（為天然精子障壁，人工授精須穿入此處）。', [-0.55, -0.18, 0.18, 0.55].map((y, k) => halfRing([X + (k % 2 ? 0.05 : -0.05), y, 0], 0.22, 0.1, RG)), { anchor: [X - 0.35, 0.18, 0] });
+        const LR = [];
+        for (let k = 0; k < 5; k++) { const a = Math.PI + (k + 0.5) / 5 * Math.PI, zx = X + Math.cos(a) * 0.3, zz = -Math.abs(Math.sin(a)) * 0.3; LR.push(tube([[zx, -0.75, zz], [zx, 0.75, zz]], 0.025, 0xb85a80)); }
+        reg(G, '縱脊（黏膜皺褶）', 'Longitudinal ridges', '顯著擴大黏膜隱窩貯精與分泌表面積。', LR, { anchor: [X + 0.25, -0.4, -0.2] });
+        const canal = []; for (let i = 0; i <= 24; i++) { const t = i / 24; canal.push([X + 0.07 * Math.sin(t * Math.PI * 8), -0.95 + t * 1.85, 0]); }
+        reg(G, '子宮頸管（曲折）', 'Cervical canal', '平日緊閉之蜿蜒路徑。', tube(canal, 0.02, 0xfff0f4), { anchor: [X, 0.75, 0.05] });
+        reg(G, '子宮頸栓（懷孕）', 'Cervical plug', '懷孕期黏液變稠硬化鎖閉防菌（分娩前數日液化）。', ttube([[X, -0.9, 0], [X, 0, 0], [X, 0.85, 0]], 0.13, 0xf7e27a, 0.75), { anchor: [X + 0.1, -0.1, 0.15], hidden: true });
+        reg(G, '子宮頸陰道部＋外口', 'Portio vaginalis + external os', '向陰道腔突出。', [lathe([[0.42, 0], [0.4, -0.15], [0.3, -0.3], [0.08, -0.35], [0.04, -0.3]], CXC, 0.8, [X, -0.8, 0]), ring(V(X, -1.13, 0), V(0, 1, 0), 0.05, 0.02, 0x5a1a30)], { anchor: [X + 0.35, -1.0, 0.1] });
+        reg(G, '陰道穹窿', 'Fornix vaginae', '突入部周圍凹弧。', halfRing([X, -0.85, 0], 0.53, 0.06, 0xd77a94), { anchor: [X - 0.55, -0.85, 0] });
+        reg(G, '陰道（牛）', 'Vagina', '反芻獸陰道上皮不角化。', vag(X, -0.8), { anchor: [X + 0.6, -1.7, 0] });
+        reg(G, '子宮體（牛）', 'Uterine body', '假子宮體前方區域。', uter(X, 0.8), { anchor: [X + 0.6, 1.25, 0] });
+
+        X = -2.5; G = '豬';
+        title(X, '母豬', '長・螺旋圓環');
+        reg(G, '子宮頸壁（豬，很長）', 'Cervical wall (long)', '直接接續陰道（無陰道穹窿），交配直接宮內射精（150–500 ml）。', [halfCyl([X, 0, 0], 0.4, 0.4, -1.4, 1.0, CXC, 0.7), halfCyl([X, 0, 0], 0.3, 0.3, -1.4, 1.0, MUC, 0.9)], { anchor: [X + 0.4, 0.5, 0] });
+        reg(G, '螺旋狀圓環（子宮頸枕）', 'Spiral annular rings (pulvini)', '交錯枕狀螺旋鎖扣與公豬螺旋狀陰莖尖吻合鎖定。', tube(helixAlong(new THREE.LineCurve3(V(X, -1.3, 0), V(X, 0.9, 0)), 0.2, 5, 0, 300), 0.08, RG, 1, 2), { anchor: [X - 0.3, -0.2, 0.1] });
+        reg(G, '陰道（豬）', 'Vagina', '單一陰道。', [halfCyl([X, 0, 0], 0.55, 0.42, -2.2, -1.4, VG, 0.35)], { anchor: [X + 0.55, -1.85, 0] });
+        reg(G, '子宮體（豬）', 'Uterine body (short)', '短小子宮體。', uter(X, 1.0), { anchor: [X + 0.6, 1.4, 0] });
+
+        X = 0; G = '馬';
+        title(X, '母馬', '短・縱褶突入陰道');
+        reg(G, '子宮頸壁（馬，短）', 'Cervical wall (short)', '鬆軟且短，無精子運輸障礙（精液直入子宮）。', [halfCyl([X, 0, 0], 0.4, 0.4, -0.5, 0.5, CXC, 0.7), halfCyl([X, 0, 0], 0.3, 0.3, -0.5, 0.5, MUC, 0.9)], { anchor: [X + 0.4, 0.2, 0] });
+        const MF = []; for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2, r = 0.16; MF.push(tube([[X + Math.cos(a) * r, 0.45, Math.sin(a) * r], [X + Math.cos(a) * r, -0.5, Math.sin(a) * r], [X + Math.cos(a) * r * 1.4, -0.95, Math.sin(a) * r * 1.4], [X + Math.cos(a) * r * 1.5, -1.25, Math.sin(a) * r * 1.5]], 0.045, RG)); }
+        reg(G, '縱行黏膜皺摺（突入陰道）', 'Longitudinal folds', '花瓣狀顯著深垂入陰道穹窿。', MF, { anchor: [X - 0.3, -1.1, 0.2] });
+        reg(G, '陰道穹窿（馬）', 'Fornix vaginae', '深度明顯。', halfRing([X, -0.55, 0], 0.5, 0.06, 0xd77a94), { anchor: [X + 0.55, -0.55, 0] });
+        reg(G, '陰道（馬）', 'Vagina', '單一陰道。', vag(X, -0.5), { anchor: [X + 0.6, -1.7, 0] });
+        reg(G, '子宮體（馬）', 'Uterine body (large)', '大型子宮體。', uter(X, 0.5), { anchor: [X + 0.6, 0.95, 0] });
+
+        X = 2.5; G = '狗、貓';
+        title(X, '母狗', '短・平滑・單一皺褶');
+        reg(G, '子宮頸壁（狗，短）', 'Cervical wall', '內襯複層鱗狀上皮，具單皺褶但斜開口對精子具選擇性屏障。', [halfCyl([X, 0, 0], 0.36, 0.36, -0.4, 0.4, CXC, 0.7), halfCyl([X, 0, 0], 0.26, 0.26, -0.4, 0.4, 0xf6d0da, 0.9)], { anchor: [X + 0.36, 0.1, 0] });
+        reg(G, '單一黏膜皺褶', 'Single mucosal fold', '只具單一顯著皺褶。', tube([[X, 0.38, -0.24], [X, 0, -0.18], [X, -0.38, -0.24]], 0.05, RG), { anchor: [X - 0.15, 0, -0.15] });
+        reg(G, '陰道（狗）', 'Vagina (dog)', '發情期陰道表層角化（陰道抹片判定動情期核心）。', vag(X, -0.4), { anchor: [X + 0.6, -1.5, 0] });
+        reg(G, '子宮體（狗）', 'Uterine body', '接雙角子宮。', uter(X, 0.4), { anchor: [X + 0.6, 0.85, 0] });
+
+        X = 5; G = '人';
+        title(X, '人', '內子宮頸／外子宮頸');
+        reg(G, '內子宮頸', 'Endocervix', '單層高柱狀分泌黏液細胞（受 E₂/P₄ 調控 Muc5B）。', [halfCyl([X, 0, 0], 0.42, 0.42, -0.6, 0.7, CXC, 0.65), halfCyl([X, 0, 0], 0.2, 0.2, -0.6, 0.7, 0xd0607a, 0.95)], { anchor: [X + 0.42, 0.3, 0] });
+        const CG = [], rq = rnd(81);
+        for (let k = 0; k < 9; k++) {
+          const y = -0.45 + k * 0.13, a = Math.PI * (1.15 + rq() * 0.7), r0 = 0.2, r1 = 0.36;
+          const p0 = [X + Math.cos(a) * r0, y, -Math.abs(Math.sin(a)) * r0], p1 = [X + Math.cos(a) * r1, y - 0.05, -Math.abs(Math.sin(a)) * r1];
+          CG.push(tube([p0, p1], 0.022, 0xb070c0), tube([p1, [p1[0] + 0.03, p1[1] + 0.06, p1[2] - 0.02]], 0.018, 0xb070c0));
+        }
+        reg(G, '子宮頸腺（內子宮頸隱窩）', 'Endocervical crypts', '精子避開陰道酸性環境之主要貯存庫（可存活 28–48 小時！）。', CG, { anchor: [X - 0.35, 0.1, -0.2] });
+        reg(G, '外子宮頸', 'Ectocervix', '面對陰道側覆複層非角化鱗狀上皮。', lathe([[0.42, 0], [0.42, -0.15], [0.32, -0.32], [0.1, -0.4], [0.05, -0.36]], 0xf2c4cc, 0.85, [X, -0.6, 0]), { anchor: [X + 0.4, -0.85, 0.1] });
+        reg(G, '鱗狀柱狀交接處', 'Squamocolumnar junction (SCJ)', '柱狀上皮與鱗狀上皮移行轉化區（隨年齡/荷爾蒙移位）。', ring(V(X, -0.99, 0), V(0, 1, 0), 0.07, 0.022, 0xffd400), { anchor: [X - 0.15, -1.0, 0.1] });
+        reg(G, '子宮頸內口', 'Internal os', '通向梨形子宮腔之內口。', halfRing([X, 0.7, 0], 0.2, 0.04, 0x6a2040), { anchor: [X - 0.2, 0.7, 0] });
+        reg(G, '陰道（人）', 'Vagina (human)', '複層鱗狀上皮＋陰道乳酸菌維持酸性 (pH ~4.0–5.7)。', vag(X, -0.6), { anchor: [X + 0.6, -1.6, 0] });
+        reg(G, '子宮體（人）', 'Uterine body', '單式子宮。', uter(X, 0.7), { anchor: [X + 0.6, 1.15, 0] });
+      }
+    });
+  })();
 })();

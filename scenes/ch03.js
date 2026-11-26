@@ -284,4 +284,62 @@
       checkbox(box, '播放褪黑素傳遞', true, v => S4.play = v);
     }
   });
+
+  /* ===== 場景⑤：陰囊、精索筋膜與鞘膜逐層解剖（整合比較大體解剖） ===== */
+  SCENES.push({
+    name: '⑤ 陰囊與被膜層次',
+    title: '陰囊、精索筋膜與鞘膜層次解剖（由外而內逐層剝開）',
+    camera: { pos: [1.0, 0.5, 6.4], target: [0, 0.35, 0], fit: [2.8, 2.5] },
+    controls: [{ label: '🔍 陰囊全層視角', fn() { flyHome(); } }],
+    desc: `
+<p>陰囊由外而內分層：<b>皮膚 → 肉膜 → 精索筋膜（外精索筋膜、提睪筋膜、內精索筋膜）→ 鞘膜層（壁層、鞘膜腔、臟層）</b>，最內層緊貼睪丸白膜。</p>
+<details open><summary>陰囊四重溫度調節機制</summary><ul>
+  <li>① 陰囊皮膚薄、無皮下脂肪、毛髮稀疏且富含汗腺與溫度感受器（牛、羊汗腺少則以喘息散熱代償）。</li>
+  <li>② <b>肉膜（Tunica dartos）</b>：平滑肌受雄性素依賴，冷時收縮使陰囊皺褶貼體壁、熱時鬆弛擴張散熱面積。</li>
+  <li>③ <b>提睪肌（Cremaster muscle）</b>：橫紋肌受反射調控拉升或下放睪丸。</li>
+  <li>④ <b>蔓狀靜脈叢＋睪丸動脈</b>構成逆流熱交換（搭配本頁場景②動態機制）。</li>
+</ul></details>
+<p class="src">雷弟生物學 3D 比較解剖整合（對應 Essential Reproduction Ch.3 p.51–52 陰囊與溫度調控）</p>`,
+    build() {
+      const P = Math.PI, SC = [0.78, 1.0, 0.78];
+      const thinShell = (r, sc, col, o, phiStart, phiLen) => {
+        const g = new THREE.SphereGeometry(r, 48, 32, phiStart, phiLen);
+        const m = new THREE.Mesh(g, mat(col, o));
+        m.scale.set(sc[0], sc[1], sc[2]);
+        return m;
+      };
+      const defs = [
+        ['陰囊皮膚', 'Scrotal skin', 1.0, 0xe5b79d, 0, '很薄、無皮下脂肪，毛髮稀疏（貓與部分綿羊較緻密）；布滿溫度感受器，有皮脂腺與受交感神經支配的汗腺，協助溫度調節。'],
+        ['肉膜', 'Tunica dartos', 0.94, 0xb8574f, 0.2, '位於皮膚下方，由篩狀平滑肌纖維與彈性結締組織組成，並在正中形成陰囊中隔。冷時收縮（陰囊皺褶、睪丸貼近體壁），熱時鬆弛（增加散熱表面積）；收縮能力依賴雄性素。'],
+        ['外精索筋膜', 'External spermatic fascia', 0.88, 0xf2ece0, 0.4, '衍生自外腹斜肌的筋膜，三層精索筋膜中最明顯。'],
+        ['提睪筋膜／提睪肌', 'Cremasteric fascia & muscle', 0.82, 0xc9605a, 0.6, '衍生自內腹斜肌及其筋膜，含橫紋肌（提睪肌），不受意志控制；冷時收縮將睪丸拉近體壁，熱時鬆弛。'],
+        ['內精索筋膜', 'Internal spermatic fascia', 0.76, 0xe7e1cf, 0.8, '與橫腹筋膜連續的最內層精索筋膜。'],
+        ['鞘膜壁層', 'Parietal vaginal lamina', 0.70, 0x9fd0ff, 1.0, '衍生自腹膜鞘狀突，出生前封閉成囊。壁層外層疏鬆附著於陰囊內表面。'],
+        ['鞘膜臟層', 'Visceral vaginal lamina', 0.63, 0x7fb4ee, 1.2, '覆蓋在睪丸白膜外面（除與附睪接觸處），與壁層相連續；兩層間的空腔為<b>鞘膜腔 (cavum vaginale)</b>，含少量漿液潤滑。']
+      ];
+      defs.forEach((d, k) => {
+        const e = k * 0.3;
+        const m = thinShell(d[2], SC, d[3], k === 0 ? 0.55 : (k >= 5 ? 0.6 : 0.95), P - e, Math.min(2 * P, P + 2 * e));
+        const th = 0.7 + 0.25 * k;
+        reg('陰囊被膜（由外而內）', d[0], d[1], d[5], m, {
+          anchor: [d[2] * Math.cos(e) * Math.sin(th) * SC[0], d[2] * Math.cos(th) * SC[1], d[2] * Math.sin(e) * Math.sin(th) * SC[2]]
+        });
+      });
+      const tMesh = new THREE.Mesh(new THREE.SphereGeometry(1, 40, 28), mat(0xf8f4e6, 1));
+      tMesh.scale.set(0.45, 0.58, 0.45);
+      reg('睪丸與附睪', '睪丸白膜', 'Tunica albuginea of testis', '包被睪丸的緻密白色纖維結締組織，含平滑肌；其節律性收縮／鬆弛具<b>幫浦作用</b>，協助精子輸送進入睪丸網及輸出管。內面緊貼薄血管層 (tunica vasculosa)。',
+        tMesh, { anchor: [0.25, 0.1, 0.5] });
+      const ep = tube([[0.15, 0.6, 0.15], [-0.15, 0.52, 0.12], [-0.42, 0.2, 0.12], [-0.46, -0.2, 0.12], [-0.33, -0.52, 0.12]], 0.07, 0xd8a47f);
+      reg('睪丸與附睪', '附睪', 'Epididymis', '緊貼睪丸的長形構造，含迂曲的附睪管；分頭、體、尾，負責精子成熟、運輸、貯存與保護。外覆鞘膜臟層。', ep, { anchor: [-0.55, -0.1, -0.1] });
+      const cordc = lineCurve([0, 0.6, 0], [0, 1.6, 0]);
+      reg('精索與血管', '精索（含輸精管與血管）', 'Spermatic cord', '含輸精管、睪丸動脈、蔓狀靜脈叢、提睪肌動靜脈、神經與淋巴管，由深腹股溝環下行至睪丸。',
+        tube([[0, 0.6, 0], [0, 1.6, 0]], 0.13, 0xf0e6d8, 0.45), { anchor: [0.1, 1.3, 0] });
+      reg('精索與血管', '睪丸動脈', 'Testicular artery', '主要供應睪丸與附睪的動脈，十分迂曲，被蔓狀靜脈叢包圍。',
+        tube(helixAlong(cordc, 0.03, 8, 0, 120), 0.015, 0xe02020), { anchor: [-0.03, 1.55, 0] });
+      reg('精索與血管', '蔓狀靜脈叢', 'Pampiniform plexus', '緊密圍繞睪丸動脈的靜脈網，與動脈形成<b>逆流熱交換器</b>：低溫靜脈血帶走動脈血的熱，使進入睪丸的血液降溫。',
+        [tube(helixAlong(cordc, 0.07, 6, 0.5, 120), 0.016, 0x3b6fe0), tube(helixAlong(cordc, 0.07, 6, 3.6, 120), 0.016, 0x3b6fe0)], { anchor: [0.08, 1.1, 0.04] });
+      reg('精索與血管', '輸精管', 'Vas deferens', '位於精索中，將精子由附睪尾送往尿道。',
+        tube([[-0.33, -0.52, -0.02], [-0.5, -0.2, -0.1], [-0.35, 0.5, -0.12], [0, 0.7, 0], [0, 1.6, 0]], 0.025, 0xffffff), { anchor: [-0.05, 1.7, 0] });
+    }
+  });
 })();
