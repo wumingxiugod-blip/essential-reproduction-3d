@@ -26,19 +26,25 @@
       S1 = { t: 0, play: true };
       const BR = '左側：人類乳房 15–20 葉輸乳竇解剖', AL = '右側：放大的分泌腺泡與肌上皮籃（Figs 18.3–18.4）';
 
-      // 左側：乳房輪廓 + 6條代表性的獨立輸乳竇 & 乳頭開口
-      const breastS = shell(1, [2.9, 3.3, 2.3], 0xf0c8b8, 0.25, 0.45, Math.PI * 1.65);
+      // 左側：乳房解剖剖面 + 葡萄串狀腺泡小葉群 + 膨大輸乳竇 + 乳暈與乳頭（Fig 18.1）
+      const breastS = shell(1, [2.9, 3.3, 2.3], 0xf0c8b8, 0.24, 0.45, Math.PI * 1.65);
       breastS.position.set(-4.8, 0, 0);
       const lobes = [];
+      const lobCol = L_ST1 === 'lact' ? 0xffe488 : (L_ST1 === 'wean' ? 0x9aa4b2 : 0xe890a8);
       for (let i = 0; i < 6; i++) {
         const ly = -2.0 + i * 0.8;
-        lobes.push(ell([-6.0 + Math.abs(i - 2.5) * 0.22, ly, 0.15], [0.65, 0.38, 0.5], L_ST1 === 'lact' ? 0xffe488 : 0xe090a0, 0.88));
-        lobes.push(ttube([V(-5.4, ly, 0.15), V(-3.8, ly * 0.45, 0.15), V(-2.2, ly * 0.08, 0)], [0.09, 0.22, 0.08], L_ST1 === 'lact' ? 0xffe090 : 0xd8a8b8, 0.85, { organic: false }));
+        const lx = -6.05 + Math.abs(i - 2.5) * 0.24;
+        // 葡萄串狀腺泡小葉
+        const acPts = [V(lx, ly, 0.15), V(lx - 0.28, ly + 0.18, 0.28), V(lx - 0.26, ly - 0.18, 0.02), V(lx + 0.12, ly + 0.24, -0.05), V(lx + 0.12, ly - 0.22, 0.25)];
+        lobes.push(dots(acPts, L_ST1 === 'lact' ? 0.24 : 0.19, lobCol, 0.92));
+        // 輸乳管→乳暈下膨大輸乳竇→乳頭獨立細管
+        lobes.push(ttube([V(lx + 0.35, ly, 0.14), V(-3.8, ly * 0.46, 0.14), V(-2.95, ly * 0.2, 0.08), V(-2.05, ly * 0.07, 0)], [0.08, 0.14, 0.24, 0.06], L_ST1 === 'lact' ? 0xffe090 : 0xd8a8b8, 0.88, { organic: false }));
       }
-      const nip = ell([-2.0, 0, 0], [0.45, 0.45, 0.45], 0xc07060);
-      reg(BR, '15–20 葉獨立輸乳管與輸乳竇（人類開口模式，Fig 18.2c）', 'Human mammary lobes & lactiferous sinuses',
-        '各葉輸乳管於乳暈下膨大為<b>輸乳竇（貯存小室）</b>再獨立開口於乳頭（反芻牛羊則合併匯入巨大乳腺池與乳頭池）。',
-        [breastS, ...lobes, nip], { anchor: [-5.5, 3.4, 0.8] });
+      const areola = ring([-2.22, 0, 0], [1, 0, 0], 0.72, 0.16, 0xb8685c, 0.88);
+      const nip = ell([-1.92, 0, 0], [0.46, 0.36, 0.36], 0xc07060);
+      reg(BR, '15–20 葉葡萄串狀腺泡小葉、輸乳竇與乳暈乳頭（Fig 18.1）', 'Human mammary lobes, alveoli & lactiferous sinuses',
+        '各葉腺泡小葉匯入輸乳管，於乳暈下膨大為<b>輸乳竇（貯存小室）</b>再獨立開口於乳頭（反芻牛羊則合併匯入巨大乳腺池與乳頭池）。',
+        [breastS, ...lobes, areola, nip], { anchor: [-5.5, 3.4, 0.8] });
 
       // 右側：單顆放大腺泡剖面（基底微血管 + 基底膜 + 肌上皮條 + 立方分泌上皮 + 頂端胞吐/頂漿微滴！）
       const alvX = 3.8, alvY = 0;
@@ -62,7 +68,12 @@
         const cell = ell([cx, cy, 0], [0.56, 0.48, 0.52], cCol, L_ST1 === 'wean' ? 0.45 : 0.9);
         cell.rotation.z = a;
         const nuc = ell([alvX + Math.cos(a) * (r + 0.16), alvY + Math.sin(a) * (r + 0.16), 0.12], [0.2, 0.2, 0.2], 0x5c3474, 0.96);
-        epCells.push(cell, nuc);
+        // 頂端微絨毛與頂漿分泌凸出脂滴（Fig 18.4）
+        const mv = capsule([alvX + Math.cos(a) * (r - 0.48), alvY + Math.sin(a) * (r - 0.48), 0.08], [alvX + Math.cos(a) * (r - 0.68), alvY + Math.sin(a) * (r - 0.68), 0.08], 0.035, 0xffe4b8, 0.85);
+        epCells.push(cell, nuc, mv);
+        if (L_ST1 === 'lact' && i % 2 === 0) {
+          epCells.push(ell([alvX + Math.cos(a) * (r - 0.56), alvY + Math.sin(a) * (r - 0.56), 0.12], [0.24, 0.24, 0.24], 0xffe060, 0.95));
+        }
       }
       const nDrop = L_ST1 === 'lact' ? 14 : (L_ST1 === 'wean' ? 18 : 2);
       for (let i = 0; i < nDrop; i++) {
@@ -138,14 +149,24 @@
         CUE2 === 'bromo' ? '<b>Bromocriptine (D₂ 致效劑)</b> 直接綁定垂體前葉 D₂ 受體強烈抑止 PRL 分泌！' : '前葉受門脈去多巴胺+VIP激發產 PRL；後葉透過神經軸突直放催產素。',
         [antPit, postPit], { anchor: [0, -0.5, 0.9] });
 
-      // 乳房與嬰兒吸吮示意
-      const breast = ell([0, -3.2, 0], [2.4, 1.35, 1.3], 0xf0c8b8, 0.82);
-      const babyLip = ell([0, -4.4, 0.8], [0.8, 0.45, 0.5], 0xff90a0, 0.92);
+      // 乳房（含乳暈、乳頭、放射狀輸乳管）＋左側脊髓灰白質切片＋吸吮示意（Figs 18.6–18.7）
+      const breast = [
+        ell([0, -3.15, 0], [2.35, 1.32, 1.25], 0xf0c8b8, 0.55),
+        ring([0, -4.15, 0.72], [0, -0.6, 0.8], 0.58, 0.12, 0xb8685c, 0.9),
+        ell([0, -4.28, 0.88], [0.32, 0.28, 0.34], 0xc07060, 0.96),
+        ...[-1.1, 0, 1.1].map(dx => ttube([V(dx, -2.65, 0.15), V(dx * 0.45, -3.45, 0.48), V(0, -4.18, 0.8)], [0.16, 0.14, 0.06], 0xffe090, 0.88, { organic: false }))
+      ];
+      const cordS2 = [
+        ell([-4.8, -1.0, 0.15], [1.05, 0.72, 0.26], 0xd8e4f0, 0.72),
+        ell([-5.12, -1.0, 0.34], [0.2, 0.42, 0.12], 0x8090a8, 0.95),
+        ell([-4.48, -1.0, 0.34], [0.2, 0.42, 0.12], 0x8090a8, 0.95),
+        box([-4.8, -1.0, 0.34], [0.48, 0.16, 0.12], 0x8090a8, 0.95)
+      ];
       const cAff = arcArrow([[-1.2, -3.3, 0.3], [-4.8, -1.0, 0.3], [-4.8, 2.2, 0.3], [-2.5, 3.6, 0.3]], CUE2 === 'suckle' ? 0x38bdf8 : 0x445566, 0.06);
       const cPRL = arcArrow([[-2.0, -0.2, 0.3], [-1.3, -2.2, 0.3]], isPRLOn ? 0xe8b84b : C_INH, 0.07, { inhibit: CUE2 === 'bromo' });
       const cOT = arcArrow([[2.0, -0.2, 0.3], [1.3, -2.2, 0.3]], isMEROn ? 0x45c49e : C_INH, 0.07, { inhibit: CUE2 === 'stress' });
-      reg(BR, '乳頭感測上傳與兩路荷爾蒙輸出目標', 'Nipple stimulation & Milk/Ejection targets', C2_TXT[CUE2][1],
-        [breast, babyLip, ...cAff, ...cPRL, ...cOT], { anchor: [3.2, -3.4, 0.9] });
+      reg(BR, '乳頭感測上傳（經脊髓背角與前外側柱）與雙荷爾蒙標靶', 'Nipple stimulation, spinal cord & Milk/Ejection targets', C2_TXT[CUE2][1],
+        [...breast, ...cordS2, ...cAff, ...cPRL, ...cOT], { anchor: [3.2, -3.4, 0.9] });
 
       S2.fAf = flowOn(cAff.curve, 12, 0.11, 0x38bdf8, 0x103050, CUE2 === 'suckle' ? 0.38 : 0.02, 0.03);
       S2.fP = flowOn(cPRL.curve, 12, 0.12, 0xe8b84b, 0x403000, isPRLOn ? 0.35 : 0.02, 0.03);

@@ -173,36 +173,80 @@
       const shrink = CAST3 ? 0.45 : 1.0;
       const UR = '泌尿與骨盆基準', GL = '雄性附屬生殖腺（DHT 依賴）', EX = '排精道與陰莖';
 
-      const blad = ell([0, 2.6, 1.0], [1.7, 1.4, 1.5], 0xe8b878, 0.35);
-      const pubis = box([0, 1.0, 2.8], [1.4, 1.1, 0.9], 0xeadcbc, 0.65);
-      const rect = ttube([[0, 4.2, -2.5], [0, 0.5, -2.2], [0, -3.5, -2.6]], 0.9, 0xb87068, 0.3);
-      reg(UR, '膀胱、恥骨與直腸地標', 'Urinary bladder, pubis & rectum', '直腸緊貼前列腺與儲精囊後方，獸醫／臨床可經直腸觸診評估（Fig 7.5a）。', [blad, pubis, rect], { anchor: [0, 3.8, -2.2] });
-
-      const vas = [
-        ttube([[-1.4, -3.6, 0.2], [-1.7, 0.2, 0.6], [-1.3, 3.5, 0.5], [-0.4, 1.8, -0.3]], 0.12, 0x3b82f6, 0.92, { organic: false }),
-        ttube([[1.4, -3.6, 0.2], [1.7, 0.2, 0.6], [1.3, 3.5, 0.5], [0.4, 1.8, -0.3]], 0.12, 0x3b82f6, 0.92, { organic: false })
+      // 膀胱（含輸尿管匯入三角區）+ 弧形恥骨聯合 + 直腸（Fig 7.5）
+      const blad = ell([0, 2.6, 1.0], [1.75, 1.45, 1.5], 0xe8b878, 0.36);
+      const ureters = [-1, 1].map(s => ttube([[s * 1.35, 4.7, 0.2], [s * 1.05, 3.5, 0.45], [s * 0.72, 2.35, 0.55]], 0.1, 0xd8a868, 0.85, { organic: false }));
+      const pubis = [
+        ttube([[-1.55, 0.8, 2.25], [-0.55, 1.08, 2.85], [0, 1.12, 2.95], [0.55, 1.08, 2.85], [1.55, 0.8, 2.25]], [0.32, 0.42, 0.46, 0.42, 0.32], 0xeadcbc, 0.72, { organic: false }),
+        ell([0, 1.1, 2.95], [0.16, 0.45, 0.38], 0xd0c0a0, 0.85)
       ];
-      const tes = [ell([-1.3, -3.9, 0.5], [0.55, 0.78, 0.55], 0x5aa8ff, CAST3 ? 0.2 : 0.9), ell([1.3, -3.9, 0.5], [0.55, 0.78, 0.55], 0x5aa8ff, CAST3 ? 0.2 : 0.9)];
-      const ure = ttube([[0, 1.5, 0.8], [0, -0.4, 0.6], [0, -1.5, 1.4], [0, -2.3, 3.6], [0, -3.6, 4.3]], 0.14, 0x90d8ff, 0.85, { organic: false });
-      const pen = ttube([[0, -1.4, 1.4], [0, -2.3, 3.6], [0, -3.6, 4.3]], [0.55, 0.5, 0.58], 0xd88888, 0.45, { organic: false });
-      reg(EX, '睪丸與輸精管（從陰囊繞過膀胱）', 'Testes & vas deferens', '輸精管將精子從副睪尾輸送至尿道前列腺部。', [...vas, ...tes], { anchor: [-1.8, -3.8, 0.8] });
-      reg(EX, '尿道與陰莖', 'Urethra & penis', '泌尿與射精共同終端通道，穿過前列腺、尿生殖膈與陰莖海綿體（Fig 7.5a）。', [ure, pen], { anchor: [0, -3.0, 4.5] });
+      const rect = ttube([[0, 4.3, -2.55], [0, 1.6, -2.15], [0, -0.6, -2.3], [0, -3.5, -2.65]], [0.85, 0.95, 0.88, 0.75], 0xb87068, 0.3, { organic: false });
+      reg(UR, '膀胱（含輸尿管）、恥骨聯合與直腸地標', 'Urinary bladder, ureters, pubis & rectum', '直腸緊貼前列腺與儲精囊後方，獸醫／臨床可經直腸觸診評估（Fig 7.5a）。', [blad, ...ureters, ...pubis, rect], { anchor: [0, 3.8, -2.2] });
 
-      // 4 個受 DHT 調節的附屬腺（依物種及去勢狀態縮放）
-      const pros = ell([0, 0.9, 0.6], [1.05 * pSc * shrink, 0.85 * pSc * shrink, 0.95 * pSc * shrink], 0xff9a4a);
-      reg(GL, `前列腺（${SP3}）`, 'Prostate gland', '富含 5α-還原酶與 AR（加上催乳素協同），製造微酸性或鹼性精漿液與前列腺素。', pros, { anchor: [1.8, 0.9, 0.8] });
+      // 雙側睪丸 + 盤繞副睪 + 輸精管
+      const vas = [
+        ttube([[-1.45, -3.55, 0.25], [-1.75, 0.2, 0.6], [-1.3, 3.55, 0.5], [-0.42, 1.85, -0.32]], 0.11, 0x3b82f6, 0.92, { organic: false }),
+        ttube([[1.45, -3.55, 0.25], [1.75, 0.2, 0.6], [1.3, 3.55, 0.5], [0.42, 1.85, -0.32]], 0.11, 0x3b82f6, 0.92, { organic: false })
+      ];
+      const tes = [];
+      [-1, 1].forEach(s => {
+        tes.push(ell([s * 1.3, -3.9, 0.5], [0.55, 0.78, 0.55], 0x5aa8ff, CAST3 ? 0.2 : 0.9));
+        // 附睪頭→體→尾緊貼睪丸後外側
+        const epPath = new THREE.CatmullRomCurve3(PV([[s * 1.35, -3.15, 0.45], [s * 1.72, -3.55, 0.2], [s * 1.68, -4.35, 0.22], [s * 1.45, -4.55, 0.28]]));
+        tes.push(ttube(helixAlong(epPath, 0.11, 6, 0, 56), 0.065, 0xd890a8, CAST3 ? 0.35 : 0.88, { organic: false, radial: 8 }));
+      });
+      const ure = ttube([[0, 1.55, 0.8], [0, -0.4, 0.6], [0, -1.5, 1.4], [0, -2.3, 3.6], [0, -3.65, 4.35]], 0.14, 0x90d8ff, 0.88, { organic: false });
+      const pen = [
+        ttube([[0, -1.4, 1.4], [0, -2.25, 3.45], [0, -3.25, 4.1]], [0.58, 0.52, 0.48], 0xd88888, 0.48, { organic: false }),
+        // 龜頭與冠狀溝
+        ell([0, -3.62, 4.32], [0.54, 0.62, 0.56], 0xe07884, 0.68),
+        ring([0, -3.22, 4.08], [0, -0.82, 0.57], 0.54, 0.09, 0xd06878, 0.72)
+      ];
+      reg(EX, '睪丸、盤繞副睪與輸精管', 'Testes, epididymis & vas deferens', '輸精管將精子從副睪尾輸送至尿道前列腺部。', [...vas, ...tes], { anchor: [-1.8, -3.8, 0.8] });
+      reg(EX, '尿道與陰莖（含陰莖頭與冠狀溝）', 'Urethra & penis', '泌尿與射精共同終端通道，穿過前列腺、尿生殖膈與陰莖海綿體（Fig 7.5a）。', [ure, ...pen], { anchor: [0, -3.0, 4.5] });
+
+      // 4 個受 DHT 調節的附屬腺（依物種及去勢狀態縮放，精細化葉狀/分節造型）
+      const ps = pSc * shrink;
+      const pros = [
+        ell([-0.38 * ps, 0.9, 0.58], [0.76 * ps, 0.84 * ps, 0.86 * ps], 0xff9a4a, 0.92),
+        ell([0.38 * ps, 0.9, 0.58], [0.76 * ps, 0.84 * ps, 0.86 * ps], 0xff9a4a, 0.92),
+        ell([0, 0.96, 0.82], [0.58 * ps, 0.62 * ps, 0.55 * ps], 0xf58a3a, 0.88)
+      ];
+      reg(GL, `前列腺（栗狀雙葉，${SP3}）`, 'Prostate gland', '富含 5α-還原酶與 AR（加上催乳素協同），包繞尿道起始部製造微酸性或鹼性精漿液與前列腺素。', pros, { anchor: [1.8, 0.9, 0.8] });
 
       if (svSc > 0) {
-        const sv = [ell([-1.1, 2.0, -0.6], [0.42 * svSc * shrink, 0.9 * svSc * shrink, 0.35 * svSc * shrink], 0x46d16a), ell([1.1, 2.0, -0.6], [0.42 * svSc * shrink, 0.9 * svSc * shrink, 0.35 * svSc * shrink], 0x46d16a)];
-        reg(GL, '儲精囊（牛/豬最發達，犬無）', 'Seminal vesicles', '位於膀胱後外側，分泌大量含果糖、檸檬酸與前列腺素之精漿液。', sv, { anchor: [-2.2, 2.2, -0.6] });
+        const svs = svSc * shrink;
+        const sv = [];
+        [-1, 1].forEach(s => {
+          const svAxis = new THREE.CatmullRomCurve3(PV([[s * 0.45, 1.35, -0.25], [s * (0.95 + 0.25 * svs), 1.95, -0.55], [s * (1.25 + 0.35 * svs), 2.55, -0.68]]));
+          sv.push(ttube(helixAlong(svAxis, 0.18 * svs, 4, s > 0 ? 0 : Math.PI, 48), 0.22 * svs, 0x46d16a, 0.92, { organic: false, radial: 10 }));
+          for (let k = 0; k < 4; k++) {
+            const pt = svAxis.getPoint(0.2 + k * 0.25);
+            sv.push(ell([pt.x + s * 0.12 * svs, pt.y, pt.z - 0.1 * svs], [0.24 * svs, 0.26 * svs, 0.22 * svs], 0x52de78, 0.9));
+          }
+        });
+        reg(GL, '儲精囊（分葉盤繞腺囊，牛/豬最發達，犬無）', 'Seminal vesicles', '位於膀胱後外側，呈盤繞分葉狀，分泌大量含果糖、檸檬酸與前列腺素之精漿液（Fig 7.5b）。', sv, { anchor: [-2.2, 2.2, -0.6] });
       }
       if (amSc > 0) {
-        const amp = [ell([-0.55, 1.75, -0.35], [0.22 * amSc * shrink, 0.45 * amSc * shrink, 0.22 * amSc * shrink], 0xffe060), ell([0.55, 1.75, -0.35], [0.22 * amSc * shrink, 0.45 * amSc * shrink, 0.22 * amSc * shrink], 0xffe060)];
-        reg(GL, '輸精管壺腹（牛/羊/馬/人具，豬/犬無）', 'Ampulla of vas deferens', '輸精管末端腺體性膨大處，具局部儲存與分泌功能。', amp, { anchor: [1.4, 2.0, -0.4] });
+        const ams = amSc * shrink;
+        const amp = [];
+        [-1, 1].forEach(s => {
+          for (let k = 0; k < 3; k++) {
+            const frac = k / 2;
+            const r = (0.18 + 0.08 * Math.sin(frac * Math.PI)) * ams;
+            amp.push(ell([s * (0.42 + frac * 0.24), 1.48 + frac * 0.62, -0.28 - frac * 0.1], [r, r * 1.25, r], 0xffe060, 0.94));
+          }
+        });
+        reg(GL, '輸精管壺腹（念珠狀膨大，牛/羊/馬/人具，豬/犬無）', 'Ampulla of vas deferens', '輸精管末端腺體性膨大處，具局部儲存與分泌功能（Fig 7.5b）。', amp, { anchor: [1.4, 2.0, -0.4] });
       }
       if (bgSc > 0) {
-        const bg = [ell([-0.42, -0.4, 0.35], [0.25 * bgSc * shrink, 0.32 * bgSc * shrink, 0.25 * bgSc * shrink], 0xc084fc), ell([0.42, -0.4, 0.35], [0.25 * bgSc * shrink, 0.32 * bgSc * shrink, 0.25 * bgSc * shrink], 0xc084fc)];
-        reg(GL, '尿道球腺／考珀氏腺（豬最發達，犬無）', 'Bulbourethral (Cowper\'s) glands', '位於膜部尿道旁，射精前分泌透明黏液沖洗潤滑尿道，在豬還負責形成凝固栓塞（Table 7.1）。', bg, { anchor: [1.8, -0.5, 0.4] });
+        const bgs = bgSc * shrink;
+        const bg = [];
+        [-1, 1].forEach(s => {
+          bg.push(ell([s * 0.45, -0.42, 0.35], [0.25 * bgs, 0.32 * bgs, 0.25 * bgs], 0xc084fc, 0.94));
+          bg.push(ttube([[s * 0.42, -0.5, 0.38], [s * 0.15, -0.82, 0.62], [0, -0.95, 0.72]], 0.045, 0xd0a0ff, 0.88, { organic: false }));
+        });
+        reg(GL, '尿道球腺／考珀氏腺（含排泄管，豬最發達，犬無）', 'Bulbourethral (Cowper\'s) glands', '位於膜部尿道旁，射精前經細導管分泌透明黏液沖洗潤滑尿道，在豬還負責形成凝固栓塞（Table 7.1）。', bg, { anchor: [1.8, -0.5, 0.4] });
       }
       textSprite(CAST3 ? '去勢 18 天：缺乏 DHT → 腺體上皮萎縮、腔室縮小 (Fig 7.6b)' : `${GL_TAB[SP3][0]} 附屬生殖腺配置 (Table 7.1)`, [0, 5.1, 0], 0.38, CAST3 ? '#ff8a8a' : '#ffd479');
     },

@@ -67,22 +67,29 @@
         MODE1 === 'vas' ? '輸精管結紮處阻塞，但前方輸出小管已吸收水分，因此僅副睪尾累積精子由巨噬細胞清除，不影響生精！' : '副睪經歷起始→中→終段（5–11 天），將精子濃縮 100 倍並賦予受精與游泳潛能；尾段及輸精管作為儲存庫。',
         epArr, { anchor: [0.8, -3.8, 0.9] });
 
-      // 右側：放大精子比較（隨 STAGE1 0=未成熟頭段 -> 1=成熟尾段變化）
+      // 右側：高精細度放大精子比較（梨形扁平頭 + 頂體帽 + 螺旋粒線體鞘 + 動態波動鞭毛）
       const mCol = STAGE1 > 0.5 ? 0x60f0c8 : 0xaab8c8;
-      const sHead = ell([5.4, 2.3, 0], [0.55 - STAGE1 * 0.1, 0.8 - STAGE1 * 0.08, 0.32 - STAGE1 * 0.06], mCol, 0.95);
-      const acroCap = ell([5.4, 2.8, 0.06], [0.48, 0.36, 0.3], 0xffd479, 0.88);
-      const eppinCoat = dots([V(5.0, 2.4, 0.35), V(5.8, 2.4, 0.35), V(5.4, 3.05, 0.32), V(5.4, 1.9, 0.35)], 0.11, 0x4db8e8, STAGE1 > 0.35 ? 0.95 : 0.1);
+      const sHeadG = spermHeadGeo(1.38 - STAGE1 * 0.12, 0.84 - STAGE1 * 0.1, 0.36 - STAGE1 * 0.06);
+      const sHead = new THREE.Mesh(sHeadG, mat(mCol, 0.95));
+      sHead.rotation.z = Math.PI / 2; sHead.position.set(5.4, 2.35, 0); CUR.root.add(sHead);
+      const acroG = spermAcrosomeGeo(1.38 - STAGE1 * 0.12, 0.84 - STAGE1 * 0.1, 0.36 - STAGE1 * 0.06);
+      const acroCap = new THREE.Mesh(acroG, mat(0xffd479, 0.9));
+      acroCap.rotation.z = Math.PI / 2; acroCap.position.set(5.4, 2.35, 0); CUR.root.add(acroCap);
+      const eppinCoat = dots([V(4.92, 2.45, 0.32), V(5.88, 2.45, 0.32), V(5.4, 3.12, 0.26), V(5.05, 1.92, 0.3), V(5.75, 1.92, 0.3)], 0.1, 0x4db8e8, STAGE1 > 0.35 ? 0.95 : 0.1);
       // 細胞質滴隨 STAGE1 滑下中段並於 STAGE1>0.85 脫落消失
-      const dropY = 1.45 - STAGE1 * 2.6;
-      const cyDrop = ell([5.75, dropY, 0.15], [0.32, 0.32, 0.32], 0xffa8a8, STAGE1 > 0.85 ? 0.08 : 0.85);
-      const midP = cyl([5.4, 1.5, 0], [5.4, -0.3, 0], 0.18, 0x50d890, 0.92);
-      const tailGrp = new THREE.Group();
-      const tailM = cyl([5.4, -0.3, 0], [5.4, -3.5, 0], 0.075, STAGE1 > 0.5 ? 0xffd43a : 0x8899aa, 0.95);
-      tailGrp.add(tailM);
-      CUR.root.add(tailGrp);
+      const dropY = 1.45 - STAGE1 * 2.55;
+      const cyDrop = ell([5.72, dropY, 0.16], [0.28, 0.28, 0.26], 0xffa8a8, STAGE1 > 0.85 ? 0.08 : 0.88);
+      const midCore = cyl([5.4, 1.55, 0], [5.4, -0.35, 0], 0.14, 0x3eb878, 0.92);
+      const midHelix = ttube(helixAlong(lineCurve([5.4, 1.5, 0], [5.4, -0.3, 0]), 0.19, 8, 0, 72), 0.052, 0x58e098, 0.94, { organic: false, radial: 8 });
+      const tailW = waveTail(0, 0, 0, 3.4, 0.09, 0.025, STAGE1 > 0.5 ? 0xffd43a : 0x8899aa, 0.95, 36, 10);
+      tailW.rotation.z = -Math.PI / 2;
+      tailW.position.set(5.4, -0.35, 0);
+      const tAmp = STAGE1 > 0.35 ? (0.14 + 0.28 * STAGE1) : 0.05;
+      tailW.updateWave(0, tAmp, 6.5);
+      CUR.root.add(tailW);
       reg(SP, `精子成熟模型（Day ${Math.round(STAGE1 * 11)}）`, 'Spermatozoon Maturation Changes',
         '隨副睪推進：①核緻密化與頂體塑形；②<b>細胞質滴下移脫落</b>；③表面 GPI 醣蛋白與 <b>EPPIN</b> 保護層（藍珠）累積（唾液酸↑負電↑）；④鞭毛外緻密纖維 <b>S–S 雙硫鍵↑</b> 更強韌、cAMP↑！',
-        [sHead, acroCap, eppinCoat, cyDrop, midP, tailM], { anchor: [7.6, 0.2, 0.6] });
+        [sHead, acroCap, eppinCoat, cyDrop, midCore, midHelix, tailW], { anchor: [7.6, 0.2, 0.6] });
 
       const flowC = new THREE.CatmullRomCurve3(epiPts);
       S1.flow = flowOn(flowC, MODE1 === 'norm' ? 24 : 8, 0.11, 0xe8f6ff, 0x204060, MODE1 === 'norm' ? 0.26 : 0.04, 0.06);
@@ -94,9 +101,7 @@
       CUR.tick = () => {
         const d = S1.play ? dt() : 0; S1.t += d;
         S1.flow.run(d);
-        if (STAGE1 > 0.4) {
-          tailM.rotation.z = Math.sin(S1.t * 8) * (0.04 + 0.1 * STAGE1);
-        }
+        if (S1.play) tailW.updateWave(S1.t * 6.5, tAmp, 6.5);
       };
     },
     panel(box) {
@@ -133,19 +138,30 @@
       const eScale = 0.62 + 0.42 * clamp(TURGOR2 * kNO, 0.05, 1.08);
       const CC = '成對陰莖海綿體與白膜', CS = '尿道海綿體與尿道', VS = '海綿動脈、分流與白膜下靜脈';
 
-      // 外皮與堅韌白膜（截面圖：呈現完整 3D 短圓柱剖面）
-      const skin = annulus(4.15, 3.85, 2.2, 0xd8a890, 0.25, -1.1);
-      const tunicaL = annulus(1.85 * eScale, 1.65 * eScale, 2.5, 0xf2f4f8, 0.82, -1.25);
+      // 外皮、Buck 深筋膜、堅韌白膜與海綿體小樑竇網（Fig 10.4b）
+      const skin = annulus(4.2, 3.88, 2.2, 0xd8a890, 0.24, -1.1);
+      const fascia = annulus(3.84, 3.72, 2.3, 0xe8dcd0, 0.32, -1.15);
+      const tunicaL = annulus(1.85 * eScale, 1.65 * eScale, 2.5, 0xf2f4f8, 0.86, -1.25);
       tunicaL.position.set(-1.7, 0.95, 0);
-      const tunicaR = annulus(1.85 * eScale, 1.65 * eScale, 2.5, 0xf2f4f8, 0.82, -1.25);
+      const tunicaR = annulus(1.85 * eScale, 1.65 * eScale, 2.5, 0xf2f4f8, 0.86, -1.25);
       tunicaR.position.set(1.7, 0.95, 0);
-      // 充血竇空間（隨 TURGOR 變紅且擴大）
+      const septum = box([0, 0.95, 0], [0.18, 2.4 * eScale, 2.42], 0xeaf0f6, 0.78);
+      // 充血竇空間 + 內側小樑血竇腔（隨 TURGOR 變紅且擴大）
       const sinCol = TURGOR2 * kNO > 0.55 ? 0xd83048 : 0x7a3848;
-      const sinusL = disc(1.63 * eScale, 2.4, sinCol, 0.82, -1.7, 0.95, -1.2);
-      const sinusR = disc(1.63 * eScale, 2.4, sinCol, 0.82, 1.7, 0.95, -1.2);
-      reg(CC, '陰莖海綿體竇與纖維白膜（Corpora cavernosa）', 'Corpora cavernosa & Fibrous tunica',
-        '小樑平滑肌舒張使海綿體竇大量充血膨脹，頂住外圍堅韌白膜產生極高靜水壓；白膜撕裂則無法鎖壓導致勃起障礙（Fig 10.4b）。',
-        [skin, tunicaL, tunicaR, sinusL, sinusR], { anchor: [-3.9, 2.3, 0.9] });
+      const lacCol = TURGOR2 * kNO > 0.55 ? 0x981028 : 0x4e1e2c;
+      const sinusL = disc(1.63 * eScale, 2.36, sinCol, 0.76, -1.7, 0.95, -1.18);
+      const sinusR = disc(1.63 * eScale, 2.36, sinCol, 0.76, 1.7, 0.95, -1.18);
+      const lacunae = [];
+      [-1.7, 1.7].forEach(cx => {
+        for (let i = 0; i < 8; i++) {
+          const a = (i / 8) * Math.PI * 2 + 0.25;
+          const r = 0.88 * eScale;
+          lacunae.push(disc(0.28 * eScale, 2.44, lacCol, 0.88, cx + Math.cos(a) * r, 0.95 + Math.sin(a) * r, -1.22));
+        }
+      });
+      reg(CC, '陰莖海綿體小樑竇、中膈與纖維白膜（Corpora cavernosa）', 'Corpora cavernosa & Fibrous tunica',
+        '小樑平滑肌舒張使海綿體血竇腔大量充血膨脹，頂住外圍堅韌白膜與中膈產生極高靜水壓；白膜撕裂則無法鎖壓導致勃起障礙（Fig 10.4b）。',
+        [skin, fascia, tunicaL, tunicaR, septum, sinusL, sinusR, ...lacunae], { anchor: [-3.9, 2.3, 0.9] });
 
       // 尿道海綿體與中央尿道
       const csScale = 0.82 + 0.2 * clamp(TURGOR2 * kNO, 0, 1);
@@ -170,9 +186,11 @@
       const subV2 = cyl([3.15, 1.5, -1.2], [3.15, 1.5, 1.2], veinR, 0x3b7bff, 0.95);
       const dArtL = cyl([-0.7, 3.15, -1.35], [-0.7, 3.15, 1.35], 0.13, 0xff6060);
       const dArtR = cyl([0.7, 3.15, -1.35], [0.7, 3.15, 1.35], 0.13, 0xff6060);
-      reg(VS, '海綿深動脈（擴張↑）與白膜下靜脈叢（被壓閉↓）', 'Profunda arteries & Sub-tunical veins',
-        '高壓使靜脈回流近乎歸零：動脈血流入↑而通過流出↓。若勃起持續過久（缺血性陰莖異常勃起 priapism）會危及組織供氧！',
-        [profL, profR, deepDorsalV, subV1, subV2, dArtL, dArtR], { anchor: [4.0, 2.8, 0.9] });
+      const dNrvL = cyl([-1.28, 3.05, -1.35], [-1.28, 3.05, 1.35], 0.1, 0xffe060);
+      const dNrvR = cyl([1.28, 3.05, -1.35], [1.28, 3.05, 1.35], 0.1, 0xffe060);
+      reg(VS, '海綿深動脈（擴張↑）、背神經與白膜下靜脈叢（壓閉↓）', 'Profunda arteries, dorsal nerves & sub-tunical veins',
+        '高壓使靜脈回流近乎歸零：動脈血流入↑而通過流出↓。背神經（黃）傳導感覺輸入啟動副交感 NO 路徑（Fig 10.4b）。',
+        [profL, profR, deepDorsalV, subV1, subV2, dArtL, dArtR, dNrvL, dNrvR], { anchor: [4.0, 2.8, 0.9] });
 
       // NO -> cGMP 神經血管訊號流
       const nArc = arcArrow([[-4.5, -2.5, 0.5], [-2.5, -0.5, 0.5], [-1.7, 0.85, 0.9]], 0x70f0a0, 0.06);
@@ -232,15 +250,15 @@
         DEPO3 === 'human' ? '人類/牛/羊於陰道沉積：超過 99% 精子隨外漏流失；存活進子宮頸隱窩者受黏液滋養並過濾畸形精子（28–48 h）。' : '豬（150–500 ml）/馬（30–300 ml）/犬/鼠於交配時直接射入子宮頸或子宮內。',
         [vag, coag, cvx, ...crypts], { anchor: [-2.8, -2.5, 0.8] });
 
-      // 子宮體剖面 + 兩側輸卵管（著重右側高細節放大）
-      const utBody = shell(1, [2.1, 2.0, 1.2], 0xe27080, 0.34, 0.35, Math.PI * 1.7);
-      utBody.position.set(0, 1.1, 0);
-      const endoIn = shell(1, [1.55, 1.5, 0.9], 0xff9eb0, 0.45, 0.4, Math.PI * 1.6);
-      endoIn.position.set(0, 1.05, 0);
+      // 梨形子宮體剖面（肌層 + 內膜腔）+ 兩側輸卵管（Fig 10.6）
+      const utBody = lathe([[0.82, -0.45], [1.15, 0.2], [1.75, 1.15], [2.12, 2.05], [1.82, 2.72], [0.95, 3.05], [0.02, 3.12]], 0xe27080, 0.36, [0, 0, 0]);
+      utBody.scale.set(1.0, 1.0, 0.62);
+      const endoIn = lathe([[0.32, -0.35], [0.58, 0.35], [1.18, 1.25], [1.55, 1.98], [1.15, 2.48], [0.02, 2.56]], 0xff9eb0, 0.5, [0, 0, 0]);
+      endoIn.scale.set(1.0, 1.0, 0.58);
       const utjR = ring([1.75, 2.0, 0], [0.95, 0.3, 0], 0.36, 0.11, 0xffd479);
       const utjL = ring([-1.75, 2.0, 0], [-0.95, 0.3, 0], 0.36, 0.11, 0xffd479);
-      reg(UT, '子宮腔與 UTJ 括約肌關卡（ADAM1 檢驗點）', 'Uterus & Uterotubal junction (UTJ)',
-        '交配後 2–7 小時第一批活精子可抵輸卵管；<b>UTJ 括約肌</b>只允許具正常表面蛋白 <b>ADAM1</b> 且交互作用合格的精子通過！',
+      reg(UT, '梨形子宮腔（肌層／內膜）與 UTJ 括約肌關卡', 'Uterus & Uterotubal junction (UTJ)',
+        '交配後 2–7 小時第一批活精子可抵輸卵管；<b>UTJ 括約肌</b>只允許具正常表面蛋白 <b>ADAM1</b> 且交互作用合格的精子通過（Fig 10.6）！',
         [utBody, endoIn, utjR, utjL], { anchor: [-3.3, 1.9, 0.8] });
 
       // 右側輸卵管：峽部 -> AIJ -> 壺腹 -> 輸卵管傘 -> 腹腔開口 -> 卵巢
@@ -250,22 +268,58 @@
       // 卵巢 + 排卵點
       const ovR = ell([5.4, 0.2, 0], [1.1, 0.75, 0.7], 0xf6c080, 0.9);
       const ovL = ell([-5.2, 0.2, 0], [1.1, 0.75, 0.7], 0xf6c080, 0.75);
-      // 傘指
+      // 弧形指狀輸卵管傘（右 6 條、左 4 條）
       const fimb = [];
-      for (let i = 0; i < 5; i++) fimb.push(cone([6.8, 0.6, 0.2], [6.0 + Math.cos(i * 1.2) * 0.65, 0.05 + Math.sin(i * 1.2) * 0.45, 0.25], 0.14, 0xff8098, 0.9));
+      for (let i = 0; i < 6; i++) {
+        const a = -0.5 + i * 0.48;
+        fimb.push(ttube([
+          [6.7, 0.65, 0.2],
+          [6.45 + Math.cos(a) * 0.45, 0.32 + Math.sin(a) * 0.35, 0.36],
+          [5.9 + Math.cos(a) * 0.68, 0.05 + Math.sin(a) * 0.48, 0.32 + (i % 2) * 0.14]
+        ], [0.15, 0.1, 0.04], 0xff8098, 0.9, { organic: false }));
+      }
+      for (let i = 0; i < 4; i++) {
+        const a = Math.PI - 0.5 + i * 0.45;
+        fimb.push(ttube([
+          [-6.95, 1.45, 0.2],
+          [-6.5 + Math.cos(a) * 0.35, 0.85 + Math.sin(a) * 0.3, 0.3],
+          [-5.95 + Math.cos(a) * 0.45, 0.35 + Math.sin(a) * 0.4, 0.25]
+        ], [0.13, 0.08, 0.035], 0xf08098, 0.78, { organic: false }));
+      }
       const aijMark = ring([4.8, 3.3, 0], [0.95, 0.25, 0], 0.52, 0.09, 0x46d16a);
-      reg(OD, '峽部貯存庫、AIJ 受精位點與輸卵管傘', 'Isthmus, Ampullary–Isthmic Junction & Fimbria',
+      reg(OD, '峽部貯存庫、AIJ 受精位點與指狀輸卵管傘', 'Isthmus, Ampullary–Isthmic Junction & Fimbria',
         '受精發生於<b>壺腹—峽部交界處（AIJ，綠環）</b>：精子從峽部受化學趨化訊號吸引游出，與被輸卵管傘從腹腔拾入且靠纖毛/ICC 推進的卵丘卵團會合！',
         [tubeR, tubeL, ovR, ovL, ...fimb, aijMark], { anchor: [7.6, 3.6, 0.8] });
 
-      // 追蹤精子群（藍白點）與排出的卵丘卵團（黃珠）沿 STEP3 移動到 AIJ
+      // 追蹤具象梨形精子群（帶鞭毛）與排出的卵丘–放射冠卵團沿 STEP3 移動到 AIJ
       const spCurve = new THREE.CatmullRomCurve3([V(0, -3.5, 0), V(0, -1.2, 0), V(0.5, 1.3, 0), V(1.8, 2.0, 0), V(3.3, 2.5, 0), V(4.8, 3.3, 0)]);
       const ovCurve = new THREE.CatmullRomCurve3([V(5.6, 0.5, 0.1), V(6.7, 0.7, 0.2), V(7.3, 1.8, 0.3), V(6.4, 3.2, 0.2), V(4.8, 3.3, 0)]);
       const spPos = spCurve.getPoint(STEP3);
+      const spTan = spCurve.getTangent(STEP3).normalize();
+      const spAng = Math.atan2(spTan.y, spTan.x);
       const ovPos = ovCurve.getPoint(STEP3);
-      S3.spermSwarm = dots([spPos, spPos.clone().add(V(0.18, 0.1, 0.1)), spPos.clone().add(V(-0.15, -0.08, 0.1))], 0.13, 0x90e8ff);
-      S3.egg = ell(ovPos.toArray(), [0.32, 0.32, 0.32], 0xffd43a, 0.95);
-      S3.cumulus = ell(ovPos.toArray(), [0.55, 0.55, 0.55], 0xffe898, 0.38);
+      S3.spermSwarm = new THREE.Group();
+      const miniHeadG = spermHeadGeo(0.28, 0.16, 0.08);
+      const miniMat = mat(0x90e8ff, 0.96);
+      const miniTailMat = mat(0xc8f4ff, 0.9);
+      [[0, 0, 0.12], [0.22, 0.14, 0.16], [-0.18, -0.12, 0.14]].forEach(([dx, dy, dz], idx) => {
+        const sg = new THREE.Group();
+        sg.position.set(spPos.x + dx, spPos.y + dy, spPos.z + dz);
+        sg.rotation.z = spAng;
+        const hd = new THREE.Mesh(miniHeadG, miniMat);
+        sg.add(hd);
+        const tPts = [V(-0.12, 0, 0), V(-0.34, 0.06 * (idx % 2 ? 1 : -1), 0), V(-0.56, -0.05 * (idx % 2 ? 1 : -1), 0), V(-0.76, 0.04, 0)];
+        const tl = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(tPts), 14, 0.024, 6, false), miniTailMat);
+        sg.add(tl);
+        S3.spermSwarm.add(sg);
+      });
+      S3.egg = ell(ovPos.toArray(), [0.32, 0.32, 0.32], 0xffd43a, 0.96);
+      const crPts = [];
+      for (let i = 0; i < 10; i++) {
+        const a = (i / 10) * Math.PI * 2;
+        crPts.push(V(ovPos.x + Math.cos(a) * 0.44, ovPos.y + Math.sin(a) * 0.44, ovPos.z + 0.06));
+      }
+      S3.cumulus = dots(crPts, 0.13, 0xffe898, 0.88);
       CUR.root.add(S3.spermSwarm, S3.egg, S3.cumulus);
 
       S3.fSp = flowOn(spCurve, 18, 0.08, 0x90e8ff, 0x103050, 0.18, 0.05);

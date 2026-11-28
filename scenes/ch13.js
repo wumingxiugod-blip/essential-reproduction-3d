@@ -31,28 +31,57 @@
         '外層面向母體脫膜／子宮腺（第一孕期透過組織滋養吸收「子宮乳」，第 10–12 週切換成血液滋養胎盤，見右側頂部血管叢）。',
         [chor, chorMes], { anchor: [-4.6, 3.3, 0.9] });
 
-      // 胎盤位置 (頂右)：隨 ST1 >= 3 長出絨毛叢
-      const placDisk = ST1 >= 3 ? ell([0, 3.65, 0], [2.4, 0.65, 1.8], 0xd83050, 0.92) : ell([0, 3.65, 0], [1.2, 0.35, 1.0], 0xf08090, 0.5);
-      reg(CH, ST1 >= 3 ? '尿囊絨毛膜胎盤發育處' : '早期絨毛卵黃囊接觸帶', 'Placental disc region',
-        '胚胎第 1 孕期維持在 2–3% 低氧組織滋養，第 2 孕期啟動尿囊絨毛膜高效血液交換。', placDisk, { anchor: [0, 4.5, 0.8] });
+      // 胎盤位置 (頂部)：隨 ST1 >= 3 長出樹狀絨毛叢（Fig 13.2d-e）
+      const placDisk = ST1 >= 3 ? ell([0, 3.65, 0], [2.4, 0.62, 1.75], 0xd83050, 0.92) : ell([0, 3.65, 0], [1.2, 0.35, 1.0], 0xf08090, 0.5);
+      const placMs = [placDisk];
+      if (ST1 >= 3) {
+        for (let i = -3; i <= 3; i++) {
+          const vx = i * 0.58;
+          placMs.push(ttube([V(vx, 3.72, 0.2), V(vx * 1.12, 4.18, 0.25), V(vx * 1.2, 4.52, 0.15)], [0.16, 0.08], 0xe84868, 0.92, { organic: false }));
+        }
+      }
+      reg(CH, ST1 >= 3 ? '尿囊絨毛膜胎盤與樹狀絨毛叢' : '早期絨毛卵黃囊接觸帶', 'Placental disc & chorionic villi',
+        '胚胎第 1 孕期維持在 2–3% 低氧組織滋養，第 2 孕期啟動尿囊絨毛膜高效血液交換（Fig 13.2）。', placMs, { anchor: [0, 4.65, 0.8] });
 
-      // 羊膜腔 & 胚胎
+      // 羊膜腔 & 胚胎（早：三胚層胚盤；晚：捲曲雕塑胎兒 fetusMesh！）
       const amScale = ST1 === 4 ? 3.85 : ST1 >= 2 ? 2.1 : 1.15;
       const amnion = shell(1, [amScale, amScale * 0.82, amScale * 0.7], 0x70e8ff, 0.24, 0.5, Math.PI * 1.6);
       amnion.position.set(0, ST1 === 4 ? 0 : 0.7, 0);
-      const embY = ST1 >= 3 ? 0.2 : 0.5;
-      const embryo = ST1 >= 2 ? ell([0, embY, 0.2], [1.25, 0.75, 0.7], 0xf09070, 0.95) : box([0, embY, 0.1], [1.8, 0.4, 1.2], 0xf09070, 0.95);
-      const heart = ST1 >= 2 ? ell([-0.55, embY - 0.1, 0.5], [0.24, 0.24, 0.24], 0xff2828) : null;
-      const emArr = [amnion, embryo]; if (heart) emArr.push(heart);
-      reg(EM, ST1 === 4 ? '擴張之羊膜腔（已消滅胚外體腔！）' : '胚盤／捲曲胎兒與羊膜腔', 'Amnion & Embryo',
-        '上胚層衍生胚胎外胚層（未來皮膚＋神經系統）與羊膜上皮；紅點為胚內原始心臟開始透過臍血管泵血。', emArr, { anchor: [-3.9, -0.5, 0.9] });
+      const embY = ST1 >= 3 ? 0.15 : 0.5;
+      const emArr = [amnion];
+      if (ST1 >= 3) {
+        const fet = fetusMesh([0, embY, 0.15], ST1 === 4 ? 1.25 : 0.92, 0xf2a890, 0.95);
+        emArr.push(...fet.ms);
+      } else if (ST1 === 2) {
+        emArr.push(
+          tissueSlab([0, embY + 0.18, 0.15], [1.85, 0.18, 1.15], 0xf09070, 0.95, { wave: 0.06, seed: 1.1 }),
+          tissueSlab([0, embY, 0.15], [1.8, 0.16, 1.1], 0xe05080, 0.92, { wave: 0.05, seed: 1.5 }),
+          tissueSlab([0, embY - 0.18, 0.15], [1.85, 0.16, 1.15], 0x4db8e8, 0.95, { wave: 0.06, seed: 1.9 })
+        );
+      } else {
+        emArr.push(
+          tissueSlab([0, embY + 0.12, 0.15], [1.75, 0.2, 1.15], 0xf09070, 0.95, { wave: 0.05, seed: 1.1 }),
+          tissueSlab([0, embY - 0.12, 0.15], [1.75, 0.18, 1.15], 0x4db8e8, 0.95, { wave: 0.05, seed: 1.6 })
+        );
+      }
+      const heart = ST1 >= 2 ? ell([-0.32, embY - 0.05, 0.55], [0.22, 0.22, 0.22], 0xff2828) : null;
+      if (heart) emArr.push(heart);
+      reg(EM, ST1 === 4 ? '擴張之羊膜腔（已消滅胚外體腔！）與捲曲胎兒' : '三胚層胚盤／捲曲胚胎與羊膜腔', 'Amnion & Embryo',
+        '上胚層衍生胚胎外胚層（未來皮膚＋神經系統）與羊膜上皮；紅點為胚內原始心臟開始透過臍血管泵血（Figs 13.1–13.2）。', emArr, { anchor: [-3.9, -0.5, 0.9] });
 
-      // 卵黃囊（前大後縮） + 尿囊臍帶血管
+      // 卵黃囊（前大後縮） + 尿囊臍帶（雙螺旋臍動脈＋臍靜脈）
       const ykR = ST1 === 0 ? 1.5 : ST1 <= 2 ? 1.85 : ST1 === 3 ? 1.1 : 0.48;
       const ykX = ST1 >= 3 ? -1.8 : 0, ykY = ST1 >= 3 ? -1.4 : -1.25;
       const yolk = ell([ykX, ykY, 0.2], [ykR, ykR * 0.85, ykR * 0.75], 0x4db8e8, 0.72);
-      const allan = ST1 >= 3 ? ttube([V(0.7, embY - 0.2, 0.2), V(1.3, 1.4, 0.3), V(0.2, 3.2, 0.1)], [0.22, 0.28, 0.32], 0x45c49e, 0.92, { organic: false }) : null;
-      const yArr = [yolk]; if (allan) yArr.push(allan);
+      const yArr = [yolk];
+      if (ST1 >= 3) {
+        const stalkC = new THREE.CatmullRomCurve3(PV([[0.55, embY - 0.15, 0.25], [1.35, 1.35, 0.35], [0.25, 3.25, 0.15]]));
+        yArr.push(
+          ttube(stalkC.getPoints(24), [0.24, 0.28, 0.32], 0x45c49e, 0.45, { organic: false }),
+          ttube(helixAlong(stalkC, 0.11, 5, 0, 72), 0.065, 0xff4050, 0.94, { organic: false, radial: 8 }),
+          ttube(helixAlong(stalkC, 0.11, 5, Math.PI, 72), 0.065, 0x3b82f6, 0.94, { organic: false, radial: 8 })
+        );
+      }
       reg(YK, ST1 >= 3 ? '萎縮中之卵黃囊（藍）與新生尿囊臍帶（綠）' : '卵黃囊（最早造血與原始卵黃囊胎盤）', 'Yolk sac & Allantois (Umbilical stalk)',
         ST1 >= 3 ? '綠色管道即後腸長出的尿囊連同臍動靜脈直接貼合頂部絨毛膜建立胎盤！藍色卵黃囊隨後萎縮並入臍帶。' : '卵黃囊內壁為下胚層、外壁為造血中胚層；在兔／鼠一直協助免疫球蛋白等特定運輸，在人類則逐步退化。',
         yArr, { anchor: [3.2, -1.8, 0.9] });

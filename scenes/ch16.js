@@ -25,20 +25,29 @@
       const H = '四腔心臟與卵圓孔瓣膜', SH = '三大分流管（DV / FO / DA）', ORG = '胎盤・肺臟・胎頭／體循環';
       const isFet = CIRC1 === 'fetal', isPDA = CIRC1 === 'pda';
 
-      // 四腔心（右心在圖左側 x=-1.4, 左心在圖右側 x=+1.4）
-      const ra = box([-1.5, 1.1, 0], [2.2, 1.8, 1.8], 0x906090, 0.45);
-      const rv = box([-1.5, -1.0, 0], [2.2, 2.0, 1.8], 0x5068a0, 0.55);
-      const la = box([1.5, 1.1, 0], [2.2, 1.8, 1.8], isFet ? 0xd06080 : 0xff4555, 0.45);
-      const lv = box([1.5, -1.0, 0], [2.2, 2.0, 1.8], isFet ? 0xd85070 : 0xff3b3b, 0.55);
-      // 卵圓孔通道 (FO)
-      const fo = cyl([-0.35, 1.1, 0], [0.35, 1.1, 0], isFet ? 0.34 : 0.08, isFet ? 0xffd43a : 0x556677, isFet ? 0.96 : 0.45);
-      reg(H, '右房/右室（2/3 心輸出）↔ 左房/左室 ＋ 卵圓孔（FO）', 'Heart chambers & Foramen Ovale', C1_INFO[CIRC1][1],
-        [ra, rv, la, lv, fo], { anchor: [1.5, -0.5, 1.1] });
+      // 有機四腔心臟輪廓（左右心房穹頂＋圓錐狀左右心室＋中膈＋卵圓孔瓣膜）
+      const ra = ell([-1.32, 1.05, 0], [1.18, 0.92, 0.95], 0x906090, 0.48);
+      const la = ell([1.32, 1.05, 0], [1.15, 0.9, 0.95], isFet ? 0xd06080 : 0xff4555, 0.48);
+      const rv = ttube([V(-1.35, 0.25, 0), V(-1.05, -1.05, 0.1), V(-0.15, -2.05, 0)], [1.12, 0.95, 0.42], 0x5068a0, 0.56, { organic: false });
+      const lv = ttube([V(1.35, 0.25, 0), V(1.1, -1.1, 0.1), V(0.2, -2.15, 0)], [1.15, 1.02, 0.48], isFet ? 0xd85070 : 0xff3b3b, 0.58, { organic: false });
+      const septum = capsule([0, 1.85, 0], [0, -1.95, 0], 0.14, 0xd89098, 0.65);
+      // 卵圓孔通道 (FO)＋左側瓣膜葉
+      const fo = cyl([-0.38, 1.1, 0], [0.38, 1.1, 0], isFet ? 0.34 : 0.08, isFet ? 0xffd43a : 0x556677, isFet ? 0.96 : 0.45);
+      const foFlap = box([0.38, 1.1, 0], [0.1, 0.68, 0.68], isFet ? 0xffe080 : 0x8090a0, 0.82);
+      if (isFet) foFlap.rotation.z = -0.35;
+      reg(H, '有機四腔心臟（右室 2/3 心輸出）＋ 卵圓孔瓣膜（FO）', 'Heart chambers & Foramen Ovale', C1_INFO[CIRC1][1],
+        [ra, rv, la, lv, septum, fo, foFlap], { anchor: [1.5, -0.5, 1.1] });
 
-      // 器官節點：頂左=頭臂供腦(y=4.0,x=1.5), 頂右=胎肺(y=3.2,x=-4.8 vs 5.2), 底部=胎盤&DV(y=-4.0)
-      const brain = ell([2.2, 4.1, 0], [1.4, 0.72, 0.8], 0xf2a090, 0.92);
-      const lungs = ell([-5.2, 2.5, 0], [1.35, 1.4, 0.9], isFet ? 0x607898 : 0xff8098, isFet ? 0.72 : 0.95);
-      const placenta = ell([-5.2, -3.5, 0], [1.65, 0.85, 0.9], isFet || CIRC1 === 'trans' ? 0xd83050 : 0x445566, isFet ? 0.95 : 0.25);
+      // 器官節點：雙半球大腦、雙葉胎肺（含氣管支氣管）、圓盤狀胎盤、肝臟
+      const brain = [ell([1.65, 4.1, 0], [0.95, 0.68, 0.78], 0xf2a090, 0.94), ell([2.75, 4.1, 0], [0.95, 0.68, 0.78], 0xf2a090, 0.94)];
+      const lungs = [
+        ell([-5.85, 2.45, 0], [0.78, 1.32, 0.85], isFet ? 0x607898 : 0xff8098, isFet ? 0.74 : 0.95),
+        ell([-4.55, 2.45, 0], [0.78, 1.32, 0.85], isFet ? 0x607898 : 0xff8098, isFet ? 0.74 : 0.95),
+        cyl([-5.2, 4.0, 0], [-5.2, 3.1, 0], 0.16, 0xd8e4f0, 0.9),
+        cyl([-5.2, 3.15, 0], [-5.7, 2.75, 0], 0.11, 0xd8e4f0, 0.9),
+        cyl([-5.2, 3.15, 0], [-4.7, 2.75, 0], 0.11, 0xd8e4f0, 0.9)
+      ];
+      const placenta = lathe([[0.01, -0.32], [1.45, -0.26], [1.65, 0], [1.45, 0.26], [0.01, 0.34]], isFet || CIRC1 === 'trans' ? 0xd83050 : 0x445566, isFet ? 0.95 : 0.25, [-5.2, -3.55, 0], [0, 1, 0], 32);
       const liver = ell([-2.6, -3.5, 0], [0.95, 0.6, 0.7], 0x904830, 0.88);
       const body = ell([5.2, -2.5, 0], [1.3, 1.6, 0.9], 0xc07080, 0.88);
 
@@ -59,7 +68,7 @@
         [dv, da], { anchor: [-0.2, 3.3, 0.9] });
       reg(ORG, '胎盤 (90% O₂ 源)・低灌流胎肺 (Po₂ 20–25)・頭與體循環', 'Placenta, Lungs, Head & Body',
         '胎頭/上肢經由卵圓孔搶得 62% 血氧優先發育大腦；肺臟在出生第一口氣後血流量暴升數倍接手換氣！',
-        [brain, lungs, placenta, liver, body, rvPulm, pulmRet, lvAorta, descPlac], { anchor: [-5.8, -1.8, 0.9] });
+        [...brain, ...lungs, placenta, liver, body, rvPulm, pulmRet, lvAorta, descPlac], { anchor: [-5.8, -1.8, 0.9] });
 
       // 流向粒子：DV->FO->Brain（胎兒最粗黃紅流），Adult 為 RV->Lung->LV->Body
       const mainC = isFet ? new THREE.CatmullRomCurve3([V(-4.0, -3.4, 0.3), V(-2.2, -1.8, 0.3), V(-1.2, 1.1, 0.3), V(1.4, 1.1, 0.3), V(2.1, 3.5, 0.3)])
@@ -108,15 +117,18 @@
         '胎兒皮質醇活化肺與腎上腺髓質之 <b>PNMT</b>，把正腎上腺素甲基化為腎上腺素，並刺激肺與肝臟末期酵素群成熟（Table 16.1）。',
         [adr, med], { anchor: [-5.5, 3.8, 0.8] });
 
-      // 肺泡氣囊（表面張力素不夠就扁塌緊繃；夠則圓潤擴張並有一層亮青色卵磷脂內膜！）
+      // 肺泡氣囊（含終末細支氣管＋第 II 型肺泡上皮細胞＋外圍肺微血管網）
       const alvR = 1.15 + 1.35 * Math.pow(effU, 1.2);
       const alvWall = shell(1, [alvR, alvR, alvR * 0.85], effU > 0.6 ? 0x90e8ff : 0xff7080, 0.35, 0.55, Math.PI * 1.6);
       alvWall.position.set(0.4, 1.4, 0);
       const surfCoat = shell(1, [alvR * 0.88, alvR * 0.88, alvR * 0.75], 0x38bdf8, 0.1 + 0.65 * effU, 0.55, Math.PI * 1.6);
       surfCoat.position.set(0.4, 1.4, 0);
-      reg(LG, effU > 0.6 ? '富含卵磷脂表面張力素之成熟肺泡（L/S > 2）' : '缺張力素之塌陷危機肺泡（RDS 風險 · L/S < 2）', 'Alveolus & Dipalmitoyl lecithin',
-        '雙飽和卵磷脂大幅降低表面張力；羊水卵磷脂/神經鞘磷脂比 L/S &gt; 2 表示不致發生呼吸窘迫症（玻璃樣膜病）。',
-        [alvWall, surfCoat], { anchor: [0.4, 4.3, 0.8] });
+      const bronchiole = ttube([V(0.4, 1.4 + alvR + 1.15, 0), V(0.4, 1.4 + alvR * 0.88, 0)], [0.36, 0.52], 0xd8a8b8, 0.78, { organic: false });
+      const type2Cells = dots([V(0.4 - alvR * 0.72, 1.4 - alvR * 0.42, 0.32), V(0.4 + alvR * 0.72, 1.4 - alvR * 0.35, 0.32), V(0.4, 1.4 - alvR * 0.82, 0.28)], 0.24, 0x45c49e, 0.94);
+      const alvCap = ttube([V(0.4 - alvR * 1.15, 1.4 + 0.3, 0.1), V(0.4 - alvR * 0.6, 1.4 - alvR * 1.05, 0.25), V(0.4 + alvR * 0.6, 1.4 - alvR * 1.05, 0.25), V(0.4 + alvR * 1.15, 1.4 + 0.3, 0.1)], 0.12, 0xff4050, 0.9, { organic: false });
+      reg(LG, effU > 0.6 ? '富含卵磷脂表面張力素之成熟肺泡（L/S > 2）' : '缺張力素之塌陷危機肺泡（RDS 風險 · L/S < 2）', 'Alveolus, Type II cells & Dipalmitoyl lecithin',
+        '第 II 型肺泡細胞（綠）分泌雙飽和卵磷脂大幅降低表面張力；羊水卵磷脂/神經鞘磷脂比 L/S &gt; 2 表示不致發生呼吸窘迫症（玻璃樣膜病）。',
+        [alvWall, surfCoat, bronchiole, type2Cells, alvCap], { anchor: [0.4, 4.3, 0.8] });
 
       // 右下方：胎兒肝臟 (肝醣黃顆粒) + 腎臟 (Na+/K+-ATPase)
       const liv = ell([5.2, 1.6, 0], [1.45, 1.0, 0.9], 0xb05040, 0.85);

@@ -97,6 +97,28 @@
       });
       reg(ME, '四個獨特單倍體（1n）配子', '4 genetically unique haploid cells', '受精時兩個 1n 配子結合恢復二倍體 2n 合子，使族群基因庫在環境變動下保持多樣性與適應力。', S1.hap.flatMap(c => c.ms), { anchor: [5.4, -4.1, 0.5] });
 
+      // 依 Fig 1.1 加上兩極中心粒、星狀微管與彎曲紡錘絲
+      function mkSpindle(cx, cy, rx, ry, col) {
+        const g = new THREE.Group(); g.position.set(cx, cy, 0);
+        [-1, 1].forEach(sgn => {
+          const px = sgn * rx;
+          g.add(capsule([px, -0.16, 0.06], [px, 0.16, 0.06], 0.055, 0xffd479, 0.96));
+          g.add(capsule([px - 0.14, 0, -0.06], [px + 0.14, 0, -0.06], 0.055, 0xffb84a, 0.96));
+          for (let k = 0; k < 6; k++) {
+            const a = (k / 6) * Math.PI * 2;
+            g.add(capsule([px, 0, 0], [px + Math.cos(a) * 0.42, Math.sin(a) * 0.42, 0], 0.018, 0xffe498, 0.65));
+          }
+        });
+        for (let k = -2; k <= 2; k++) {
+          const dy = k * (ry * 0.34);
+          g.add(ttube([V(-rx, 0, 0), V(0, dy, 0.12 * (k % 2 ? 1 : -1)), V(rx, 0, 0)], 0.02, col, 0.52, { organic: false, seg: 16, radial: 6 }));
+        }
+        CUR.root.add(g);
+        return g;
+      }
+      S1.mitSpindle = mkSpindle(-5.4, 0, 2.75, 1.85, 0x8fd0ff);
+      S1.meiSpindle = mkSpindle(5.4, 0, 2.85, 1.95, 0xffd479);
+
       const dt = dtClock();
       CUR.tick = () => {
         const d = dt(); if (S1.play) S1.t += d;
@@ -123,6 +145,8 @@
         });
         S1.chiasma.forEach(c => { c.visible = st === 1; c.scale.setScalar(1 + 0.15 * Math.sin(S1.t * 4)); });
         S1.hap.forEach(c => c.g.visible = st === 3);
+        if (S1.mitSpindle) S1.mitSpindle.visible = st === 1 || st === 2;
+        if (S1.meiSpindle) S1.meiSpindle.visible = st === 1;
       };
     },
     panel(box) {
@@ -243,43 +267,62 @@
     build() {
       S3 = { t: 0, play: true };
       const BR = '腦與松果體', HY = '下視丘核團', PT = '腦垂腺與連結';
-      // 矢狀切腦輪廓、視丘與松果體
-      const cortex = shell(5.4, [1.25, 0.92, 0.42], 0xd8c4b4, 0.22, Math.PI * 0.5, Math.PI, 0, Math.PI * 0.72);
-      cortex.position.set(0.2, 2.2, -0.5);
-      const thal = ell([0.6, 3.3, -0.2], [2.2, 1.3, 1.0], 0xc8a898, 0.42);
-      const pineal = ell([3.4, 3.2, 0], [0.42, 0.34, 0.34], 0xffd060);
-      const optCh = ell([-2.9, 1.4, 0.3], [0.5, 0.32, 0.4], 0xe8e0c8);
-      const mamB = ell([1.8, 1.1, 0], [0.4, 0.35, 0.35], 0xd8b8a8);
-      reg(BR, '視丘與大腦矢狀輪廓', 'Thalamus & cerebral cortex', '下視丘位於視丘下方、第三腦室底部與兩側壁，前方為終板、後方止於乳頭體後平面（Fig 1.9–1.10）。', [cortex, thal], { anchor: [-2.8, 5.2, 0.5] });
-      reg(BR, '松果體（分泌褪黑素）', 'Pineal gland (Melatonin)', '附著於上視丘（habenula），依日照長短調節季節性生殖節律（Ch.1 Fig 1.9, Ch.3 Box 3.3）。', pineal, { anchor: [4.2, 3.6, 0.4] });
-      reg(BR, '視交叉與乳頭體', 'Optic chiasm & mammillary body', '視交叉為下視丘前界地標，視網膜光訊號經視下視丘徑傳至視交叉上核（SCN）。', [optCh, mamB], { anchor: [-3.8, 1.4, 0.4] });
+      // 依 Fig 1.9 精雕大腦矢狀解剖：大腦半球輪廓、胼胝體、穹窿、視丘、中腦/橋腦/延腦、小腦與松果體
+      const cortex = shell(5.4, [1.28, 0.92, 0.42], 0xd8c4b4, 0.18, Math.PI * 0.5, Math.PI, 0, Math.PI * 0.72);
+      cortex.position.set(0.3, 2.25, -0.55);
+      const cc = ttube([V(-3.4, 3.0, -0.15), V(-2.2, 4.5, -0.15), V(0.5, 4.9, -0.15), V(2.8, 4.15, -0.15), V(3.3, 3.6, -0.15)], [0.36, 0.42, 0.36, 0.44, 0.38], 0xf0e4d4, 0.62, { organic: false });
+      const fornix = ttube([V(2.5, 3.9, -0.1), V(0.4, 4.2, -0.1), V(-1.4, 3.2, -0.05), V(-1.1, 2.1, 0.0), V(1.65, 1.15, 0.0)], [0.16, 0.18, 0.16, 0.14, 0.14], 0xe8d8c4, 0.72, { organic: false });
+      const thal = ell([0.65, 3.35, -0.2], [2.15, 1.2, 0.95], 0xc8a496, 0.46);
+      const brainstem = ttube([V(1.6, 1.8, -0.2), V(2.1, 0.2, -0.2), V(2.45, -1.5, -0.2), V(2.8, -3.4, -0.25)], [0.78, 1.05, 0.72, 0.55], 0xd2b8aa, 0.45, { organic: false });
+      const pons = ell([1.85, -0.5, -0.1], [0.95, 0.85, 0.82], 0xd8beb0, 0.48);
+      const cereb = ell([4.1, -0.35, -0.25], [1.45, 1.15, 0.95], 0xc09a8e, 0.44);
+      const pinealStalk = capsule([2.55, 3.25, -0.1], [3.35, 3.15, 0], 0.09, 0xe8c878, 0.88);
+      const pineal = ell([3.55, 3.1, 0], [0.42, 0.32, 0.32], 0xffd060, 0.96);
+      const optCh = [
+        ell([-2.85, 1.38, 0.25], [0.52, 0.3, 0.42], 0xe8e0c8, 0.94),
+        ttube([V(-4.1, 1.15, 0.45), V(-2.85, 1.38, 0.25), V(-1.6, 1.85, 0.1)], 0.13, 0xe8e0c8, 0.88, { organic: false })
+      ];
+      const mamB = ell([1.72, 1.1, 0.05], [0.42, 0.36, 0.36], 0xd8b8a8, 0.95);
+      reg(BR, '視丘、胼胝體、穹窿與腦幹（Fig 1.9）', 'Thalamus, corpus callosum, fornix & brainstem', '下視丘位於視丘下方、第三腦室底部與兩側壁，前方為終板與視交叉、後方止於乳頭體後平面（Figs 1.9–1.10）。', [cortex, cc, fornix, thal, brainstem, pons, cereb], { anchor: [-2.8, 5.2, 0.5] });
+      reg(BR, '松果體（附著於上視丘）', 'Pineal gland (Melatonin)', '附著於上視丘（habenula）位於中腦四疊體上方，依日照長短調節季節性生殖節律（Ch.1 Fig 1.9, Ch.3 Box 3.3）。', [pinealStalk, pineal], { anchor: [4.3, 3.5, 0.4] });
+      reg(BR, '視交叉與乳頭體', 'Optic chiasm & mammillary body', '視交叉為下視丘前界地標，視網膜光訊號經視下視丘徑傳至視交叉上核（SCN）。', [...optCh, mamB], { anchor: [-3.9, 1.35, 0.4] });
 
-      // 下視丘主要生殖核團
-      const hypoBox = ell([-0.4, 1.9, 0], [2.6, 1.1, 1.2], 0xe8a0b8, 0.25);
-      const poa = ell([-1.8, 2.1, 0.4], [0.55, 0.45, 0.45], 0x50d0ff);
-      const scn = ell([-2.3, 1.6, 0.45], [0.35, 0.3, 0.35], 0x70ff90);
-      const pvn = ell([-0.5, 2.6, 0.45], [0.52, 0.42, 0.42], 0xff8ad8);
-      const son = ell([-1.2, 1.6, 0.7], [0.42, 0.34, 0.38], 0xffa0c8);
-      const arc = ell([0.1, 1.25, 0.45], [0.52, 0.38, 0.42], 0x90a8ff);
-      reg(HY, '視前區–前下視丘（GnRH）', 'POA–AHA (parvocellular GnRH)', '含主要 GnRH 神經元群，投射至正中隆起外側柵欄區（Fig 1.10, 1.13）。', [poa, hypoBox], { anchor: [-2.4, 2.8, 0.5] });
+      // 下視丘主要生殖核團（含分支神經元胞體與樹突，Fig 1.10 & 1.12）
+      const hypoBox = ell([-0.4, 1.9, 0], [2.65, 1.15, 1.2], 0xe8a0b8, 0.22);
+      const poa = neuronM([-1.85, 2.15, 0.42], 0x50d0ff, { s: 0.72, dend: 4, seed: 2 });
+      const scn = ell([-2.35, 1.62, 0.48], [0.34, 0.28, 0.32], 0x70ff90, 0.95);
+      const pvn = neuronM([-0.48, 2.65, 0.46], 0xff8ad8, { s: 0.78, dend: 5, seed: 4 });
+      const son = neuronM([-1.28, 1.62, 0.68], 0xffa0c8, { s: 0.68, dend: 4, seed: 6 });
+      const arc = neuronM([0.12, 1.28, 0.46], 0x90a8ff, { s: 0.72, dend: 4, seed: 8 });
+      reg(HY, '視前區–前下視丘（GnRH）', 'POA–AHA (parvocellular GnRH)', '含主要 GnRH 小細胞神經元群，軸突投射至正中隆起外側柵欄區初級門脈微血管網（Figs 1.10, 1.12b）。', [...poa, hypoBox], { anchor: [-2.4, 2.8, 0.5] });
       reg(HY, '視交叉上核（生物時鐘）', 'Suprachiasmatic nucleus (SCN)', '內源性 24 小時晝夜節律起搏器，受光暗訊號校正（Fig 1.11a, Box 3.3）。', scn, { anchor: [-3.4, 2.0, 0.5] });
-      reg(HY, '室旁核與視上核（大細胞 OT）', 'PVN & SON (magnocellular)', '合成催產素（與 neurophysin）與血管加壓素，軸突直達腦垂腺後葉（Fig 1.12a）。', [pvn, son], { anchor: [-0.4, 3.4, 0.6] });
+      reg(HY, '室旁核與視上核（大細胞 OT）', 'PVN & SON (magnocellular)', '合成催產素（與 neurophysin）與血管加壓素，軸突經漏斗柄直達腦垂腺後葉（Fig 1.12a）。', [...pvn, ...son], { anchor: [-0.4, 3.4, 0.6] });
       reg(HY, '弓狀核（GnRH＋TIDA 多巴胺）', 'Arcuate nucleus (ARC)', '含小細胞 GnRH、Kisspeptin 與分泌 PIF（多巴胺）之 TIDA 神經元（Figs 1.11b, 1.13b）。', arc, { anchor: [1.3, 1.7, 0.5] });
 
-      // 漏斗柄、正中隆起、門脈與前後葉
-      const stalk = ttube([[-0.1, 0.9, 0], [0.0, -0.4, 0], [0.1, -1.6, 0]], [0.55, 0.35, 0.42], 0xe2c0d0, 0.42, { organic: false });
-      const ap = ell([-0.9, -2.5, 0.1], [1.15, 0.95, 0.95], 0xd87a70, 0.82);
-      const pp = ell([0.9, -2.5, 0.1], [0.85, 0.85, 0.85], 0xc898d8, 0.82);
+      // 漏斗柄（正中隆起漏斗形旋轉體）、腺垂腺前葉與神經垂腺後葉（Fig 1.10, 1.12）
+      const stalk = lathe([[0.46, -1.6], [0.3, -0.5], [0.38, 0.4], [0.72, 1.05]], 0xe2c0d0, 0.4, [0, -0.1, 0], [0, 1, 0], 28);
+      const ap = ell([-0.92, -2.52, 0.12], [1.22, 1.02, 0.96], 0xd87a70, 0.62);
+      const pp = ell([0.82, -2.48, 0.1], [0.82, 0.88, 0.84], 0xc898d8, 0.66);
       reg(PT, '腦垂腺前葉（腺垂腺）', 'Anterior pituitary (Adenohypophysis)', '含促性腺細胞（分泌 LH/FSH）與泌乳細胞（分泌 PRL）；無直接腦神經支配，全賴門脈血管（Fig 1.10）。', [ap, stalk], { anchor: [-2.4, -2.6, 0.6] });
       reg(PT, '腦垂腺後葉（神經垂腺）', 'Posterior pituitary (Neurohypophysis)', '由腦延伸形成，儲存並胞吐釋放來自 SON/PVN 軸突末梢的催產素與血管加壓素。', pp, { anchor: [2.4, -2.6, 0.6] });
 
-      // 門脈（紅）與大細胞神經束（紫綠）
-      const portalPts = [[-0.5, 0.7, 0.35], [-0.45, -0.3, 0.4], [-0.7, -1.4, 0.45], [-0.95, -2.35, 0.5]];
-      const tractPts = [[-0.5, 2.5, 0.4], [-0.1, 1.0, 0.25], [0.35, -0.5, 0.25], [0.85, -2.4, 0.35]];
-      const portalM = ttube(portalPts, 0.11, 0xff4a4a, 0.95, { organic: false });
-      const tractM = ttube(tractPts, 0.09, 0xff8ad8, 0.95, { organic: false });
-      reg(PT, '下視丘–腦垂腺門脈血管', 'Hypothalamo–hypophyseal portal system', '上腦垂腺動脈 → 正中隆起初級微血管網 → 長門脈靜脈 → 前葉次級微血管網（傳送 GnRH 與多巴胺）。', portalM, { anchor: [-2.2, -0.5, 0.6] });
-      reg(PT, '下視丘–腦垂腺神經束', 'Hypothalamo–hypophyseal tract', 'SON/PVN 大細胞軸突直接沿漏斗柄通往後葉微血管釋放催產素（Fig 1.12a）。', tractM, { anchor: [2.1, -0.2, 0.5] });
+      // 依 Fig 1.10 / 1.12b 建立完整上腦垂腺動脈 → 初級門脈微血管叢 → 多條長門脈靜脈 → 前葉次級微血管網
+      const portalPts = [[-0.48, 0.72, 0.35], [-0.45, -0.3, 0.4], [-0.68, -1.4, 0.45], [-0.95, -2.35, 0.5]];
+      const portalM = ttube(portalPts, 0.085, 0xff4448, 0.96, { organic: false });
+      const portalV2 = ttube([[-0.22, 0.65, 0.38], [-0.25, -0.35, 0.42], [-0.5, -1.45, 0.46], [-0.72, -2.45, 0.48]], 0.065, 0xff4448, 0.92, { organic: false });
+      const supArt = ttube([[-2.35, 0.68, 0.32], [-1.3, 0.72, 0.36], [-0.48, 0.72, 0.35]], 0.09, 0xe82838, 0.96, { organic: false });
+      const primPlex = ttube(helixAlong(lineCurve([-0.62, 0.72, 0.35], [-0.08, 0.72, 0.35]), 0.16, 4.5, 0, 90), 0.04, 0xff5a5e, 0.95, { organic: false });
+      const secPlex = ttube(helixAlong(lineCurve([-1.45, -2.45, 0.35], [-0.45, -2.5, 0.35]), 0.35, 4, 0, 90), 0.045, 0xff5a5e, 0.92, { organic: false });
+      const parvoAx1 = ttube([[-1.85, 2.15, 0.42], [-1.2, 1.35, 0.42], [-0.45, 0.78, 0.38]], 0.04, 0x50d0ff, 0.92, { organic: false });
+      const parvoAx2 = ttube([[0.12, 1.28, 0.46], [-0.15, 0.95, 0.42], [-0.28, 0.76, 0.38]], 0.04, 0x90a8ff, 0.92, { organic: false });
+      // 下視丘–腦垂腺神經束（PVN + SON 雙軸突直達後葉膨大末梢＋下腦垂腺動脈）
+      const tractPts = [[-0.48, 2.65, 0.46], [-0.05, 1.05, 0.25], [0.35, -0.5, 0.25], [0.82, -2.35, 0.35]];
+      const tractM = ttube(tractPts, 0.068, 0xff8ad8, 0.96, { organic: false });
+      const tractSon = ttube([[-1.28, 1.62, 0.68], [-0.3, 0.85, 0.35], [0.22, -0.6, 0.28], [0.68, -2.55, 0.36]], 0.055, 0xffa0c8, 0.94, { organic: false });
+      const infArt = ttube([[2.1, -2.85, 0.2], [1.3, -2.65, 0.28], [0.85, -2.45, 0.32]], 0.075, 0xe82838, 0.94, { organic: false });
+      const termButtons = dots([V(0.82, -2.35, 0.36), V(0.68, -2.55, 0.38), V(0.95, -2.58, 0.32)], 0.13, 0xffb8e8, 0.98, 12);
+      reg(PT, '下視丘–腦垂腺門脈血管（初級／次級叢）', 'Hypothalamo–hypophyseal portal system', '上腦垂腺動脈 → 正中隆起初級微血管網 → 長門脈靜脈 → 前葉次級微血管網（傳送 GnRH 與多巴胺，Fig 1.10）。', [supArt, primPlex, portalM, portalV2, secPlex, parvoAx1, parvoAx2], { anchor: [-2.2, -0.5, 0.6] });
+      reg(PT, '下視丘–腦垂腺神經束（PVN/SON 軸突）', 'Hypothalamo–hypophyseal tract', 'SON/PVN 大細胞軸突直接沿漏斗柄通往後葉膨大末梢與微血管釋放催產素（Fig 1.12a）。', [tractM, tractSon, infArt, termButtons], { anchor: [2.1, -0.2, 0.5] });
 
       S3.fGnrh = flowOn(portalM.userData.curve, 16, 0.11, 0x7dff8a, 0x104010, 0.28, 0.06); CUR.root.add(S3.fGnrh);
       S3.fOT = flowOn(tractM.userData.curve, 14, 0.11, 0xff90e0, 0x400030, 0.22, 0.05); CUR.root.add(S3.fOT);
@@ -332,16 +375,52 @@
       const nuc = cellShell([5.0, -3.4, 0], [3.6, 1.8, 1.8], 0x8a6ad0, 0.25, 1.5);
       reg(RC, '細胞核與 SRE/TF 轉錄目標', 'Nucleus (SRE / Transcription factors)', '所有路徑最終透過磷酸化轉錄因子、Smad 或核受體–SRE 改變細胞基因表現。', nuc, { anchor: [8.4, -3.5, 0.5] });
 
-      const rDefs = [
-        ['1. 核內類固醇受體 (SRE)', 'Intracellular steroid receptor', [2.1, -2.9, 0.3], 0xffb84a, '脂溶性類固醇進入核內結合受體，釋出 HSP90 後結合 SRE（ARE/ERE/PRE）。'],
-        ['2. 雙聚激酶受體 (JAK-STAT)', 'Cytokine receptor (PRL/Leptin)', [3.0, 0.8, 0.2], 0xb07ae0, 'PRL、PL、Leptin、LIF 交聯兩條受體鏈，活化 JAK-STAT 激酶級聯。'],
-        ['3. TGFβ/RTK 激酶受體 (Smad)', 'Receptor kinase (AMH/IGF/EGF)', [5.0, 0.8, 0.2], 0x46d16a, 'EGF/IGF 為酪胺酸激酶；AMH/活化素/BMP 為兩組 II+I 型絲蘇胺酸激酶 → Smad。'],
-        ['4. GPCR (LH/FSH/GnRH/OT)', 'G-protein coupled receptor', [7.0, 0.8, 0.2], 0x4aa8ff, '7 次穿膜受體活化 Gs/AC（cAMP）或 Gq/PLCβ（IP₃/DAG/PKC/Ca²⁺）。']
+      // 核內 DNA 雙螺旋（SRE 結合位，Fig 1.16）
+      const dnaA = [], dnaB = [];
+      for (let k = 0; k <= 24; k++) {
+        const u = k / 24, x = 2.6 + u * 4.8, a = u * Math.PI * 4;
+        dnaA.push(V(x, -3.55 + Math.sin(a) * 0.26, Math.cos(a) * 0.26));
+        dnaB.push(V(x, -3.55 - Math.sin(a) * 0.26, -Math.cos(a) * 0.26));
+      }
+      addRoot([ttube(dnaA, 0.055, 0x60c8ff, 0.95, { organic: false }), ttube(dnaB, 0.055, 0xffa8d0, 0.95, { organic: false })]);
+
+      // 1. 核內類固醇受體 + 類固醇配體 + 脫離之 HSP90
+      const r1 = [
+        ell([2.5, -2.95, 0.3], [0.52, 0.36, 0.42], 0xffb84a, 0.96),
+        ell([2.05, -2.75, 0.45], [0.22, 0.18, 0.2], 0xffe870, 0.98),
+        ell([3.3, -2.55, 0.25], [0.3, 0.24, 0.28], 0x90a8c0, 0.65)
       ];
-      rDefs.forEach(([zh, en, pos, col, inf], idx) => {
-        const m = idx === 0 ? ell(pos, [0.55, 0.38, 0.45], col) : helixBundle(pos, idx === 3 ? 7 : 2, idx === 3 ? 0.45 : 0.28, col, 2.7, 0.16);
-        reg(RC, zh, en, inf, m, { anchor: [pos[0], idx === 0 ? -4.2 : 2.8, 0.4] });
-      });
+      reg(RC, '1. 核內類固醇受體 (SRE)', 'Intracellular steroid receptor', '脂溶性類固醇進入核內結合受體，釋出 HSP90 後結合 DNA 的 SRE（ARE/ERE/PRE，Fig 1.16-1）。', r1, { anchor: [2.2, -4.3, 0.4] });
+
+      // 2. 雙聚細胞激素受體 + 交聯配體 + 胞內 JAK 激酶（Fig 1.16-2）
+      const r2 = [
+        helixBundle([3.0, 0.8, 0.2], 2, 0.28, 0xb07ae0, 2.7, 0.14),
+        ell([3.0, 2.35, 0.2], [0.42, 0.28, 0.32], 0xff9ad8, 0.96),
+        ell([2.65, -0.75, 0.25], [0.26, 0.24, 0.24], 0xffd479, 0.95),
+        ell([3.35, -0.75, 0.25], [0.26, 0.24, 0.24], 0xffd479, 0.95)
+      ];
+      reg(RC, '2. 雙聚激酶受體 (JAK-STAT)', 'Cytokine receptor (PRL/Leptin)', 'PRL、PL、Leptin、LIF 交聯兩條受體鏈並活化胞內 JAK-STAT 激酶級聯（Fig 1.16-2）。', r2, { anchor: [3.0, 3.0, 0.4] });
+
+      // 3. 受體激酶 RTK / TGFβ 絲蘇胺酸激酶四聚體 + 自體磷酸化 -P（Fig 1.16-3）
+      const r3 = [
+        helixBundle([5.0, 0.8, 0.2], 4, 0.32, 0x46d16a, 2.7, 0.13),
+        ell([5.0, 2.38, 0.2], [0.46, 0.3, 0.34], 0x80ffb8, 0.96),
+        ell([4.62, -0.82, 0.25], [0.3, 0.28, 0.28], 0x2ea858, 0.95),
+        ell([5.38, -0.82, 0.25], [0.3, 0.28, 0.28], 0x2ea858, 0.95),
+        dots([V(4.3, -0.9, 0.4), V(5.7, -0.9, 0.4)], 0.12, 0xffe040, 0.98, 10)
+      ];
+      reg(RC, '3. TGFβ/RTK 激酶受體 (Smad)', 'Receptor kinase (AMH/IGF/EGF)', 'EGF/IGF 為酪胺酸激酶；AMH/活化素/BMP 為兩組 II+I 型絲蘇胺酸激酶 → 自體磷酸化活化 Smad（Fig 1.16-3）。', r3, { anchor: [5.0, 3.0, 0.4] });
+
+      // 4. 7 次穿膜 GPCR + 異三聚體 G 蛋白（α/β/γ）+ 腺苷酸環化酶 AC（Fig 1.16-4）
+      const r4 = [
+        helixBundle([7.0, 0.8, 0.2], 7, 0.44, 0x4aa8ff, 2.7, 0.13),
+        ell([7.0, 2.38, 0.2], [0.38, 0.28, 0.32], 0x9fd8ff, 0.96),
+        ell([6.7, -0.95, 0.35], [0.34, 0.28, 0.28], 0xff9f40, 0.96),
+        ell([7.25, -1.05, 0.25], [0.24, 0.22, 0.22], 0xffcf60, 0.95),
+        ell([7.55, -0.88, 0.32], [0.18, 0.16, 0.18], 0xffe488, 0.95),
+        ell([8.15, 0.25, 0.2], [0.38, 0.58, 0.36], 0x60e8c0, 0.92)
+      ];
+      reg(RC, '4. GPCR (LH/FSH/GnRH/OT)', 'G-protein coupled receptor', '7 次穿膜受體偶聯異三聚體 G 蛋白（α/β/γ），活化 AC→cAMP 或 PLCβ→IP₃/DAG/Ca²⁺（Fig 1.16-4）。', r4, { anchor: [7.0, 3.0, 0.4] });
 
       const dt = dtClock();
       CUR.tick = () => {

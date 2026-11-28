@@ -118,23 +118,42 @@
       // 透明帶外環 + 外圍卵丘殘留
       const zpCol = PHASE2 === 2 ? 0xffb84d : 0x70c8ff;
       const zp = shell(1, [4.6, 4.4, 3.6], zpCol, PHASE2 === 2 ? 0.42 : 0.25, 0.5, Math.PI * 1.6);
-      // 外側阻擋的多餘精子（PHASE2=2 時彈開）
-      const extraSps = [
-        ell([-4.9 - (PHASE2 === 2 ? 0.6 : 0), 2.1, 0.3], [0.38, 0.2, 0.18], PHASE2 === 2 ? 0x607080 : 0xffffff),
-        ell([4.8 + (PHASE2 === 2 ? 0.6 : 0), -1.8, 0.3], [0.38, 0.2, 0.18], PHASE2 === 2 ? 0x607080 : 0xffffff)
-      ];
+      // 外側阻擋的多餘具象精子（梨形頭＋鞭毛，PHASE2=2 時彈開）＋殘留卵丘細胞環（Fig 11.2a-c）
+      const extraSps = [];
+      const exGeo = spermHeadGeo(0.68, 0.34, 0.16);
+      const exCol = PHASE2 === 2 ? 0x607080 : 0xf4f8ff;
+      [[-4.95 - (PHASE2 === 2 ? 0.65 : 0), 2.15, 0.3, -0.4], [4.85 + (PHASE2 === 2 ? 0.65 : 0), -1.85, 0.3, Math.PI - 0.35]].forEach(([sx, sy, sz, rot]) => {
+        const g = new THREE.Group(); g.position.set(sx, sy, sz); g.rotation.z = rot;
+        const hm = new THREE.Mesh(exGeo, mat(exCol, 0.94));
+        const tm = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([V(-0.3, 0, 0), V(-0.8, 0.14, 0.05), V(-1.3, -0.1, -0.05), V(-1.8, 0.08, 0)]), 14, 0.032, 6, false), mat(exCol, 0.9));
+        g.add(hm, tm); CUR.root.add(g); extraSps.push(hm, tm);
+      });
+      const cumPts = [];
+      for (let i = 0; i < 14; i++) {
+        const a = (i / 14) * Math.PI * 2;
+        if (Math.abs(a - Math.PI) < 0.35) continue;
+        cumPts.push(V(Math.cos(a) * 5.15, Math.sin(a) * 4.9, (i % 2 ? 0.45 : -0.35)));
+      }
+      extraSps.push(dots(cumPts, 0.28, 0xf4a0c0, 0.42));
       reg(O, PHASE2 === 2 ? '硬化之透明帶（ZP2 截切、ZP3 去糖、Tyr 交聯）' : '透明帶（Zona pellucida）與卵周隙', 'Zona Pellucida & Perivitelline space',
         PHASE2 === 2 ? '皮質顆粒胞吐觸發「透明帶反應」：無法再與第二隻精子結合或被蛋白酶穿破，防止雄核性三倍體！' : '卵周隙位於透明帶與卵膜之間；頂體反應後精子橫躺於此等候結合。',
         [zp, ...extraSps], { anchor: [-5.1, 3.3, 0.9] });
 
-      // 卵質與卵膜 + 頂端 MII 紡錘體免融合區 + 第一極體
+      // 卵質與卵膜（除頂端盲區外具微絨毛）+ 頂端具象 MII 紡錘體（紡錘絲＋赤道染色體）+ 第一極體
       const ooMem = shell(1, [3.65, 3.5, 2.8], 0xe8a0b8, 0.38, 0.5, Math.PI * 1.6);
-      const spSpin = ell([0.1, 2.7, 0.2], [0.95, 0.55, 0.55], 0xffd43a, 0.92);
+      const spFibs = [-0.28, 0, 0.28].map(dy => ttube([V(-0.78, 2.7, 0.25), V(0.1, 2.7 + dy, 0.32), V(0.98, 2.7, 0.25)], 0.024, 0xffd479, 0.82, { organic: false, seg: 12, radial: 6 }));
+      const spChrs = [-0.22, 0.05, 0.32].flatMap(dx => chromMesh([dx, 2.7, 0.28], 0xff5080, 0xff80a8, true, 0.36).ms);
       const noBindArc = ell([0.1, 3.45, 0.2], [1.45, 0.22, 0.7], 0xff6080, 0.55); // 無 CD9/Integrin 區域
+      const mvFringe = [];
+      for (let i = 0; i < 16; i++) {
+        const a = (i / 16) * Math.PI * 2;
+        if (Math.sin(a) > 0.72) continue; // 頂端盲區無微絨毛！
+        mvFringe.push(capsule([Math.cos(a) * 3.62, Math.sin(a) * 3.47, 0.3], [Math.cos(a) * 3.92, Math.sin(a) * 3.76, 0.34], 0.04, 0xf4a0c0, 0.82));
+      }
       const pb1 = ell([0.8, 4.05, 0.2], [0.42, 0.36, 0.36], 0xffb0c8, 0.92);
-      reg(M, 'MII 紡錘體與上方「無融合蛋白盲區」', 'MII spindle & Integrin/CD9-free dome',
-        '排出的第一極體旁即為 MII 紡錘體；該上方質膜<b>刻意缺乏整合素、CD9 與微絨毛</b>，防止精子從此進入干擾極體分離（p.198）。',
-        [ooMem, spSpin, noBindArc, pb1], { anchor: [1.5, 4.4, 0.8] });
+      reg(M, 'MII 紡錘體（含染色體）與上方「無微絨毛／無融合蛋白盲區」', 'MII spindle & Integrin/CD9-free dome',
+        '排出的第一極體旁即為 MII 紡錘體；該上方質膜<b>刻意缺乏整合素、CD9 與微絨毛</b>，防止精子從此進入干擾極體分離（Fig 11.2a–c, p.198）。',
+        [ooMem, ...spFibs, ...spChrs, noBindArc, ...mvFringe, pb1], { anchor: [1.5, 4.4, 0.8] });
 
       // 主融合精子（扁平梨形頭＋波浪鞭毛）
       const sHead = new THREE.Mesh(spermHeadGeo(0.95, 0.48, 0.24), mat(0x50ffb0, 0.98));
@@ -213,10 +232,19 @@
       reg(Z, EXP3 === 'scnt' ? '去核 MII 卵母細胞胞質（含母源粒線體）' : '受精卵質與雙極體（Polar bodies 1 & 2）', 'Zygote & Polar bodies', E3_INFO[EXP3][1],
         [egg, pb1, pb2], { anchor: [-4.2, 3.3, 0.8] });
 
-      // 雙原核 vs G0核
-      const pnF = ell([-1.1, 0.2, 0.2], [0.95, 0.95, 0.85], 0xff80a8, EXP3 === 'scnt' ? 0.15 : 0.92);
-      const pnM = ell([1.2, 0.2, 0.2], [1.22, 1.15, 0.95], EXP3 === 'normal' ? 0x4db8e8 : (EXP3 === 'partheno' ? 0xff80a8 : 0xb080ff), 0.92);
-      const cent = EXP3 === 'partheno' ? ell([2.2, 1.1, 0.3], [0.22, 0.22, 0.22], 0x445566, 0.2) : ell([2.2, 1.1, 0.3], [0.24, 0.34, 0.24], 0x46d16a, 0.98);
+      // 雙原核（含核仁與解聚染色質）＋精子正交中心粒對與殘留精尾（Fig 11.2d）
+      const pnF = ell([-1.1, 0.2, 0.2], [0.95, 0.95, 0.85], 0xff80a8, EXP3 === 'scnt' ? 0.15 : 0.58);
+      const pnM = ell([1.2, 0.2, 0.2], [1.22, 1.15, 0.95], EXP3 === 'normal' ? 0x4db8e8 : (EXP3 === 'partheno' ? 0xff80a8 : 0xb080ff), 0.58);
+      const nucDots = [];
+      if (EXP3 !== 'scnt') nucDots.push(ell([-1.25, 0.35, 0.45], [0.2, 0.2, 0.2], 0x8e244c, 0.94), ell([-0.85, -0.05, 0.45], [0.16, 0.16, 0.16], 0x8e244c, 0.94));
+      nucDots.push(ell([1.0, 0.42, 0.48], [0.24, 0.24, 0.24], 0x1e4a8c, 0.94), ell([1.5, -0.08, 0.48], [0.18, 0.18, 0.18], 0x1e4a8c, 0.94));
+      const cent = EXP3 === 'partheno'
+        ? [ell([2.2, 1.1, 0.3], [0.2, 0.2, 0.2], 0x445566, 0.2)]
+        : [
+            cyl([2.05, 1.1, 0.35], [2.45, 1.1, 0.35], 0.1, 0x46d16a, 0.98),
+            cyl([2.25, 0.9, 0.35], [2.25, 1.3, 0.35], 0.1, 0x70ff98, 0.98),
+            ...(EXP3 === 'normal' ? [ttube([V(2.35, 0.95, 0.3), V(2.9, 0.1, 0.25), V(2.65, -0.95, 0.2), V(3.1, -1.75, 0.15)], [0.06, 0.025], 0xc8e4f4, 0.88, { organic: false })] : [])
+          ];
       // 粒線體（金：卵子母系；紫：SCNT體細胞異源粒線體殘留！）
       const mtPts = [V(-2.2, -1.5, 0.6), V(-1.4, -2.0, -0.5), V(0.5, -2.2, 0.7), V(2.0, -1.6, 0.4), V(-2.3, 1.2, 0.5)];
       const mtEgg = dots(mtPts, 0.18, 0xffd43a);
@@ -224,7 +252,7 @@
       if (EXP3 !== 'scnt') mtSom.visible = false;
 
       reg(P, EXP3 === 'normal' ? '母源雌原核（粉）與較大父源雄原核（藍）＋中心粒（綠）' : EXP3 === 'partheno' ? '雙套純母源基因（缺父源銘印＋非囓齒類缺中心粒）' : 'G₀ 體細胞核＋異源粒線體混合（紫點）', 'Pronuclei & Centriole / Mitochondria',
-        E3_INFO[EXP3][1], [pnF, pnM, cent, mtEgg, mtSom], { anchor: [0, -3.5, 0.8] });
+        E3_INFO[EXP3][1], [pnF, pnM, ...nucDots, ...cent, mtEgg, mtSom], { anchor: [0, -3.5, 0.8] });
 
       // 右上方小模組：MPF (cdk1 + cyclin B) <-> CSF (Emi2)
       const csf = ell([5.2, 2.2, 0], [0.65, 0.45, 0.45], EXP3 === 'scnt' ? 0x607080 : 0xff6060, 0.9);

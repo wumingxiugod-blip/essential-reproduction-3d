@@ -73,8 +73,9 @@
         for (let i = 0; i < 8; i++) {
           const a = -1.2 + i * 0.35;
           const x = 4.9 + Math.cos(a) * 2.1, y = 0.2 + Math.sin(a) * 2.4;
-          cords.push(ell([x, y, 0.2], [0.42, 0.42, 0.42], 0xff8ab8, 0.68));
-          germDots.push(V(x, y, 0.2));
+          cords.push(ring(V(x, y, 0.22), V(0, 0, 1), 0.38, 0.085, 0xf278a8, 0.92));
+          cords.push(ell([x, y, 0.22], [0.27, 0.27, 0.27], 0xffe47a, 0.94));
+          germDots.push(V(x + 0.05, y + 0.05, 0.34));
         }
         const degen = [0, 1, 2].map(i => cyl([3.3, -0.7 + i * 0.7, 0], [4.4, -0.5 + i * 0.5, 0], 0.08, 0x7a8090, 0.35));
         const mull = cyl([2.0, -3.2, 0], [2.0, 2.8, 0], 0.22, 0xff70a8);
@@ -212,16 +213,35 @@
       // 吳爾夫氏管（兩側降下至尿道/前列腺與儲精囊）
       const wL = ttube([[-3.0, 3.1, 0.1], [-2.8, 1.4, 0.1], [-2.0, -0.6, 0.1], [-0.9, -2.1, 0.1], [-0.3, -3.0, 0.1]], keepW ? 0.2 : 0.06, 0x3b82f6, keepW ? 0.95 : 0.25, { organic: false });
       const wR = ttube([[3.0, 3.1, 0.1], [2.8, 1.4, 0.1], [2.0, -0.6, 0.1], [0.9, -2.1, 0.1], [0.3, -3.0, 0.1]], keepW ? 0.2 : 0.06, 0x3b82f6, keepW ? 0.95 : 0.25, { organic: false });
-      const sv = keepW ? [ell([-0.9, -2.6, -0.2], [0.55, 0.25, 0.25], 0x2563eb), ell([0.9, -2.6, -0.2], [0.55, 0.25, 0.25], 0x2563eb)] : [];
+      const sv = [];
+      if (keepW) {
+        // 盤曲副睪貼附雙側睪丸外側＋分葉儲精囊＋前列腺（Fig 2.5c 左）
+        [-1, 1].forEach(sgn => {
+          const epiAxis = new THREE.CatmullRomCurve3([V(sgn * 4.25, 3.85, 0.1), V(sgn * 4.4, 3.1, 0.15), V(sgn * 3.9, 2.3, 0.1)]);
+          sv.push(ttube(helixAlong(epiAxis, 0.18, 6, 0, 120), 0.085, 0x2563eb, 0.96, { organic: false }));
+          sv.push(ttube([V(sgn * 0.45, -2.75, -0.15), V(sgn * 1.1, -2.45, -0.25), V(sgn * 1.45, -2.1, -0.2)], [0.16, 0.28, 0.2], 0x1d4ed8, 0.94));
+        });
+        sv.push(ell([0, -3.35, 0.05], [0.88, 0.65, 0.72], 0x60a5fa, 0.48));
+      }
       reg(W, keepW ? '吳爾夫氏管 → 副睪、輸精管、儲精囊' : '吳爾夫氏管退化（殘留 Gartner 囊腫等）', 'Wolffian (mesonephric) duct',
         keepW ? '受雄性素（與功能性 AR）維持而保留分化。' : '缺乏有效雄性素訊號而退化（在女性留存 epoophoron、paroophoron 與 Gartner’s cyst）。', [wL, wR, ...sv], { anchor: [-3.2, 0.5, 0.6] });
 
       // 穆勒氏管（由外側上端向下中央融合形成子宮–陰道管）
       const mL = ttube([[-4.2, 3.4, -0.1], [-3.6, 2.0, -0.1], [-1.8, 0.4, 0], [-0.6, -0.8, 0]], keepM ? 0.24 : 0.06, 0xf472b6, keepM ? 0.95 : 0.22, { organic: false });
       const mR = ttube([[4.2, 3.4, -0.1], [3.6, 2.0, -0.1], [1.8, 0.4, 0], [0.6, -0.8, 0]], keepM ? 0.24 : 0.06, 0xf472b6, keepM ? 0.95 : 0.22, { organic: false });
-      const ut = lathe([[0.05, 0], [0.55, 0.6], [0.62, 1.5], [1.15, 2.5], [0.2, 2.8]], 0xe85d99, keepM ? 0.88 : 0.18, [0, -3.5, 0]);
-      reg(M, keepM ? '穆勒氏管 → 輸卵管、子宮與上陰道' : '穆勒氏管退化（殘留睪丸附件／前列腺囊）', 'Müllerian (paramesonephric) duct',
-        keepM ? '缺乏 AMH 作用時保留，下段融合成子宮體、子宮頸與陰道上段。' : '受塞透力氏細胞分泌之 AMH 誘導上皮凋亡而退化（男性殘留 appendix testis 與 utriculus prostaticus）。', [mL, mR, ut], { anchor: [3.6, -1.2, 0.6] });
+      const ut = lathe([[0.05, 0], [0.48, 0.45], [0.58, 1.35], [1.22, 2.45], [0.85, 2.85], [0.05, 2.95]], 0xe85d99, keepM ? 0.9 : 0.18, [0, -3.5, 0]);
+      const fimbMs = [];
+      if (keepM) {
+        [-1, 1].forEach(sgn => {
+          // 輸卵管繖狀漏斗與指狀繖毛（Fig 2.5c 右）
+          for (let k = 0; k < 5; k++) {
+            const a = (k / 4 - 0.5) * 1.4;
+            fimbMs.push(ttube([V(sgn * 4.2, 3.4, -0.1), V(sgn * (4.55 + Math.cos(a) * 0.35), 3.65 + Math.sin(a) * 0.45, 0.15 * (k % 2 ? 1 : -1))], [0.1, 0.04], 0xff85c0, 0.94, { organic: false, seg: 10, radial: 8 }));
+          }
+        });
+      }
+      reg(M, keepM ? '穆勒氏管 → 輸卵管繖、子宮與上陰道' : '穆勒氏管退化（殘留睪丸附件／前列腺囊）', 'Müllerian (paramesonephric) duct',
+        keepM ? '缺乏 AMH 作用時保留，上端張開為輸卵管繖，下段融合成子宮體、子宮頸與陰道上段（Fig 2.5c）。' : '受塞透力氏細胞分泌之 AMH 誘導上皮凋亡而退化（男性殘留 appendix testis 與 utriculus prostaticus）。', [mL, mR, ut, ...fimbMs], { anchor: [3.6, -1.2, 0.6] });
 
       // 尿生殖竇／下段陰道或尿道基底
       const ugs = cyl([0, -5.0, 0], [0, -3.4, 0], 0.55, 0xd8a0a0, 0.45);
@@ -269,8 +289,10 @@
       const f = PROG4 * (1 - DHT4); // 女性化進度 0..1
       // 生殖結節 → 陰蒂 vs 陰莖體/龜頭
       const gtLen = 0.5 + 2.3 * k + 0.25 * f;
-      const gt = ttube([[0, 1.5, 0.1], [0, 1.5 + gtLen * 0.5, 0.4 + 1.1 * k], [0, 1.5 + gtLen, 0.5 + 1.8 * k]], [0.42 + 0.12 * k, 0.38 + 0.12 * k, 0.32 + 0.15 * k], 0xd97d8a);
-      reg(P, k > 0.5 ? '生殖結節 → 陰莖與龜頭' : '生殖結節 → 陰蒂', 'Genital tubercle → Penis / Clitoris', '在 DHT 作用下大幅延長並膨大形成陰莖與龜頭；無 DHT 則僅輕微發育為陰蒂。', gt, { anchor: [0, 2.8 + k * 1.2, 1.2] });
+      const gtShaft = ttube([[0, 1.5, 0.1], [0, 1.5 + gtLen * 0.52, 0.4 + 1.05 * k], [0, 1.5 + gtLen * 0.92, 0.48 + 1.65 * k]], [0.42 + 0.12 * k, 0.38 + 0.1 * k, 0.36 + 0.12 * k], 0xd97d8a);
+      const glans = ell([0, 1.5 + gtLen * 1.02, 0.52 + 1.82 * k], [0.42 + 0.18 * k, 0.44 + 0.2 * k, 0.38 + 0.16 * k], 0xc96478, 0.96);
+      const raphe = k > 0.4 ? [ttube([V(0, -1.5, 0.62), V(0, 0.2, 0.55), V(0, 1.45, 0.45)], 0.045, 0xa85858, 0.85, { organic: false })] : [];
+      reg(P, k > 0.5 ? '生殖結節 → 陰莖體與龜頭（Fig 2.6f）' : '生殖結節 → 陰蒂（Fig 2.6e）', 'Genital tubercle → Penis / Clitoris', '在 DHT 作用下大幅延長並膨大形成陰莖體與龜頭冠；無 DHT 則僅輕微發育為陰蒂。', [gtShaft, glans, ...raphe], { anchor: [0, 2.8 + k * 1.2, 1.2] });
 
       // 尿道褶 → 融合包住尿道 vs 小陰唇
       const foldSep = 0.58 * (1 - 0.85 * k) + 0.12 * f;

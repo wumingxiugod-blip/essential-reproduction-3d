@@ -24,15 +24,20 @@
     build() {
       S1 = { t: 0 };
       const BG = '腹腔與骨盆地標', M = '睪丸與牽引結構';
-      // 腎臟、主動脈、膀胱、恥骨、陰囊囊袋
-      const kid = [ell([-2.5, 4.0, -0.8], [0.85, 1.3, 0.7], 0xa05858, 0.5), ell([2.5, 4.0, -0.8], [0.85, 1.3, 0.7], 0xa05858, 0.5)];
-      const aorta = cyl([0, -0.5, -1.2], [0, 5.2, -1.2], 0.35, 0xd83a3a, 0.5);
-      const bladder = ell([0, -1.3, 0.6], [1.4, 1.2, 1.1], 0xe8b878, 0.35);
-      const pubis = box([0, -2.5, 1.4], [3.6, 0.7, 0.7], 0xeadcbc, 0.7);
+      // 依 Fig 3.1d,e：豆形腎臟（含腎動脈＋輸尿管）、主動脈、膀胱與弧形恥骨弓
+      const kid = [];
+      [-1, 1].forEach(sgn => {
+        kid.push(ttube([V(sgn * 2.2, 4.85, -0.8), V(sgn * 2.85, 4.0, -0.8), V(sgn * 2.2, 3.15, -0.8)], [0.58, 0.78, 0.58], 0xa85458, 0.72));
+        kid.push(ttube([V(0, 4.05, -1.2), V(sgn * 1.1, 4.0, -1.0), V(sgn * 2.15, 4.0, -0.85)], 0.11, 0xd83a3a, 0.78, { organic: false }));
+        kid.push(ttube([V(sgn * 2.0, 3.7, -0.75), V(sgn * 1.65, 1.4, -0.35), V(sgn * 0.85, -0.95, 0.45)], 0.08, 0xe8d098, 0.72, { organic: false }));
+      });
+      const aorta = ttube([V(0, 5.4, -1.2), V(0, 2.2, -1.2), V(0, -0.4, -1.2)], 0.34, 0xd83a3a, 0.65, { organic: false });
+      const bladder = ell([0, -1.25, 0.6], [1.35, 1.15, 1.05], 0xe8b878, 0.42);
+      const pubis = ttube([V(-2.4, -2.05, 1.15), V(-1.1, -2.55, 1.45), V(0, -2.65, 1.52), V(1.1, -2.55, 1.45), V(2.4, -2.05, 1.15)], [0.34, 0.38, 0.42, 0.38, 0.34], 0xeadcbc, 0.86, { organic: false });
       const scrotum = shell(2.0, [1.25, 1.35, 0.9], 0xd89888, 0.25, Math.PI * 0.4, Math.PI * 1.2);
       scrotum.position.set(0, -4.8, 0.8);
-      reg(BG, '腎臟與腹主動脈（腰部起源）', 'Kidneys & abdominal aorta', '睪丸動靜脈發源自腰部腎動脈旁的主動脈，隨睪丸下降而拉長（Fig 3.1d,e）。', [...kid, aorta], { anchor: [-3.8, 4.2, 0.4] });
-      reg(BG, '膀胱與恥骨弓', 'Urinary bladder & pubic bone', '睪丸須跨過骨盆緣與恥骨前方進入腹股溝管。', [bladder, pubis], { anchor: [-2.6, -1.8, 1.0] });
+      reg(BG, '腎臟、輸尿管與腹主動脈（腰部起源）', 'Kidneys, ureters & abdominal aorta', '睪丸動靜脈發源自腰部腎動脈旁的主動脈，隨睪丸下降而拉長（Fig 3.1d,e）。', [...kid, aorta], { anchor: [-3.8, 4.2, 0.4] });
+      reg(BG, '膀胱與弧形恥骨弓', 'Urinary bladder & pubic arch', '睪丸須跨過骨盆緣與恥骨前方進入腹股溝管。', [bladder, pubis], { anchor: [-2.6, -1.8, 1.0] });
       reg(BG, '陰囊與腹膜鞘突腔', 'Scrotum & processus vaginalis', '第 25–28 週腹肌筋膜與腹膜膨出為鞘突，包裹抵達的睪丸形成鞘膜（tunica vaginalis）。', scrotum, { anchor: [2.8, -5.0, 0.8] });
 
       // 雙側睪丸位置隨 WK1（若 CRYPT 則右側停在腹腔）
@@ -92,22 +97,31 @@
       tv.position.set(0, -1.8, 0);
       const ta = shell(2.2, [1.0, 1.4, 0.85], 0xf4f1ea, 0.32, Math.PI * 0.55, Math.PI * 0.9);
       ta.position.set(0, -1.8, 0);
-      // 小葉與曲細精管
-      const tubs = [];
+      // 依 Fig 3.2a：纖維中隔劃分 5 個小葉＋高度盤曲曲細精管＋直細精管→睪丸網→輸出小管→盤曲副睪
+      const septa = [];
       for (let i = 0; i < 4; i++) {
-        const y = -3.6 + i * 1.15;
-        tubs.push(ttube([[0.6, y, 0], [1.4, y + 0.3, 0.4], [0.8, y + 0.5, -0.3], [-0.4, y + 0.2, 0.3], [-1.0, y, 0]], 0.14, 0xf2c870, 0.9, { organic: false }));
+        const y = -3.3 + i * 1.05;
+        septa.push(ttube([V(-0.95, y, 0), V(0.5, y + 0.15, 0.1), V(1.85, y + 0.35, 0)], 0.045, 0xe8e0d0, 0.72, { organic: false }));
       }
-      const rete = cyl([-1.1, -3.4, 0], [-1.1, -0.2, 0], 0.22, 0xe8d080);
-      const epi = ttube([[-1.2, 0.4, 0], [-2.1, 0.8, 0.2], [-2.4, -1.5, 0.1], [-2.0, -4.3, 0], [-1.1, -4.6, -0.2], [-1.8, -1.2, -0.5], [-1.5, 4.5, -0.4]], [0.5, 0.42, 0.28, 0.26, 0.35, 0.2, 0.18], 0xd8a860, 0.88, { organic: false });
-      reg(T, '鞘膜與白膜', 'Tunica vaginalis & albuginea', '雙層鞘膜包覆堅韌纖維性白膜，白膜向內延伸形成隔膜劃分睪丸小葉。', [tv, ta], { anchor: [2.7, -3.2, 0.6] });
-      reg(T, '曲細精管與睪丸網', 'Seminiferous tubules & rete testis', '產生精子後經直細精管匯入後側睪丸網（rete testis），再由輸出小管進入副睪。', [...tubs, rete], { anchor: [2.2, -1.6, 0.5] });
-      reg(T, '副睪（頭／體／尾）與輸精管', 'Epididymis & vas deferens', '精子在此完成運動與受精能力成熟並儲存於副睪尾，沿輸精管上行進入精索。', epi, { anchor: [-3.2, -1.4, 0.4] });
+      const tubs = [];
+      for (let i = 0; i < 5; i++) {
+        const y = -3.8 + i * 0.98;
+        const axis = new THREE.CatmullRomCurve3([V(-0.85, y, 0.05), V(0.35, y + 0.12, 0.2), V(1.55, y + 0.18, 0.05)]);
+        tubs.push(ttube(helixAlong(axis, 0.24, 5.5, i * 1.1, 110), 0.075, 0xf2c870, 0.94, { organic: false }));
+      }
+      const rete = ttube([V(-1.05, -3.6, 0), V(-1.15, -1.8, 0.05), V(-1.05, -0.1, 0)], 0.22, 0xe8d080, 0.95, { organic: false });
+      const vasaEff = [0, 1, 2, 3, 4].map(i => ttube([V(-1.12, -0.35 + i * 0.18, 0.05), V(-1.6, 0.2 + i * 0.14, 0.15), V(-2.05, 0.45 + i * 0.1, 0.18)], 0.055, 0xe2b868, 0.94, { organic: false }));
+      const epiAxis = new THREE.CatmullRomCurve3(PV([[-1.6, 0.65, 0.12], [-2.25, 0.4, 0.2], [-2.45, -1.6, 0.15], [-2.05, -4.25, 0.05], [-1.15, -4.55, -0.15]]));
+      const epiCoil = ttube(helixAlong(epiAxis, 0.22, 16, 0, 260), 0.11, 0xd8a860, 0.94, { organic: false });
+      const vasDef = ttube([[-1.15, -4.55, -0.15], [-1.65, -2.5, -0.45], [-1.75, 0.5, -0.48], [-1.45, 4.7, -0.38]], 0.15, 0xc89652, 0.95, { organic: false });
+      reg(T, '鞘膜、白膜與睪丸中隔（Fig 3.2a）', 'Tunica vaginalis, albuginea & septa', '雙層鞘膜包覆堅韌纖維性白膜，白膜向內延伸形成中隔劃分睪丸小葉。', [tv, ta, ...septa], { anchor: [2.7, -3.2, 0.6] });
+      reg(T, '盤曲曲細精管、直細精管與睪丸網', 'Seminiferous tubules & rete testis', '小葉內高度盤曲之曲細精管產生精子，經直細精管匯入後側睪丸網（rete testis），再經輸出小管入副睪。', [...tubs, rete, ...vasaEff], { anchor: [2.2, -1.6, 0.5] });
+      reg(T, '盤曲副睪（頭／體／尾）與輸精管', 'Epididymis & vas deferens', '精子在此完成運動與受精能力成熟並儲存於副睪尾，沿輸精管上行進入精索。', [epiCoil, vasDef], { anchor: [-3.2, -1.4, 0.4] });
 
-      // 精索熱交換：中央盤曲動脈 + 周圍編織蔓狀靜脈叢
-      const artCurve = new THREE.CatmullRomCurve3(PV([[0.2, 5.4, 0], [0.6, 4.3, 0.3], [-0.3, 3.4, -0.2], [0.5, 2.5, 0.3], [-0.2, 1.6, -0.2], [0.4, 0.6, 0.2], [0.1, -0.6, 0]]));
-      const art = ttube(artCurve.getPoints(60), 0.14, 0xff4040, 0.95, { organic: false });
-      const veins = [0, 1, 2].map(p => ttube(helixAlong(lineCurve([0.1, -0.5, 0], [0.1, 5.4, 0]), 0.65, 5, p * 2.1, 180), 0.09, 0x3b82f6, 0.82, { organic: false }));
+      // 依 Fig 3.2b,c：高度盤曲內精動脈＋4 股交織蔓狀靜脈叢
+      const artCurve = new THREE.CatmullRomCurve3(helixAlong(lineCurve([0.1, 5.4, 0], [0.1, -0.5, 0]), 0.26, 7.5, 0, 140));
+      const art = ttube(artCurve.getPoints(120), 0.115, 0xff4040, 0.96, { organic: false });
+      const veins = [0, 1, 2, 3].map(p => ttube(helixAlong(lineCurve([0.1, -0.5, 0], [0.1, 5.4, 0]), 0.62, 6, p * Math.PI / 2, 200), 0.075, 0x3b82f6, 0.85, { organic: false }));
       reg(VSC, '盤曲內精動脈（37 °C → 31–33 °C）', 'Coiled internal spermatic artery', '血液下行途中把熱量傳給緊貼的外圍冷靜脈叢，到達睪丸時已降溫 4–7 °C。', art, { anchor: [1.5, 3.8, 0.5] });
       reg(VSC, '蔓狀靜脈叢（逆流吸收熱量）', 'Pampiniform venous plexus', '由陰囊表面冷卻的靜脈血上行回流，包裹動脈進行高效逆流熱交換（Fig 3.2c）。', veins, { anchor: [-1.4, 3.5, 0.6] });
 

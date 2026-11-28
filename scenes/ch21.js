@@ -125,25 +125,33 @@
       S2 = { t: 0, play: true };
       const OO = '透明帶（外）與卵母細胞膜（內）＋固定針', PIP = '微操作注射吸管與單精深度';
 
-      // 左側：負壓固定吸管 holding pipette 穩住卵母細胞
-      const holdPip = ttube([V(-7.8, 0, 0), V(-4.7, 0, 0)], [0.65, 0.52], 0xb0d8f0, 0.55, { organic: false });
+      // 左側：負壓固定吸管 holding pipette（帶圓潤吸附口）穩住卵母細胞（Fig 21.5）
+      const holdPip = [
+        ttube([V(-7.8, 0, 0), V(-4.45, 0, 0)], [0.68, 0.54], 0xb0d8f0, 0.52, { organic: false }),
+        ring([-4.45, 0, 0], [1, 0, 0], 0.46, 0.1, 0xd8f0ff, 0.82)
+      ];
       const zpGap = ART2 === 'zd' ? 0.55 : 0.25;
       const zp = shell(1, [4.2, 4.0, 3.2], 0xe8d0a8, 0.34, zpGap, Math.PI * 1.65);
       const ool = shell(1, [3.2, 3.1, 2.5], 0xff80a8, 0.42, 0.5, Math.PI * 1.6);
-      const m2sp = ell([0, 2.5, 0.2], [0.75, 0.4, 0.4], 0xffd43a, 0.92); // 避開上方減數紡錘體進針！
+      // 12 點鐘方向具象 MII 減數紡錘體（紡錘絲＋染色體，進針必須避開！）
+      const m2sp = [
+        ...[-0.22, 0, 0.22].map(dy => ttube([V(-0.78, 2.55, 0.22), V(0, 2.55 + dy, 0.28), V(0.78, 2.55, 0.22)], 0.024, 0xffd479, 0.84, { organic: false, seg: 12, radial: 6 })),
+        ...[-0.2, 0.05, 0.28].flatMap(dx => chromMesh([dx, 2.55, 0.26], 0xff5080, 0xff80a8, true, 0.34).ms)
+      ];
       const pb1 = ell([0.3, 3.55, 0.2], [0.38, 0.32, 0.32], 0xffb0c8, 0.92);
-      reg(OO, '固定微管（左）、透明帶（外米色）與卵膜（內粉紅）', 'Holding pipette, Zona & Oolemma (avoid MII spindle!)',
-        '進行微針穿刺時，第一極體及其下方 MII 紡錘體（頂端黃色）務必轉向 12 點或 6 點鐘方向，嚴禁讓針從該區刺入以免破壞染色體！',
-        [holdPip, zp, ool, m2sp, pb1], { anchor: [-5.2, 2.6, 0.9] });
+      reg(OO, '固定微管（左）、透明帶（外米色）與 12 點鐘 MII 紡錘體', 'Holding pipette, Zona & MII spindle (avoid!)',
+        '進行微針穿刺時，第一極體及其下方 MII 紡錘體（頂端染色體）務必轉向 12 點或 6 點鐘方向，嚴禁讓針從該區刺入以免破壞染色體！',
+        [...holdPip, zp, ool, ...m2sp, pb1], { anchor: [-5.2, 2.6, 0.9] });
 
       // 右側進針與單隻或數隻精子深度：
-      // icsi: 針頭深入 x = 0.8 (oocytoplasm); suzi: x = 3.55 (perivitelline); zd: 僅孔洞 x=4.1 + 多隻外精子; ivf: 外圍游動
       const tipX = ART2 === 'icsi' ? 0.4 : (ART2 === 'suzi' ? 3.55 : (ART2 === 'zd' ? 4.35 : 5.6));
-      // 漸細玻璃微針吸管（LatheGeometry 呈現真實毛細管壁與尖端）
       const pipLen = 8.2 - tipX;
       const needle = lathe([[0.045, 0], [0.065, pipLen * 0.25], [0.16, pipLen * 0.65], [0.28, pipLen]], 0xc8ecff, 0.52, [tipX, 0, 0], [1, 0, 0], 24);
-      const targetSp = new THREE.Mesh(spermHeadGeo(0.75, 0.38, 0.2), mat(0x46d16a, 0.98));
+      const targetSp = new THREE.Group();
       targetSp.position.set(tipX - 0.38, 0, 0.08);
+      const tHead = new THREE.Mesh(spermHeadGeo(0.75, 0.38, 0.2), mat(0x46d16a, 0.98));
+      const tTail = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([V(0.32, 0, 0), V(0.75, 0.06, 0), V(1.25, -0.05, 0), V(1.7, 0.03, 0)]), 14, 0.03, 6, false), mat(0x90ffb0, 0.92));
+      targetSp.add(tHead, tTail); CUR.root.add(targetSp);
       const extraSp = [];
       const _spG21 = spermHeadGeo(0.62, 0.32, 0.16);
       if (ART2 === 'ivf' || ART2 === 'zd') {
@@ -155,7 +163,7 @@
           extraSp.push(sh, st);
         }
       }
-      const pMs = ART2 === 'ivf' ? extraSp : [needle, targetSp, ...extraSp];
+      const pMs = ART2 === 'ivf' ? extraSp : [needle, tHead, tTail, ...extraSp];
       reg(PIP, ART2_DATA[ART2][0], 'Micromanipulation depth & target', ART2_DATA[ART2][1], pMs, { anchor: [5.5, -2.5, 0.9] });
 
       S2.needle = needle; S2.targetSp = targetSp;
@@ -201,26 +209,28 @@
       const PAT = '患者父母受精卵（帶突變 mtDNA 紫點）', DON = '健康捐贈者受精卵（帶健康 mtDNA 金點）';
 
       if (STEP3 <= 2) {
-        // 左側：患者受精卵（紫點=突變mtDNA，雙原核藍粉）
-        const patEgg = shell(1, [2.7, 2.6, 2.2], 0xd080d0, 0.3, 0.5, Math.PI * 1.6);
-        patEgg.position.set(-4.0, 0, 0);
+        // 左側：患者受精卵（含透明帶、紫點突變mtDNA、雙親原核＋核仁，Fig 21.8）
+        const patZp = shell(1, [3.15, 3.05, 2.55], 0xe8d0a8, 0.22, 0.5, Math.PI * 1.6); patZp.position.set(-4.0, 0, 0);
+        const patEgg = shell(1, [2.7, 2.6, 2.2], 0xd080d0, 0.3, 0.5, Math.PI * 1.6); patEgg.position.set(-4.0, 0, 0);
         const pMutMt = dots([V(-5.2, 1.2, 0.4), V(-4.5, -1.3, 0.5), V(-2.7, 0.8, 0.5), V(-3.1, -1.4, -0.4), V(-5.1, -0.4, 0.6)], 0.16, 0xd040ff);
         const pnShowLeft = STEP3 < 2;
-        const pF = ell([-4.5, 0.2, 0.2], [0.52, 0.52, 0.45], 0xff80a8, pnShowLeft ? 0.95 : 0.15);
-        const pM = ell([-3.3, 0.2, 0.2], [0.62, 0.62, 0.5], 0x4db8e8, pnShowLeft ? 0.95 : 0.15);
-        reg(PAT, '患者受精卵（紫點：突變粒線體；藍/粉球：雙親核原核）', 'Patient zygote (mutant mtDNA)', S3_TXT[STEP3][1],
-          [patEgg, pMutMt, pF, pM], { anchor: [-4.0, -3.2, 0.9] });
+        const pF = ell([-4.5, 0.2, 0.2], [0.52, 0.52, 0.45], 0xff80a8, pnShowLeft ? 0.82 : 0.15);
+        const pM = ell([-3.3, 0.2, 0.2], [0.62, 0.62, 0.5], 0x4db8e8, pnShowLeft ? 0.82 : 0.15);
+        const pNuc = pnShowLeft ? [ell([-4.5, 0.22, 0.42], [0.14, 0.14, 0.14], 0x8e244c), ell([-3.3, 0.22, 0.45], [0.16, 0.16, 0.16], 0x1e4a8c)] : [];
+        reg(PAT, '患者受精卵（透明帶＋紫點突變粒線體＋雙親核原核）', 'Patient zygote (mutant mtDNA)', S3_TXT[STEP3][1],
+          [patZp, patEgg, pMutMt, pF, pM, ...pNuc], { anchor: [-4.0, -3.3, 0.9] });
 
-        // 右側：捐贈者受精卵（金點=健康mtDNA；STEP=0有捐贈核，STEP=1去核，STEP=2裝入雙親原核！）
-        const donEgg = shell(1, [2.7, 2.6, 2.2], 0x45c49e, 0.34, 0.5, Math.PI * 1.6);
-        donEgg.position.set(4.0, 0, 0);
+        // 右側：捐贈者受精卵（透明帶＋金點健康mtDNA；STEP=2 含玻璃移植微管！）
+        const donZp = shell(1, [3.15, 3.05, 2.55], 0xe8d0a8, 0.22, 0.5, Math.PI * 1.6); donZp.position.set(4.0, 0, 0);
+        const donEgg = shell(1, [2.7, 2.6, 2.2], 0x45c49e, 0.34, 0.5, Math.PI * 1.6); donEgg.position.set(4.0, 0, 0);
         const dGoodMt = dots([V(2.8, 1.2, 0.4), V(3.5, -1.3, 0.5), V(5.3, 0.8, 0.5), V(4.9, -1.4, -0.4), V(2.9, -0.4, 0.6)], 0.16, 0xffd43a);
         const dNuc = STEP3 === 0 ? [ell([3.5, 0.2, 0.2], [0.5, 0.5, 0.45], 0x708090, 0.85), ell([4.6, 0.2, 0.2], [0.55, 0.55, 0.45], 0x708090, 0.85)]
-          : (STEP3 === 2 ? [ell([3.4, 0.2, 0.2], [0.52, 0.52, 0.45], 0xff80a8, 0.98), ell([4.6, 0.2, 0.2], [0.62, 0.62, 0.5], 0x4db8e8, 0.98)] : []);
+          : (STEP3 === 2 ? [ell([3.4, 0.2, 0.2], [0.52, 0.52, 0.45], 0xff80a8, 0.88), ell([4.6, 0.2, 0.2], [0.62, 0.62, 0.5], 0x4db8e8, 0.88), ell([3.4, 0.22, 0.44], [0.14, 0.14, 0.14], 0x8e244c), ell([4.6, 0.22, 0.46], [0.16, 0.16, 0.16], 0x1e4a8c)] : []);
         const trArrow = STEP3 === 2 ? arcArrow([[-2.6, 0.6, 0.5], [0, 1.8, 0.5], [2.6, 0.6, 0.5]], 0x38bdf8, 0.08) : [];
+        const trPip = STEP3 === 2 ? [lathe([[0.12, 0], [0.16, 0.9], [0.26, 2.2], [0.34, 3.2]], 0xc8ecff, 0.48, [0, 2.15, 0.5], [0, 1, 0], 20)] : [];
         reg(DON, STEP3 === 0 ? '捐贈者受精卵（帶健康金點粒線體）' : (STEP3 === 1 ? '已移除原核之健康「空白卵質」' : '重建完成！100% 雙親核＋健康粒線體！'),
           'Donor zygote / Reconstructed embryo (Fig 21.8)', S3_TXT[STEP3][1],
-          [donEgg, dGoodMt, ...dNuc, ...trArrow], { anchor: [4.0, -3.2, 0.9] });
+          [donZp, donEgg, dGoodMt, ...dNuc, ...trArrow, ...trPip], { anchor: [4.0, -3.3, 0.9] });
 
         if (STEP3 === 2) {
           S3.fTr = flowOn(trArrow.curve, 10, 0.14, 0x38bdf8, 0x103050, 0.35, 0.03);

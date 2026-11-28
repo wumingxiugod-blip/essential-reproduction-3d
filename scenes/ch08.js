@@ -31,47 +31,112 @@
       // 左：剖半卵巢 + 卵巢血管 + 輸卵管繖
       const ovBody = shell(3.2, [1.3, 0.88, 0.72], 0xe8b098, 0.32, Math.PI * 0.45, Math.PI * 1.15);
       ovBody.position.set(-5.2, -0.4, 0);
+      // 各期濾泡 + 皺摺黃體 + 白體（Fig 8.1b）
+      const clFolds = [];
+      for (let i = 0; i < 8; i++) {
+        const a = (i / 8) * Math.PI * 2;
+        clFolds.push(ell([-3.05 + Math.cos(a) * 0.58, -1.55 + Math.sin(a) * 0.52, 0.34], [0.36, 0.34, 0.32], 0xf2c84a, 0.95));
+      }
+      clFolds.push(ell([-3.05, -1.55, 0.38], [0.28, 0.26, 0.22], 0xc84858, 0.85)); // 中央血凝塊
       const ovFolRing = [
         ell([-7.8, -0.5, 0.3], [0.22, 0.22, 0.22], 0x70b8ff),
         ell([-6.8, 0.8, 0.3], [0.45, 0.45, 0.4], 0xf090b8),
-        ell([-5.2, 1.5, 0.3], [0.85, 0.85, 0.65], 0x90d8ff, 0.7),
-        ell([-3.2, 1.1, 0.4], [1.25, 1.2, 0.9], 0xffd479, 0.75),
-        ell([-3.0, -1.6, 0.3], [1.05, 0.95, 0.8], 0xf2c84a),
-        ell([-5.2, -2.1, 0.3], [0.65, 0.55, 0.5], 0xe8ecf0)
+        ell([-5.2, 1.5, 0.3], [0.85, 0.85, 0.65], 0x90d8ff, 0.72),
+        ell([-5.35, 1.38, 0.45], [0.26, 0.26, 0.24], 0xffe47a, 0.95),
+        ell([-3.2, 1.1, 0.4], [1.25, 1.2, 0.9], 0xffd479, 0.72),
+        ell([-3.45, 0.95, 0.55], [0.34, 0.34, 0.32], 0xffe880, 0.96),
+        ...clFolds,
+        ell([-5.2, -2.1, 0.3], [0.62, 0.48, 0.44], 0xe8ecf0, 0.94)
       ];
-      const ovVess = ttube([[-5.4, -3.5, -0.4], [-5.2, -2.1, -0.2], [-5.2, -0.6, 0]], 0.22, 0xd83a3a, 0.85, { organic: false });
-      const fimb = ttube([[-1.6, 2.2, 0.4], [-2.5, 2.8, 0.3], [-4.5, 3.6, 0], [-6.8, 3.0, 0]], [0.55, 0.36, 0.22, 0.26], 0xe87a90, 0.75, { organic: false });
-      reg(OV, '卵巢皮質／髓質＋血管門', 'Ovary cortex, medulla & hilus', '從左順時針展示原始 → 初級 → 腔狀 → 排卵前優勢濾泡 → 黃體 → 白體（Fig 8.1b）。', [ovBody, ovVess], { anchor: [-5.2, -3.6, 0.6] });
-      reg(OV, '各期濾泡與黃體分佈', 'Developing follicles, CL & corpus albicans', '黃體為黃色摺疊內分泌構造，隨後退化為白色疤痕（白體）。', ovFolRing, { anchor: [-7.8, 2.0, 0.5] });
-      reg(OV, '輸卵管繖部與壺腹部', 'Fimbria & ostium of oviduct', '繖部纖毛掃取由卵巢表面排卵口釋出的卵丘–卵細胞團進入輸卵管。', fimb, { anchor: [-6.8, 3.9, 0.5] });
+      // 卵巢門動靜脈分支
+      const ovVess = [
+        ttube([[-5.5, -3.5, -0.4], [-5.3, -2.1, -0.2], [-5.2, -0.5, 0], [-4.4, 0.2, 0.1]], [0.22, 0.16, 0.12, 0.08], 0xd83a3a, 0.88, { organic: false }),
+        ttube([[-5.0, -3.5, -0.45], [-4.95, -2.0, -0.22], [-5.0, -0.6, -0.05], [-5.9, 0.1, 0.05]], [0.2, 0.15, 0.11, 0.07], 0x3b7bff, 0.84, { organic: false })
+      ];
+      // 輸卵管壺腹部 + 6 條弧形指狀繖部包覆卵巢（Fig 8.1b）
+      const fimb = [
+        ttube([[-1.8, 2.35, 0.4], [-2.7, 2.95, 0.3], [-4.6, 3.65, 0], [-6.8, 3.0, 0]], [0.62, 0.42, 0.24, 0.28], 0xe87a90, 0.76, { organic: false })
+      ];
+      for (let i = 0; i < 6; i++) {
+        const a = -0.75 + i * 0.32;
+        fimb.push(ttube([
+          [-1.85, 2.35, 0.38],
+          [-1.65 + Math.cos(a) * 0.45, 1.95 + Math.sin(a) * 0.55, 0.55],
+          [-2.05 + Math.cos(a) * 0.72, 1.35 + Math.sin(a) * 0.65, 0.62 + (i % 2) * 0.14]
+        ], [0.16, 0.11, 0.05], 0xf088a0, 0.86, { organic: false }));
+      }
+      reg(OV, '卵巢皮質／髓質＋動靜脈門', 'Ovary cortex, medulla & hilus', '從左順時針展示原始 → 初級 → 腔狀 → 排卵前優勢濾泡 → 黃體 → 白體（Fig 8.1b）。', [ovBody, ...ovVess], { anchor: [-5.2, -3.6, 0.6] });
+      reg(OV, '各期濾泡、摺疊黃體與白體', 'Developing follicles, CL & corpus albicans', '黃體為黃色摺疊內分泌構造（中央具血塊），隨後退化為白色疤痕（白體）。', ovFolRing, { anchor: [-7.8, 2.0, 0.5] });
+      reg(OV, '輸卵管繖部與壺腹部', 'Fimbria & ostium of oviduct', '繖部指狀突起與纖毛掃取由卵巢表面排卵口釋出的卵丘–卵細胞團進入輸卵管。', fimb, { anchor: [-6.8, 3.9, 0.5] });
 
-      // 右：放大單一濾泡結構（中心 [4.8, 0.2, 0]）
+      // 右：放大單一濾泡結構（中心 [4.8, 0.2, 0]，Fig 8.3d 精細卵丘柄＋壁顆粒細胞環）
       const fg = new THREE.Group(); fg.position.set(4.8, 0.2, 0); CUR.root.add(fg);
       const isCL = STG1 === 4;
       if (!isCL) {
         const sc = [1.0, 1.5, 2.2, 2.75][STG1];
-        const theca = cellShell([0, 0, 0], [sc * 1.16, sc * 1.16, sc * 0.95], 0xd88a4a, 0.38, 1.5);
+        const theca = cellShell([0, 0, 0], [sc * 1.16, sc * 1.16, sc * 0.95], 0xd88a4a, 0.36, 1.5);
         const bm = cellShell([0, 0, 0], [sc * 1.04, sc * 1.04, sc * 0.85], 0xf0e0c0, 0.28, 1.5);
-        const gran = cellShell([0, 0, 0], [sc * 0.96, sc * 0.96, sc * 0.78], 0xf4a0c0, 0.55, 1.5);
-        const ooPos = STG1 >= 2 ? [-sc * 0.35, -sc * 0.25, 0.1] : [0, 0, 0];
+        const gran = cellShell([0, 0, 0], [sc * 0.96, sc * 0.96, sc * 0.78], 0xf4a0c0, STG1 >= 2 ? 0.34 : 0.55, 1.5);
+        const ooPos = STG1 >= 2 ? [-sc * 0.32, -sc * 0.24, 0.12] : [0, 0, 0];
         const ooSz = STG1 === 0 ? 0.42 : 0.72;
         const oo = ell(ooPos, [ooSz, ooSz, ooSz], 0xffe47a);
-        const zp = STG1 >= 1 ? cellShell(ooPos, [ooSz + 0.14, ooSz + 0.14, ooSz + 0.14], 0x80d8ff, 0.45, 1.2) : null;
+        const zp = STG1 >= 1 ? cellShell(ooPos, [ooSz + 0.14, ooSz + 0.14, ooSz + 0.14], 0x80d8ff, 0.46, 1.2) : null;
         const gv = ell([ooPos[0] + 0.15, ooPos[1] + 0.15, ooPos[2] + 0.2], [ooSz * 0.35, ooSz * 0.35, ooSz * 0.35], 0x9a6ad0);
-        const ant = STG1 >= 2 ? ell([sc * 0.22, sc * 0.2, 0], [sc * 0.62, sc * 0.58, sc * 0.45], 0x9fd8ff, 0.35) : null;
+        const ant = STG1 >= 2 ? ell([sc * 0.26, sc * 0.22, -0.05], [sc * 0.62, sc * 0.58, sc * 0.44], 0x9fd8ff, 0.34) : null;
+
+        // 壁顆粒細胞環＋卵丘柄（Cumulus oophorus stalk，腔狀/排卵前期）
+        const granMeshes = [gran];
+        if (STG1 >= 1) {
+          const ringPts = [];
+          const nWall = STG1 >= 2 ? 22 : 14;
+          for (let i = 0; i < nWall; i++) {
+            const a = (i / nWall) * Math.PI * 2;
+            ringPts.push(V(Math.cos(a) * sc * 0.88, Math.sin(a) * sc * 0.88, 0.16));
+          }
+          granMeshes.push(dots(ringPts, STG1 >= 2 ? 0.16 : 0.19, 0xf48cb4, 0.92));
+        }
+        if (STG1 >= 2) {
+          // 卵丘柄與放射冠細胞環（連結左下壁顆粒層並包圍卵母細胞）
+          const cumPts = [];
+          for (let i = 0; i < 12; i++) {
+            const a = (i / 12) * Math.PI * 2;
+            cumPts.push(V(ooPos[0] + Math.cos(a) * (ooSz + 0.26), ooPos[1] + Math.sin(a) * (ooSz + 0.26), ooPos[2] + 0.08));
+          }
+          // 卵丘柄橋樑
+          for (let k = 0; k < 4; k++) {
+            const t = k / 3;
+            cumPts.push(V(-sc * 0.72 + t * 0.36, -sc * 0.62 + t * 0.32, 0.12));
+            cumPts.push(V(-sc * 0.62 + t * 0.36, -sc * 0.72 + t * 0.32, 0.12));
+          }
+          granMeshes.push(dots(cumPts, 0.17, 0xff9ec2, 0.94));
+        }
         if (STG1 >= 1) attachPart(reg(FC, '內／外濾泡膜（具血管，LH 受體）', 'Theca interna & externa', '富含微血管與平滑肌，受 LH 刺激產出雄性素供顆粒細胞芳香化（Fig 8.3c）。', [theca, bm], { anchor: [0, sc * 1.25, 0.6] }), fg);
         else attachPart(reg(FC, '固有膜（Membrana propria）', 'Membrana propria', '圍繞原始濾泡的基底膜，隔離基質血管。', bm, { anchor: [0, 1.3, 0.5] }), fg);
-        attachPart(reg(FC, STG1 >= 2 ? '壁顆粒細胞＋卵丘' : '顆粒細胞（無血管）', 'Granulosa & cumulus cells', '以穿過透明帶的胞質突起與卵母細胞間隙連接；無血管侵入！', gran, { anchor: [sc * 0.9, -sc * 0.8, 0.6] }), fg);
+        attachPart(reg(FC, STG1 >= 2 ? '壁顆粒細胞環＋卵丘柄（Cumulus oophorus）' : '顆粒細胞（無血管）', 'Granulosa & cumulus cells', '以穿過透明帶的胞質突起與卵母細胞間隙連接；腔狀期形成卵丘柄懸浮於濾泡腔中（Fig 8.3d）！', granMeshes, { anchor: [sc * 0.9, -sc * 0.8, 0.6] }), fg);
         const ooGroup = zp ? [oo, zp, gv] : [oo, gv];
         attachPart(reg(FC, '初級卵母細胞（核網期 GV）＋透明帶', 'Oocyte (GV) & Zona pellucida', '分泌 ZP 醣蛋白形成透明帶，減數前期 I 停頓直到 LH 潮湧（Fig 8.3b–d）。', ooGroup, { anchor: [-sc * 0.9, -0.8, 0.7] }), fg);
         if (ant) attachPart(reg(FC, '濾泡腔（Antrum，黏多醣濾泡液）', 'Follicular antrum', '濾泡後期體積增大主要源自濾泡液劇增（排卵前直徑達 20–25 mm）。', ant, { anchor: [sc * 0.8, sc * 0.8, 0.6] }), fg);
       } else {
         const cap = cellShell([0, 0, 0], [2.5, 2.4, 1.9], 0xd88a4a, 0.35, 1.5);
-        const bigL = dots([V(-0.9, 0.8, 0.2), V(0.8, 0.9, 0.2), V(-0.6, -0.7, 0.3), V(0.9, -0.6, 0.2), V(0, 0.2, 0.4), V(-1.2, 0, 0)], 0.55, 0xf2c84a);
-        const smlL = dots([V(-1.7, 0.9, 0.2), V(1.6, 1.0, 0.2), V(1.7, -0.9, 0.2), V(-1.6, -1.0, 0.2)], 0.28, 0xe88a4a);
-        const vessels = ttube([[-1.8, -1.5, 0], [-0.4, -0.3, 0.2], [0.5, 0.6, 0.1], [1.6, 1.3, 0]], 0.1, 0xff4040, 0.9, { organic: false });
-        attachPart(reg(FC, '大黃體細胞（源自顆粒細胞）', 'Large luteal cells (P₄, OT, Inhibin A)', '原顆粒細胞肥大並含黃體色素 lutein，大量製造助孕素、催產素與抑制素 A。', [bigL, cap], { anchor: [0, 2.6, 0.6] }), fg);
-        attachPart(reg(FC, '小黃體細胞與入侵微血管', 'Small luteal cells & invading vessels', '基底膜崩解後血管長入原無血管區（體內血管最豐富的組織之一），與來自膜內層之小黃體細胞合作分泌。', [smlL, vessels], { anchor: [2.2, -1.4, 0.6] }), fg);
+        const clot = ell([0, 0, 0.1], [0.68, 0.62, 0.5], 0xc84858, 0.78);
+        const bigPts = [];
+        for (let i = 0; i < 10; i++) {
+          const a = (i / 10) * Math.PI * 2;
+          bigPts.push(V(Math.cos(a) * 1.22, Math.sin(a) * 1.12, 0.22 + (i % 2) * 0.12));
+        }
+        const bigL = dots(bigPts, 0.46, 0xf2c84a);
+        const smlPts = [];
+        for (let i = 0; i < 8; i++) {
+          const a = (i / 8) * Math.PI * 2 + 0.2;
+          smlPts.push(V(Math.cos(a) * 1.85, Math.sin(a) * 1.72, 0.18));
+        }
+        const smlL = dots(smlPts, 0.26, 0xe88a4a);
+        const vessels = [
+          ttube([[-2.0, -1.6, 0], [-0.9, -0.7, 0.25], [0.4, 0.5, 0.22], [1.7, 1.4, 0.05]], 0.09, 0xff4040, 0.92, { organic: false }),
+          ttube([[-1.9, 1.4, 0], [-0.6, 0.6, 0.25], [0.7, -0.6, 0.2], [1.8, -1.4, 0.05]], 0.08, 0xff4848, 0.9, { organic: false })
+        ];
+        attachPart(reg(FC, '大黃體細胞環（源自顆粒細胞）與中央血塊', 'Large luteal cells (P₄, OT, Inhibin A)', '原顆粒細胞肥大摺疊並含黃體色素 lutein，大量製造助孕素、催產素與抑制素 A。', [bigL, cap, clot], { anchor: [0, 2.6, 0.6] }), fg);
+        attachPart(reg(FC, '小黃體細胞與放射狀入侵微血管', 'Small luteal cells & invading vessels', '基底膜崩解後血管長入原無血管區（體內血管最豐富的組織之一），與來自膜內層之小黃體細胞合作分泌。', [smlL, ...vessels], { anchor: [2.2, -1.4, 0.6] }), fg);
       }
       textSprite(FSTG[STG1][0], [4.8, 4.3, 0], 0.36, '#ffd479');
     },
